@@ -47,6 +47,24 @@ describe('resolveUploadMimeType', () => {
     )
   })
 
+  it('pptx 使用 presentationml mime', () => {
+    const mime = resolveUploadMimeType(
+      makeFileLike(
+        'a.pptx',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      ),
+    )
+    expect(mime).toBe(
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    )
+  })
+
+  it('pptx 即使浏览器 mime 为空也按扩展名解析', () => {
+    expect(resolveUploadMimeType(makeFileLike('a.pptx', ''))).toBe(
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    )
+  })
+
   it('未知文件类型兜底为原始 mime 或 octet-stream', () => {
     expect(resolveUploadMimeType(makeFileLike('a.unknown', 'application/x-custom'))).toBe(
       'application/x-custom',

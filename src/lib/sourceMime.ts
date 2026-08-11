@@ -7,6 +7,7 @@ const sourceUploadMimeByExt: Record<string, string> = {
   '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   '.epub': 'application/epub+zip',
   '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
 }
 
 const normalizeMimeType = (mimeType: string) =>

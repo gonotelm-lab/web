@@ -14,6 +14,7 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import PreviewIcon from '@mui/icons-material/Preview'
 import ReplayIcon from '@mui/icons-material/Replay'
 import TableChartIcon from '@mui/icons-material/TableChart'
+import PresentToAllIcon from '@mui/icons-material/PresentToAll'
 import {
   Button,
   Box,
@@ -241,6 +242,8 @@ export const SourceListRow = memo(function SourceListRow({
       <DescriptionIcon sx={sourceTypeIconSx} />
     ) : item.iconType === 'xlsx' ? (
       <TableChartIcon sx={sourceTypeIconSx} />
+    ) : item.iconType === 'pptx' ? (
+      <PresentToAllIcon sx={sourceTypeIconSx} />
     ) : (
       <DescriptionIcon sx={sourceTypeIconSx} />
     )

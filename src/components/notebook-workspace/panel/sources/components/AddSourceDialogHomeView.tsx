@@ -26,15 +26,16 @@ const allowedFileExtensions = new Set([
   '.docx',
   '.epub',
   '.xlsx',
+  '.pptx',
 ])
-const acceptedFileTypes = '.pdf,.txt,.md,.markdown,.csv,.docx,.epub,.xlsx'
+const acceptedFileTypes = '.pdf,.txt,.md,.markdown,.csv,.docx,.epub,.xlsx,.pptx'
 
 const validateSourceFile = (file: File) => {
   const lowerName = file.name.toLowerCase()
   const dotIndex = lowerName.lastIndexOf('.')
   const ext = dotIndex >= 0 ? lowerName.slice(dotIndex) : ''
   if (!allowedFileExtensions.has(ext)) {
-    return '仅支持 pdf、txt、markdown、csv、docx、epub、xlsx 文件'
+    return '仅支持 pdf、txt、markdown、csv、docx、epub、xlsx、pptx 文件'
   }
   if (file.size < 1) {
     return '文件不能为空'
@@ -166,7 +167,7 @@ export function AddSourceDialogHomeView({
             </Typography>
 
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: workspaceSpace.md }}>
-              支持：pdf、txt、markdown、csv、docx、epub、xlsx
+              支持：pdf、txt、markdown、csv、docx、epub、xlsx、pptx
             </Typography>
             <Typography
               variant="caption"

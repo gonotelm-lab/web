@@ -81,6 +81,12 @@ const detectSourceIconType = (
   ) {
     return 'xlsx'
   }
+  if (
+    normalizedFormat ===
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+  ) {
+    return 'pptx'
+  }
   if (normalizedFormat.startsWith('text/plain')) return 'txt'
   if (normalizedFormat.startsWith('text/markdown')) return 'markdown'
   if (normalizedFormat.startsWith('text/csv')) return 'csv'

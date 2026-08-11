@@ -132,6 +132,7 @@ export async function detectEncryptedSourceFile(file: File): Promise<EncryptedCh
         return await detectPdfEncrypted(file)
       case '.docx':
       case '.xlsx':
+      case '.pptx':
         return await detectOfficeOpenXmlEncrypted(file)
       case '.epub':
         return await detectEpubEncrypted(file)

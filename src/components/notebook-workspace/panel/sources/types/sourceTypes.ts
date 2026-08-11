@@ -7,6 +7,7 @@ export type SourceIconType =
   | 'epub'
   | 'docx'
   | 'xlsx'
+  | 'pptx'
   | 'txt'
   | 'markdown'
   | 'csv'

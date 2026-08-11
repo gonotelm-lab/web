@@ -58,6 +58,17 @@ describe('detectEncryptedSourceFile', () => {
     expect(xlsx.encrypted).toBe(true)
   })
 
+  it('PK 头的 pptx 通过', async () => {
+    await expect(detectEncryptedSourceFile(fileFromBytes('a.pptx', pkHeader))).resolves.toEqual({
+      encrypted: false,
+    })
+  })
+
+  it('OLE 头的 pptx 判定加密', async () => {
+    const pptx = await detectEncryptedSourceFile(fileFromBytes('locked.pptx', oleHeader))
+    expect(pptx.encrypted).toBe(true)
+  })
+
   it('PK 包内含 EncryptionInfo 入口名时判定加密', async () => {
     const name = 'EncryptionInfo'
     const nameBytes = new TextEncoder().encode(name)
