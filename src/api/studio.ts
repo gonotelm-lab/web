@@ -1,3 +1,4 @@
+import i18n from '@/i18n'
 import { ApiError, request } from '../lib/http'
 import type {
   ConvertNoteToSourceResponse,
@@ -104,7 +105,11 @@ export function listNotebookStudioArtifacts(
 export async function loadStudioArtifactContentFromUrl(url: string) {
   const response = await fetch(url)
   if (!response.ok) {
-    throw new ApiError(`产物内容读取失败，HTTP ${response.status}`, -1, response.status)
+    throw new ApiError(
+      i18n.t('studio:api.contentFailed', { status: response.status }),
+      -1,
+      response.status,
+    )
   }
   return response.text()
 }

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import '@/i18n'
 import { toNotebookCardViewModel } from './notebookCardViewModel'
 
 describe('toNotebookCardViewModel', () => {

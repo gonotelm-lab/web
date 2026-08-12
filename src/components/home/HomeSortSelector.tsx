@@ -5,6 +5,7 @@ import {
   Select,
   type SelectChangeEvent,
 } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import type { ListNotebooksSortBy } from '@/types/api'
 import {
   workspaceRadius,
@@ -18,6 +19,8 @@ interface HomeSortSelectorProps {
 }
 
 export function HomeSortSelector({ value, onChange }: HomeSortSelectorProps) {
+  const { t } = useTranslation('home')
+
   const handleSortByChange = (event: SelectChangeEvent<ListNotebooksSortBy>) => {
     onChange(event.target.value as ListNotebooksSortBy)
   }
@@ -52,13 +55,13 @@ export function HomeSortSelector({ value, onChange }: HomeSortSelectorProps) {
             top: 'calc(50% - 8px)',
           },
         }}
-        aria-label="笔记本排序方式"
+        aria-label={t('sort.aria')}
       >
         <MenuItem value="last_active" sx={{ fontSize: workspaceType.sm }}>
-          最近活跃
+          {t('sort.lastActive')}
         </MenuItem>
         <MenuItem value="create_time" sx={{ fontSize: workspaceType.sm }}>
-          创建时间
+          {t('sort.createTime')}
         </MenuItem>
       </Select>
     </FormControl>

@@ -1,0 +1,71 @@
+{
+  "panel": {
+    "title": "Chat",
+    "expandSourcesAria": "Expand sources panel",
+    "expandStudioAria": "Expand right panel",
+    "refreshTooltip": "Refresh conversation context",
+    "refresh": "Refresh",
+    "settingsAria": "Open chat settings",
+    "scrollBottomAria": "Scroll to bottom"
+  },
+  "input": {
+    "placeholder": "Ask a question..."
+  },
+  "stream": {
+    "aborting": "Stopping..."
+  },
+  "error": {
+    "clearWhileStreaming": "Cannot clear context while a reply is generating. Try again later.",
+    "clearNoSession": "No active session. Cannot clear context.",
+    "saveNote": "Failed to save note. Please retry."
+  },
+  "thinking": "Thinking",
+  "thinkingPhase": "Thinking...",
+  "message": {
+    "saveNote": "Save to note",
+    "saving": "Saving…"
+  },
+  "citation": {
+    "info": "Citation {{index}}",
+    "sourceTitle": "Source title: {{title}}",
+    "type": "Citation type: {{type}}",
+    "typeSummary": "Summary citation",
+    "typeOriginal": "Original excerpt citation",
+    "position": "Position: {{text}}",
+    "positionSummary": "No source location (summary citation)",
+    "jump": "Jump to source preview",
+    "loading": "Loading citation...",
+    "empty": "No content",
+    "notFoundSource": "Citation source not found.",
+    "notFoundDoc": "Citation document not found.",
+    "loadFailed": "Failed to load citation. Please try again later.",
+    "invalidIndex": "Invalid citation index.",
+    "missMapping": "Citation mapping not found."
+  },
+  "markdown": {
+    "openCitationAria": "Open citation {{index}}",
+    "openCitation": "Open citation",
+    "openCitationHref": "Open citation {{href}}",
+    "citationFallback": "Citation",
+    "openLink": "Open link",
+    "openLinkHref": "Open link {{href}}",
+    "linkFallback": "Link"
+  },
+  "settings": {
+    "title": "Chat settings",
+    "style": "Chat style",
+    "styleHelp": "Controls tone and organization of answers.",
+    "length": "Answer length",
+    "lengthHelp": "Controls how detailed answers are.",
+    "deepThink": "Deep thinking",
+    "deepThinkHelp": "Slower answers with more thorough reasoning.",
+    "deepThinkOff": "Off",
+    "deepThinkOn": "On",
+    "styleDefault": "Default",
+    "styleAnalyst": "Analyst",
+    "styleGuide": "Guide",
+    "lengthDefault": "Default",
+    "lengthLonger": "Longer",
+    "lengthShorter": "Shorter"
+  }
+}

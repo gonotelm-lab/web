@@ -1,5 +1,6 @@
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
 import { Button } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import {
   workspaceRadius,
   workspaceSpace,
@@ -19,6 +20,8 @@ export function CreateNotebookEntry({
   size = 'medium',
   variant = 'contained',
 }: CreateNotebookEntryProps) {
+  const { t } = useTranslation('home')
+
   return (
     <Button
       onClick={onClick}
@@ -41,7 +44,7 @@ export function CreateNotebookEntry({
         },
       }}
     >
-      新建笔记本
+      {t('create.entry')}
     </Button>
   )
 }

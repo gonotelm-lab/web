@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded'
 import ZoomOutMapRoundedIcon from '@mui/icons-material/ZoomOutMapRounded'
 import {
@@ -58,6 +59,7 @@ export function SourceInlinePreview({
   onRetryLoad,
   degradedByResizing,
 }: SourceInlinePreviewProps) {
+  const { t } = useTranslation(['sources', 'common'])
   const scrollRootRef = useRef<HTMLDivElement | null>(null)
   const [frozenWidthPx, setFrozenWidthPx] = useState<number | null>(null)
 
@@ -89,11 +91,11 @@ export function SourceInlinePreview({
           sx={{ ml: workspaceSpace.sm, alignItems: 'center', flexShrink: 0 }}
         >
           {canOpenOverlay ? (
-            <Tooltip title="放大预览">
+            <Tooltip title={t('common:preview.expand')}>
               <span>
                 <IconButton
                   size="small"
-                  aria-label="放大预览"
+                  aria-label={t('common:preview.expand')}
                   onClick={onOpenOverlay}
                   sx={inlinePreviewActionIconButtonSx}
                 >
@@ -102,11 +104,11 @@ export function SourceInlinePreview({
               </span>
             </Tooltip>
           ) : null}
-          <Tooltip title="下载预览内容">
+          <Tooltip title={t('common:preview.download')}>
             <span>
               <IconButton
                 size="small"
-                aria-label="下载预览内容"
+                aria-label={t('common:preview.download')}
                 onClick={onDownload}
                 disabled={!canDownload}
                 sx={inlinePreviewActionIconButtonSx}
@@ -134,7 +136,7 @@ export function SourceInlinePreview({
         {loading ? (
           <Stack sx={{ height: '100%', alignItems: 'center', justifyContent: 'center' }}>
             <Typography variant="body2" color="text.secondary">
-              正在加载预览内容...
+              {t('common:preview.loading')}
             </Typography>
           </Stack>
         ) : error ? (
@@ -142,7 +144,7 @@ export function SourceInlinePreview({
             <Alert severity="error">{error}</Alert>
             <Box>
               <Button size="small" variant="outlined" onClick={onRetryLoad}>
-                重试加载
+                {t('common:preview.retryLoad')}
               </Button>
             </Box>
           </Stack>

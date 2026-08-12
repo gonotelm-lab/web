@@ -1,3 +1,5 @@
+import i18n from '@/i18n'
+
 export interface ParsedMindmapNode {
   id: string
   label: string
@@ -90,7 +92,7 @@ export const parseMermaidMindmap = (rawContent: string): ParsedMindmapResult => 
       rootId: null,
       childIdsByNodeId: {},
       parentIdByNodeId: {},
-      parseError: '思维导图内容为空。',
+      parseError: i18n.t('studio:mindmap.empty'),
     }
   }
 
@@ -152,7 +154,7 @@ export const parseMermaidMindmap = (rawContent: string): ParsedMindmapResult => 
       rootId: null,
       childIdsByNodeId: {},
       parentIdByNodeId: {},
-      parseError: '未解析到有效节点，请确认 Mermaid mindmap 语法。',
+      parseError: i18n.t('studio:mindmap.invalid'),
     }
   }
 

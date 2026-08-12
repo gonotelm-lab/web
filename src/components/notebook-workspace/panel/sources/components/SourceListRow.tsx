@@ -1,4 +1,5 @@
 import { memo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import AddLinkOutlinedIcon from '@mui/icons-material/AddLinkOutlined'
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
 import CheckBoxIcon from '@mui/icons-material/CheckBox'
@@ -95,6 +96,7 @@ export const SourceListRow = memo(function SourceListRow({
   onPreviewItem,
   previewLoading,
 }: SourceListRowProps) {
+  const { t } = useTranslation(['sources', 'common'])
   const isProcessing = item.status === 'uploading' || item.status === 'preparing'
   const isFailed = item.status === 'failed'
   const isReady = item.status === 'ready'
@@ -196,7 +198,7 @@ export const SourceListRow = memo(function SourceListRow({
 
     const nextTitle = titleDraft.trim()
     if (!nextTitle) {
-      setTitleErrorText('标题不能为空')
+      setTitleErrorText(t('sources:editTitle.empty'))
       return
     }
 
@@ -212,7 +214,7 @@ export const SourceListRow = memo(function SourceListRow({
         setEditDialogOpen(false)
       })
       .catch(() => {
-        setTitleErrorText('更新标题失败，请稍后重试')
+        setTitleErrorText(t('sources:editTitle.failed'))
       })
       .finally(() => {
         setIsUpdatingTitle(false)
@@ -320,7 +322,7 @@ export const SourceListRow = memo(function SourceListRow({
           <IconButton
             className="source-action-trigger"
             size="small"
-            aria-label="来源操作"
+            aria-label={t('sources:row.actionsAria')}
             onClick={openActionMenu}
             sx={{
               position: 'absolute',
@@ -390,7 +392,7 @@ export const SourceListRow = memo(function SourceListRow({
           sx={actionMenuItemSx}
         >
           <PreviewOutlinedIcon sx={actionMenuIconSx} />
-          <Typography sx={actionMenuTextSx}>预览</Typography>
+          <Typography sx={actionMenuTextSx}>{t('sources:row.preview')}</Typography>
         </MenuItem>
         {item.kind === 'url' ? (
           <MenuItem
@@ -399,7 +401,7 @@ export const SourceListRow = memo(function SourceListRow({
             sx={actionMenuItemSx}
           >
             <OpenInNewOutlinedIcon sx={actionMenuIconSx} />
-            <Typography sx={actionMenuTextSx}>打开</Typography>
+            <Typography sx={actionMenuTextSx}>{t('sources:row.open')}</Typography>
           </MenuItem>
         ) : null}
         <MenuItem
@@ -408,7 +410,7 @@ export const SourceListRow = memo(function SourceListRow({
           sx={actionMenuItemSx}
         >
           <DownloadOutlinedIcon sx={actionMenuIconSx} />
-          <Typography sx={actionMenuTextSx}>下载</Typography>
+          <Typography sx={actionMenuTextSx}>{t('sources:row.download')}</Typography>
         </MenuItem>
         {isFailed ? (
           <MenuItem
@@ -417,7 +419,7 @@ export const SourceListRow = memo(function SourceListRow({
             sx={actionMenuItemSx}
           >
             <ReplayOutlinedIcon sx={actionMenuIconSx} />
-            <Typography sx={actionMenuTextSx}>重试</Typography>
+            <Typography sx={actionMenuTextSx}>{t('sources:row.retry')}</Typography>
           </MenuItem>
         ) : null}
         <MenuItem
@@ -426,7 +428,7 @@ export const SourceListRow = memo(function SourceListRow({
           sx={actionMenuItemSx}
         >
           <EditOutlinedIcon sx={actionMenuIconSx} />
-          <Typography sx={actionMenuTextSx}>编辑</Typography>
+          <Typography sx={actionMenuTextSx}>{t('sources:row.edit')}</Typography>
         </MenuItem>
         <MenuItem
           disabled={isBusy || removing}
@@ -434,7 +436,7 @@ export const SourceListRow = memo(function SourceListRow({
           sx={actionMenuItemSx}
         >
           <DeleteOutlineOutlinedIcon sx={actionMenuIconSx} />
-          <Typography sx={actionMenuTextSx}>删除</Typography>
+          <Typography sx={actionMenuTextSx}>{t('sources:row.delete')}</Typography>
         </MenuItem>
       </Menu>
       <Dialog
@@ -443,14 +445,14 @@ export const SourceListRow = memo(function SourceListRow({
         fullWidth
         maxWidth="xs"
       >
-        <DialogTitle>编辑来源标题</DialogTitle>
+        <DialogTitle>{t('sources:editTitle.dialog')}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             fullWidth
             size="small"
             margin="dense"
-            label="标题"
+            label={t('sources:editTitle.label')}
             value={titleDraft}
             onChange={(event) => {
               setTitleDraft(event.target.value.slice(0, sourceTitleMaxChars))
@@ -476,14 +478,14 @@ export const SourceListRow = memo(function SourceListRow({
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseEditDialog} disabled={isUpdatingTitle}>
-            取消
+            {t('common:action.cancel')}
           </Button>
           <Button
             variant="contained"
             onClick={handleCommitEditTitle}
             disabled={isUpdatingTitle}
           >
-            {isUpdatingTitle ? '保存中...' : '保存'}
+            {isUpdatingTitle ? t('common:action.saving') : t('common:action.save')}
           </Button>
         </DialogActions>
       </Dialog>

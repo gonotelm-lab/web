@@ -1,4 +1,5 @@
 import { memo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import {
   Box,
@@ -9,6 +10,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import i18n from '@/i18n'
 import { workspaceRadius, workspaceSpace } from '../../../shared/ui/layoutTokens'
 import type { StudioArtifactItem } from '../types'
 import { workspaceType } from '../../../shared/ui/typeTokens'
@@ -23,44 +25,72 @@ interface ExtrasEntry {
   value: string
 }
 
-const reportStyleLabels: Record<string, string> = {
-  default: '默认',
-  brief: '简报文档',
-  'study-guide': '学习指南',
-  detailed: '深度解读',
+function getReportStyleLabels(): Record<string, string> {
+  return {
+    default: i18n.t('studio:style.report.default.label'),
+    brief: i18n.t('studio:style.report.brief.label'),
+    'study-guide': i18n.t('studio:style.report.studyGuide.label'),
+    detailed: i18n.t('studio:style.report.detailed.label'),
+  }
 }
 
-const audioStyleLabels: Record<string, string> = {
-  'deep-research': '深度研究',
-  abstract: '摘要',
-  discussion: '讨论',
-  debate: '辩论',
+function getAudioStyleLabels(): Record<string, string> {
+  return {
+    'deep-research': i18n.t('studio:style.audio.deepResearch.label'),
+    abstract: i18n.t('studio:style.audio.abstract.label'),
+    discussion: i18n.t('studio:style.audio.discussion.label'),
+    debate: i18n.t('studio:style.audio.debate.label'),
+  }
 }
 
-const visualStyleLabels: Record<string, string> = {
-  default: '默认',
-  'hand-drawn': '手绘',
-  anime: '动漫',
-  cute: '可爱',
-  educational: '教学科普',
-  'minimal-2.5d': '极简2.5D',
+function getVisualStyleLabels(): Record<string, string> {
+  return {
+    default: i18n.t('studio:infoGraphic.visual.default.label'),
+    'hand-drawn': i18n.t('studio:infoGraphic.visual.handDrawn.label'),
+    anime: i18n.t('studio:infoGraphic.visual.anime.label'),
+    cute: i18n.t('studio:infoGraphic.visual.cute.label'),
+    educational: i18n.t('studio:infoGraphic.visual.educational.label'),
+    'minimal-2.5d': i18n.t('studio:infoGraphic.visual.minimal25d.label'),
+  }
 }
 
-const detailLevelLabels: Record<string, string> = {
-  concise: '简略',
-  standard: '标准',
-  detailed: '详细',
+function getDetailLevelLabels(): Record<string, string> {
+  return {
+    concise: i18n.t('studio:infoGraphic.detail.concise.label'),
+    standard: i18n.t('studio:infoGraphic.detail.standard.label'),
+    detailed: i18n.t('studio:infoGraphic.detail.detailed.label'),
+  }
 }
 
-const orientationLabels: Record<string, string> = {
-  portrait: '竖屏',
-  landscape: '横屏',
-  square: '方图',
+function getOrientationLabels(): Record<string, string> {
+  return {
+    portrait: i18n.t('studio:infoGraphic.orientation.portrait'),
+    landscape: i18n.t('studio:infoGraphic.orientation.landscape'),
+    square: i18n.t('studio:infoGraphic.orientation.square'),
+  }
 }
 
-const languageLabels: Record<string, string> = {
-  'zh-CN': '简体中文',
-  'en-US': 'English',
+function getLanguageLabels(): Record<string, string> {
+  return {
+    'zh-CN': i18n.t('studio:lang.zhCN'),
+    'en-US': i18n.t('studio:lang.enUS'),
+  }
+}
+
+function getCountLabels(): Record<string, string> {
+  return {
+    few: i18n.t('studio:count.few.label'),
+    default: i18n.t('studio:count.default.label'),
+    many: i18n.t('studio:count.many.label'),
+  }
+}
+
+function getDifficultyLabels(): Record<string, string> {
+  return {
+    easy: i18n.t('studio:difficulty.easy.label'),
+    medium: i18n.t('studio:difficulty.medium.label'),
+    hard: i18n.t('studio:difficulty.hard.label'),
+  }
 }
 
 function resolveExtrasEntries(artifact: StudioArtifactItem): ExtrasEntry[] {
@@ -68,19 +98,27 @@ function resolveExtrasEntries(artifact: StudioArtifactItem): ExtrasEntry[] {
   if (!extras) {
     return []
   }
+  const tipLabel = i18n.t('studio:extras.label.tip')
+  const styleLabel = i18n.t('studio:extras.label.style')
+  const languageLabel = i18n.t('studio:extras.label.language')
   switch (artifact.kind) {
     case 'mindmap': {
       const e = extras as { tip?: string }
       return [
-        { label: '附加提示', value: e.tip?.trim() || '—' },
+        { label: tipLabel, value: e.tip?.trim() || '—' },
       ]
     }
     case 'report': {
       const e = extras as { style?: string; language?: string; tip?: string }
+      const reportStyleLabels = getReportStyleLabels()
+      const languageLabels = getLanguageLabels()
       return [
-        { label: '风格', value: reportStyleLabels[e.style || ''] || e.style || '默认' },
-        { label: '语言', value: languageLabels[e.language || ''] || e.language || '—' },
-        { label: '附加提示', value: e.tip?.trim() || '—' },
+        {
+          label: styleLabel,
+          value: reportStyleLabels[e.style || ''] || e.style || i18n.t('studio:style.report.default.label'),
+        },
+        { label: languageLabel, value: languageLabels[e.language || ''] || e.language || '—' },
+        { label: tipLabel, value: e.tip?.trim() || '—' },
       ]
     }
     case 'info_graphic': {
@@ -91,12 +129,27 @@ function resolveExtrasEntries(artifact: StudioArtifactItem): ExtrasEntry[] {
         detail_level?: string
         visual_style?: string
       }
+      const visualStyleLabels = getVisualStyleLabels()
+      const detailLevelLabels = getDetailLevelLabels()
+      const orientationLabels = getOrientationLabels()
       return [
-        { label: '视觉风格', value: visualStyleLabels[e.visual_style || ''] || e.visual_style || '默认' },
-        { label: '探索深度', value: detailLevelLabels[e.detail_level || ''] || e.detail_level || '—' },
-        { label: '画面方向', value: orientationLabels[e.orientation || ''] || e.orientation || '—' },
-        { label: '文字语言', value: e.text_language || '—' },
-        { label: '附加提示', value: e.prompt?.trim() || '—' },
+        {
+          label: i18n.t('studio:extras.label.visualStyle'),
+          value: visualStyleLabels[e.visual_style || ''] || e.visual_style || i18n.t('studio:infoGraphic.visual.default.label'),
+        },
+        {
+          label: i18n.t('studio:extras.label.detailLevel'),
+          value: detailLevelLabels[e.detail_level || ''] || e.detail_level || '—',
+        },
+        {
+          label: i18n.t('studio:extras.label.orientation'),
+          value: orientationLabels[e.orientation || ''] || e.orientation || '—',
+        },
+        {
+          label: i18n.t('studio:extras.label.textLanguage'),
+          value: e.text_language || '—',
+        },
+        { label: tipLabel, value: e.prompt?.trim() || '—' },
       ]
     }
     case 'audio_overview': {
@@ -105,10 +158,12 @@ function resolveExtrasEntries(artifact: StudioArtifactItem): ExtrasEntry[] {
         language?: string
         style?: string
       }
+      const audioStyleLabels = getAudioStyleLabels()
+      const languageLabels = getLanguageLabels()
       return [
-        { label: '风格', value: audioStyleLabels[e.style || ''] || e.style || '—' },
-        { label: '语言', value: languageLabels[e.language || ''] || e.language || '—' },
-        { label: '附加提示', value: e.tip?.trim() || '—' },
+        { label: styleLabel, value: audioStyleLabels[e.style || ''] || e.style || '—' },
+        { label: languageLabel, value: languageLabels[e.language || ''] || e.language || '—' },
+        { label: tipLabel, value: e.tip?.trim() || '—' },
       ]
     }
     case 'flashcard':
@@ -118,33 +173,31 @@ function resolveExtrasEntries(artifact: StudioArtifactItem): ExtrasEntry[] {
         difficulty?: string
         tip?: string
       }
-      const countLabels: Record<string, string> = {
-        few: '少',
-        default: '默认',
-        many: '多',
-      }
-      const difficultyLabels: Record<string, string> = {
-        easy: '简单',
-        medium: '中等',
-        hard: '困难',
-      }
+      const countLabels = getCountLabels()
+      const difficultyLabels = getDifficultyLabels()
       return [
-        { label: '数量风格', value: countLabels[e.count || ''] || e.count || '默认' },
-        { label: '难度', value: difficultyLabels[e.difficulty || ''] || e.difficulty || '中等' },
-        { label: '附加提示', value: e.tip?.trim() || '—' },
+        {
+          label: i18n.t('studio:extras.label.countStyle'),
+          value: countLabels[e.count || ''] || e.count || i18n.t('studio:count.default.label'),
+        },
+        {
+          label: i18n.t('studio:extras.label.difficulty'),
+          value: difficultyLabels[e.difficulty || ''] || e.difficulty || i18n.t('studio:difficulty.medium.label'),
+        },
+        { label: tipLabel, value: e.tip?.trim() || '—' },
       ]
     }
     case 'data_table': {
       const e = extras as { tip?: string }
       return [
-        { label: '附加提示', value: e.tip?.trim() || '—' },
+        { label: tipLabel, value: e.tip?.trim() || '—' },
       ]
     }
     case 'note': {
       const e = extras as { chat_id?: string; msg_id?: string }
       return [
-        { label: '对话', value: e.chat_id?.trim() || '—' },
-        { label: '消息', value: e.msg_id?.trim() || '—' },
+        { label: i18n.t('studio:extras.label.conversation'), value: e.chat_id?.trim() || '—' },
+        { label: i18n.t('studio:extras.label.message'), value: e.msg_id?.trim() || '—' },
       ]
     }
   }
@@ -155,6 +208,7 @@ export const StudioArtifactExtrasPopover = memo(function StudioArtifactExtrasPop
   artifact,
   iconSx,
 }: StudioArtifactExtrasPopoverProps) {
+  const { t } = useTranslation(['studio', 'common'])
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const open = Boolean(anchorEl)
   const entries = resolveExtrasEntries(artifact)
@@ -165,11 +219,11 @@ export const StudioArtifactExtrasPopover = memo(function StudioArtifactExtrasPop
 
   return (
     <>
-      <Tooltip title="查看生成参数">
+      <Tooltip title={t('studio:extras.viewParams')}>
         <span>
           <IconButton
             size="small"
-            aria-label="查看生成参数"
+            aria-label={t('studio:extras.viewParams')}
             onClick={(event) => setAnchorEl(event.currentTarget)}
             sx={iconSx}
           >
@@ -190,7 +244,7 @@ export const StudioArtifactExtrasPopover = memo(function StudioArtifactExtrasPop
         }}
       >
         <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: workspaceSpace.sm }}>
-          生成参数
+          {t('studio:extras.title')}
         </Typography>
         <Stack spacing={workspaceSpace.sm}>
           {entries.map((entry) => (

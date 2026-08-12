@@ -1,19 +1,30 @@
+import i18n from '@/i18n'
 import { workspaceSpace } from '../../shared/ui/layoutTokens'
 import { workspaceType } from '../../shared/ui/typeTokens'
 
 export type ChatStyleOption = 'default' | 'analyst' | 'guide'
 export type ChatAnswerLengthOption = 'default' | 'longer' | 'shorter'
 
-export const chatStyleOptionList: { value: ChatStyleOption; label: string }[] = [
-  { value: 'default', label: '默认' },
-  { value: 'analyst', label: '分析师' },
-  { value: 'guide', label: '向导' },
+export const chatStyleOptionValues: ChatStyleOption[] = ['default', 'analyst', 'guide']
+export const chatAnswerLengthOptionValues: ChatAnswerLengthOption[] = [
+  'default',
+  'longer',
+  'shorter',
 ]
 
-export const chatAnswerLengthOptionList: { value: ChatAnswerLengthOption; label: string }[] = [
-  { value: 'default', label: '默认' },
-  { value: 'longer', label: '更长' },
-  { value: 'shorter', label: '更短' },
+export const getChatStyleOptionList = (): { value: ChatStyleOption; label: string }[] => [
+  { value: 'default', label: i18n.t('chat:settings.styleDefault') },
+  { value: 'analyst', label: i18n.t('chat:settings.styleAnalyst') },
+  { value: 'guide', label: i18n.t('chat:settings.styleGuide') },
+]
+
+export const getChatAnswerLengthOptionList = (): {
+  value: ChatAnswerLengthOption
+  label: string
+}[] => [
+  { value: 'default', label: i18n.t('chat:settings.lengthDefault') },
+  { value: 'longer', label: i18n.t('chat:settings.lengthLonger') },
+  { value: 'shorter', label: i18n.t('chat:settings.lengthShorter') },
 ]
 
 export const settingsToggleButtonSx = {

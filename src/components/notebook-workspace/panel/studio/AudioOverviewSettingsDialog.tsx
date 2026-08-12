@@ -1,4 +1,5 @@
 import { memo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Button,
@@ -21,9 +22,9 @@ import type {
 import { workspaceDialogLayout } from '../../shared/ui/dialogLayoutTokens'
 import { settingsToggleButtonSx } from '../chat/chatSettings'
 import {
-  audioOverviewLanguageOptionList,
-  audioOverviewStyleOptionList,
   defaultAudioOverviewParameters,
+  getAudioOverviewLanguageOptionList,
+  getAudioOverviewStyleOptionList,
 } from './audioOverviewSettings'
 
 interface AudioOverviewSettingsDialogProps {
@@ -39,22 +40,25 @@ export const AudioOverviewSettingsDialog = memo(function AudioOverviewSettingsDi
   onClose,
   onGenerate,
 }: AudioOverviewSettingsDialogProps) {
+  const { t } = useTranslation(['studio', 'common'])
   const [draftParams, setDraftParams] = useState<GenerateAudioOverviewParameters>(initialParams)
+  const audioOverviewLanguageOptionList = getAudioOverviewLanguageOptionList()
+  const audioOverviewStyleOptionList = getAudioOverviewStyleOptionList()
 
   const language = draftParams.language || defaultAudioOverviewParameters.language
   const style = draftParams.style || defaultAudioOverviewParameters.style || 'abstract'
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: workspaceDialogLayout.paperRadius } } }}>
-      <DialogTitle>生成音频概览</DialogTitle>
+      <DialogTitle>{t('studio:settings.audio.title')}</DialogTitle>
       <DialogContent dividers>
         <Stack spacing={workspaceDialogLayout.sectionStackSpacing}>
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              选择语言
+              {t('studio:settings.language')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: workspaceDialogLayout.helperTextMt }}>
-              控制音频概览输出文本的语言。
+              {t('studio:settings.languageHelp.audio')}
             </Typography>
             <TextField
               select
@@ -78,10 +82,10 @@ export const AudioOverviewSettingsDialog = memo(function AudioOverviewSettingsDi
 
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              生成风格
+              {t('studio:settings.style')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: workspaceDialogLayout.helperTextMt }}>
-              控制音频概览的表达方式和内容组织。
+              {t('studio:settings.styleHelp.audio')}
             </Typography>
             <ToggleButtonGroup
               exclusive
@@ -108,7 +112,7 @@ export const AudioOverviewSettingsDialog = memo(function AudioOverviewSettingsDi
 
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              附加提示
+              {t('studio:settings.tip')}
             </Typography>
             <TextField
               fullWidth
@@ -117,7 +121,7 @@ export const AudioOverviewSettingsDialog = memo(function AudioOverviewSettingsDi
               minRows={2}
               maxRows={2}
               slotProps={{ htmlInput: { maxLength: 300 } }}
-              placeholder="可补充强调重点、受众或表达要求。"
+              placeholder={t('studio:settings.tipPlaceholder.generic')}
               value={draftParams.tip || ''}
               onChange={(event) =>
                 setDraftParams((prev) => ({ ...prev, tip: event.target.value }))
@@ -128,9 +132,9 @@ export const AudioOverviewSettingsDialog = memo(function AudioOverviewSettingsDi
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>取消</Button>
+        <Button onClick={onClose}>{t('common:action.cancel')}</Button>
         <Button variant="contained" onClick={() => onGenerate(draftParams)}>
-          生成
+          {t('common:action.generate')}
         </Button>
       </DialogActions>
     </Dialog>

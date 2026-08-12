@@ -17,6 +17,7 @@ import {
   listChatMessages,
   streamChatEvents,
 } from '@/api/chat'
+import i18n from '@/i18n'
 import {
   chatMessagesPageLimit,
   getErrorMessage,
@@ -627,7 +628,7 @@ export function useChatConversation({
     if (abortStreamMutation.isPending) return
 
     setErrorText('')
-    setStreamStatus('正在终止...')
+    setStreamStatus(i18n.t('chat:stream.aborting'))
     setAbortRequestedFlag(true)
 
     try {
@@ -745,11 +746,11 @@ export function useChatConversation({
     const clearContext = async () => {
       // Clearing context during generation can race with stream updates, so guard it explicitly.
       if (isStreaming || isClearingContext) {
-        setErrorText('正在生成回复时不可清空上下文，请稍后再试。')
+        setErrorText(i18n.t('chat:error.clearWhileStreaming'))
         return
       }
       if (!chatId) {
-        setErrorText('当前会话不可用，无法清空上下文。')
+        setErrorText(i18n.t('chat:error.clearNoSession'))
         return
       }
 

@@ -2,6 +2,7 @@ import type { ReactNode, RefObject } from 'react'
 import CloseIcon from '@mui/icons-material/Close'
 import { Box, Divider, IconButton, Stack, Typography } from '@mui/material'
 import type { SxProps, Theme } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import { workspaceSpace } from './layoutTokens'
 import { workspaceTransitionPresets } from './motionTokens'
 import { panelTitleSx, panelTitleVariant } from './panelStyles'
@@ -34,6 +35,7 @@ export function PanelSubpageLayout({
   subpageBodySx,
   subpageBodyRef,
 }: PanelSubpageLayoutProps) {
+  const { t } = useTranslation('common')
   const subpageOpen = Boolean(subpage)
 
   return (
@@ -102,7 +104,7 @@ export function PanelSubpageLayout({
               <IconButton
                 size="small"
                 color="default"
-                aria-label={subpage.closeAriaLabel ?? '返回上一级'}
+                aria-label={subpage.closeAriaLabel ?? t('nav.backLevel')}
                 onClick={subpage.onClose}
               >
                 <CloseIcon fontSize="small" />

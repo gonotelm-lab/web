@@ -7,6 +7,7 @@ import {
   DialogTitle,
   TextField,
 } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { workspaceDialogLayout } from '../notebook-workspace/shared/ui/dialogLayoutTokens'
 import { workspaceSpace } from '../notebook-workspace/shared/ui/layoutTokens'
 
@@ -29,6 +30,8 @@ export function CreateNotebookDialog({
   onClose,
   onCreateWithName,
 }: CreateNotebookDialogProps) {
+  const { t } = useTranslation(['home', 'common'])
+
   return (
     <Dialog
       open={open}
@@ -37,14 +40,14 @@ export function CreateNotebookDialog({
       maxWidth="xs"
       slotProps={{ paper: { sx: { borderRadius: workspaceDialogLayout.paperRadius } } }}
     >
-      <DialogTitle>新建笔记本</DialogTitle>
+      <DialogTitle>{t('home:create.dialogTitle')}</DialogTitle>
       <DialogContent>
         <TextField
           autoFocus
           fullWidth
           size="small"
           margin="dense"
-          label="笔记本名称（可选）"
+          label={t('home:create.nameLabel')}
           value={draftName}
           onChange={(event) => onDraftNameChange(event.target.value)}
           disabled={submitting}
@@ -57,14 +60,14 @@ export function CreateNotebookDialog({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={submitting}>
-          取消
+          {t('common:action.cancel')}
         </Button>
         <Button
           variant="contained"
           onClick={onCreateWithName}
           disabled={submitting}
         >
-          创建
+          {t('home:create.submit')}
         </Button>
       </DialogActions>
     </Dialog>

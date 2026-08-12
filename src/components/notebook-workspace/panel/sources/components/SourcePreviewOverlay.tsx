@@ -10,6 +10,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { alpha } from '@mui/material/styles'
 import {
   workspaceLayout,
@@ -38,10 +39,6 @@ interface SourcePreviewOverlayProps {
   onRetryLoad: () => void
 }
 
-const viewTypeLabelMap: Record<SourcePreviewViewType, string> = {
-  content: '预览',
-}
-
 export function SourcePreviewOverlay({
   open,
   sourceName,
@@ -56,6 +53,11 @@ export function SourcePreviewOverlay({
   onClose,
   onRetryLoad,
 }: SourcePreviewOverlayProps) {
+  const { t } = useTranslation(['sources', 'common'])
+  const viewTypeLabelMap: Record<SourcePreviewViewType, string> = {
+    content: t('sources:preview.title'),
+  }
+
   const handleCloseOverlay = () => {
     onClose()
   }
@@ -122,11 +124,11 @@ export function SourcePreviewOverlay({
             spacing={workspaceSpace.xxs}
             sx={{ alignItems: 'center', flexShrink: 0 }}
           >
-            <Tooltip title="下载预览内容">
+            <Tooltip title={t('common:preview.download')}>
               <span>
                 <IconButton
                   size="small"
-                  aria-label="下载预览内容"
+                  aria-label={t('common:preview.download')}
                   onClick={onDownload}
                   disabled={!canDownload}
                   sx={inlinePreviewActionIconButtonSx}
@@ -138,7 +140,7 @@ export function SourcePreviewOverlay({
             <IconButton
               size="small"
               onClick={handleCloseOverlay}
-              aria-label="关闭预览"
+              aria-label={t('common:preview.close')}
               sx={inlinePreviewActionIconButtonSx}
             >
               <CloseRoundedIcon sx={{ fontSize: workspaceIconSize.md }} />
@@ -157,7 +159,7 @@ export function SourcePreviewOverlay({
           {loading ? (
             <Stack sx={{ height: '100%', alignItems: 'center', justifyContent: 'center' }}>
               <Typography variant="body2" color="text.secondary">
-                正在加载预览内容...
+                {t('common:preview.loading')}
               </Typography>
             </Stack>
           ) : error ? (
@@ -165,7 +167,7 @@ export function SourcePreviewOverlay({
               <Alert severity="error">{error}</Alert>
               <Box>
                 <Button size="small" variant="outlined" onClick={onRetryLoad}>
-                  重试加载
+                  {t('common:preview.retryLoad')}
                 </Button>
               </Box>
             </Stack>

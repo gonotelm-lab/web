@@ -1,5 +1,6 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { Box, Button, IconButton, Stack, TextField, Typography } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { workspaceSpace } from '../../../shared/ui/layoutTokens'
 import { workspaceType } from '../../../shared/ui/typeTokens'
 
@@ -69,6 +70,8 @@ export function AddSourceDialogEditorView({
   onTextChange,
   onSubmit,
 }: AddSourceDialogEditorViewProps) {
+  const { t } = useTranslation(['sources', 'common'])
+
   return (
     <Box
       sx={{
@@ -88,11 +91,11 @@ export function AddSourceDialogEditorView({
           minHeight: 36,
         }}
       >
-        <IconButton size="small" onClick={onBack} disabled={disabled} aria-label="返回">
+        <IconButton size="small" onClick={onBack} disabled={disabled} aria-label={t('sources:editor.backAria')}>
           <ArrowBackIcon fontSize="small" />
         </IconButton>
         <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-          {view === 'url' ? '链接' : '粘贴文字'}
+          {view === 'url' ? t('sources:editor.urlTitle') : t('sources:editor.textTitle')}
         </Typography>
       </Stack>
 
@@ -110,12 +113,12 @@ export function AddSourceDialogEditorView({
           <TextField
             fullWidth
             size="small"
-            label="链接"
+            label={t('sources:editor.urlTitle')}
             placeholder="https://example.com/article"
             value={urlInput}
             disabled={disabled}
             onChange={(e) => onUrlChange(e.target.value)}
-            helperText="支持公开可访问的网页链接"
+            helperText={t('sources:editor.urlHelper')}
             slotProps={{
               inputLabel: { shrink: true },
               formHelperText: { sx: editorHelperTextSx },
@@ -126,8 +129,8 @@ export function AddSourceDialogEditorView({
             <TextField
               fullWidth
               multiline
-              label="粘贴文字"
-              placeholder="粘贴你要添加的文本内容..."
+              label={t('sources:editor.textTitle')}
+              placeholder={t('sources:editor.textPlaceholder')}
               value={textInput}
               disabled={disabled}
               onChange={(e) => onTextChange(e.target.value)}
@@ -169,7 +172,7 @@ export function AddSourceDialogEditorView({
           disabled={disabled || !hasSubmitValue}
           variant="contained"
         >
-          添加来源
+          {t('sources:editor.submit')}
         </Button>
       </Stack>
     </Box>

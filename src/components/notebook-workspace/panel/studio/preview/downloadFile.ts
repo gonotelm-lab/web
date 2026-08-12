@@ -1,7 +1,9 @@
+import i18n from '@/i18n'
+
 export async function downloadFileFromUrl(url: string, filename: string) {
   const response = await fetch(url)
   if (!response.ok) {
-    throw new Error(`下载失败，HTTP ${response.status}`)
+    throw new Error(i18n.t('studio:download.failed', { status: response.status }))
   }
   const blob = await response.blob()
   const objectUrl = URL.createObjectURL(blob)

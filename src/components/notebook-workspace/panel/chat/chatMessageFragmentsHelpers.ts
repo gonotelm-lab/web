@@ -1,7 +1,8 @@
+import i18n from '@/i18n'
 import { extractLatestPhaseSummary } from './streamEventReducer'
 import type { ChatUiFragment, ChatUiFragmentType, ChatUiMessage } from './types'
 
-export const THINKING_PHASE_LABEL = '思考中...'
+export const getThinkingPhaseLabel = () => i18n.t('chat:thinkingPhase')
 
 export const normalizeFragmentType = (type: string): ChatUiFragmentType | null => {
   const normalized = type.toUpperCase()
@@ -26,7 +27,7 @@ export const hasResponseContent = (fragments: ChatUiFragment[]) =>
   Boolean(extractCombinedResponseContent(fragments).trim())
 
 export const resolvePhaseStatusLabel = (message: ChatUiMessage) =>
-  extractLatestPhaseSummary(message) || THINKING_PHASE_LABEL
+  extractLatestPhaseSummary(message) || getThinkingPhaseLabel()
 
 export const shouldShowPhaseStatus = ({
   isActiveAssistant,
@@ -41,8 +42,9 @@ export const resolveStickyPhaseStatusLabel = (
   previousLabel: string,
   enabled: boolean,
 ) => {
+  const thinkingLabel = getThinkingPhaseLabel()
   if (!enabled) {
-    return THINKING_PHASE_LABEL
+    return thinkingLabel
   }
 
   const latestPhase = extractLatestPhaseSummary(message)
@@ -50,9 +52,9 @@ export const resolveStickyPhaseStatusLabel = (
     return latestPhase
   }
 
-  if (previousLabel !== THINKING_PHASE_LABEL) {
+  if (previousLabel !== thinkingLabel) {
     return previousLabel
   }
 
-  return THINKING_PHASE_LABEL
+  return thinkingLabel
 }

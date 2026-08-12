@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import i18n from '@/i18n'
 import {
   getStudioArtifact,
   loadStudioArtifactContentFromUrl,
@@ -43,7 +44,7 @@ interface UseStudioPreviewControllerParams {
 
 const buildStudioPreviewErrorMessage = (
   error: unknown,
-  fallback = '加载预览内容失败，请重试。',
+  fallback = i18n.t('studio:preview.loadFailed'),
 ) => {
   if (error instanceof ApiError) {
     return error.message
@@ -125,7 +126,7 @@ export function useStudioPreviewController({
             ? {
                 ...prev,
                 loading: false,
-                error: '任务尚未完成，请稍后再试。',
+                error: i18n.t('studio:preview.taskNotDone'),
               }
             : prev,
         )
@@ -161,7 +162,7 @@ export function useStudioPreviewController({
               contentUrl,
               error: hasStudioArtifactPreviewContent(latestItem.kind, content, contentUrl)
                 ? ''
-                : '当前产物没有可预览内容。',
+                : i18n.t('studio:preview.emptyArtifact'),
             }
           : prev,
       )

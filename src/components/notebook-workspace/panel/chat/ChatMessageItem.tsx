@@ -17,6 +17,7 @@ import {
 } from '@mui/material'
 import { alpha } from '@mui/material/styles'
 import type { Theme } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import type { GetSourceDocResponse } from '@/types/api'
 import { buildSourceDocQueryOptions } from '@/api/source'
 import { ChatMessageFragments } from './ChatMessageFragments'
@@ -131,6 +132,7 @@ export const ChatMessageItem = memo(function ChatMessageItem({
   onSaveAsNote,
   onOpenCitationJump,
 }: ChatMessageItemProps) {
+  const { t } = useTranslation(['chat', 'common'])
   const queryClient = useQueryClient()
   const [citationAnchorPosition, setCitationAnchorPosition] = useState<{
     left: number
@@ -181,7 +183,7 @@ export const ChatMessageItem = memo(function ChatMessageItem({
       if (!resolvedSourceId) {
         if (citationFetchSeqRef.current === fetchSeq) {
           setActiveCitationDoc(null)
-          setCitationLoadError('未找到引用来源。')
+          setCitationLoadError(t('chat:citation.notFoundSource'))
           setIsCitationLoading(false)
         }
         return
@@ -198,17 +200,17 @@ export const ChatMessageItem = memo(function ChatMessageItem({
 
       if (citationFetchSeqRef.current === fetchSeq) {
         setActiveCitationDoc(sourceDoc)
-        setCitationLoadError(sourceDoc ? '' : '未找到引用文档。')
+        setCitationLoadError(sourceDoc ? '' : t('chat:citation.notFoundDoc'))
       }
     } catch {
       if (citationFetchSeqRef.current !== fetchSeq) return
-      setCitationLoadError('加载引用内容失败，请稍后重试。')
+      setCitationLoadError(t('chat:citation.loadFailed'))
     } finally {
       if (citationFetchSeqRef.current === fetchSeq) {
         setIsCitationLoading(false)
       }
     }
-  }, [queryClient, selectedSourceIds])
+  }, [queryClient, selectedSourceIds, t])
 
   const handleCitationClick = useCallback(
     (event: MouseEvent<HTMLAnchorElement | HTMLElement>, target: CitationClickTarget) => {
@@ -224,20 +226,20 @@ export const ChatMessageItem = memo(function ChatMessageItem({
 
       if (!Number.isFinite(index) || index <= 0) {
         setIsCitationLoading(false)
-        setCitationLoadError('引用编号无效。')
+        setCitationLoadError(t('chat:citation.invalidIndex'))
         return
       }
 
       if (!citation?.docId?.trim()) {
         setIsCitationLoading(false)
-        setCitationLoadError('未命中引用映射。')
+        setCitationLoadError(t('chat:citation.missMapping'))
         return
       }
 
       setIsCitationLoading(true)
       void fetchCitationDoc(citation.docId.trim(), citation.sourceId ?? '', fetchSeq)
     },
-    [fetchCitationDoc, message.citations],
+    [fetchCitationDoc, message.citations, t],
   )
 
   const handleCloseCitationCard = useCallback(() => {
@@ -298,7 +300,7 @@ export const ChatMessageItem = memo(function ChatMessageItem({
             <Button
               size="small"
               variant="outlined"
-              aria-label="保存到笔记"
+              aria-label={t('chat:message.saveNote')}
               disabled={!canSaveAsNote}
               startIcon={
                 savingAsNote ? (
@@ -314,9 +316,9 @@ export const ChatMessageItem = memo(function ChatMessageItem({
               }}
               sx={saveAsNoteButtonSx}
             >
-              {savingAsNote ? '正在保存…' : '保存到笔记'}
+              {savingAsNote ? t('chat:message.saving') : t('chat:message.saveNote')}
             </Button>
-            <Tooltip title={copied ? '已复制' : '复制'}>
+            <Tooltip title={copied ? t('common:action.copied') : t('common:action.copy')}>
               <Box
                 component="span"
                 sx={{
@@ -364,10 +366,14 @@ export const ChatMessageItem = memo(function ChatMessageItem({
         >
           <Box sx={{ maxWidth: citationCardTokens.maxWidth, p: citationCardTokens.padding }}>
             <Typography variant="subtitle2" sx={{ mb: citationCardTokens.titleMarginBottom, fontWeight: 700 }}>
-              引用信息 {activeCitationIndex ? `[${activeCitationIndex}]` : ''}
+              {t('chat:citation.info', {
+                index: activeCitationIndex ? `[${activeCitationIndex}]` : '',
+              })}
             </Typography>
             <Typography variant="body2" sx={{ mt: citationCardTokens.sourceTitleMarginTop, fontWeight: 600 }}>
-              {`来源标题: ${activeCitationDoc?.source_title || '-'}`}
+              {t('chat:citation.sourceTitle', {
+                title: activeCitationDoc?.source_title || '-',
+              })}
             </Typography>
             <Box
               sx={{
@@ -386,10 +392,12 @@ export const ChatMessageItem = memo(function ChatMessageItem({
                     : theme.workspacePalette.citation.originalType,
                 })}
               >
-                {`引用类型: ${resolveCitationTypeLabel(citationSummary)}`}
+                {t('chat:citation.type', {
+                  type: resolveCitationTypeLabel(citationSummary),
+                })}
               </Typography>
               {canJumpToSourcePreview ? (
-                <Tooltip title="跳转到来源预览">
+                <Tooltip title={t('chat:citation.jump')}>
                   <span>
                     <IconButton size="small" onClick={handleJumpToSourcePreview} sx={{ p: 0, color: 'primary.main' }}>
                       <OpenInNewIcon sx={{ fontSize: workspaceIconSize.md }} />
@@ -399,7 +407,7 @@ export const ChatMessageItem = memo(function ChatMessageItem({
               ) : null}
             </Box>
             <Typography variant="body2" sx={{ mt: workspaceSpace.xxs, color: 'text.secondary' }}>
-              {`位置: ${citationPositionText}`}
+              {t('chat:citation.position', { text: citationPositionText })}
             </Typography>
             <Box
               sx={(theme) => ({
@@ -418,14 +426,16 @@ export const ChatMessageItem = memo(function ChatMessageItem({
               {isCitationLoading ? (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: citationCardTokens.loadingGap, py: citationCardTokens.loadingPaddingY }}>
                   <CircularProgress size={citationCardTokens.loadingSpinnerSize} />
-                  <Typography variant="body2">正在加载引用内容...</Typography>
+                  <Typography variant="body2">{t('chat:citation.loading')}</Typography>
                 </Box>
               ) : citationLoadError ? (
                 <Typography variant="body2" sx={(theme) => ({ color: theme.workspacePalette.status.error })}>
                   {citationLoadError}
                 </Typography>
               ) : (
-                <MarkdownRenderer content={activeCitationDoc?.content || '暂无内容'} />
+                <MarkdownRenderer
+                  content={activeCitationDoc?.content || t('chat:citation.empty')}
+                />
               )}
             </Box>
           </Box>
@@ -473,7 +483,7 @@ export const ChatMessageItem = memo(function ChatMessageItem({
       </Paper>
 
       <Box className="user-message-actions" sx={{ mr: messageLayoutTokens.userBubbleMarginRight }}>
-        <Tooltip title={copied ? '已复制' : '复制'}>
+        <Tooltip title={copied ? t('common:action.copied') : t('common:action.copy')}>
           <span>
             <IconButton
               size="small"

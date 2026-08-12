@@ -1,4 +1,5 @@
 import { afterAll, afterEach, beforeAll, vi } from 'vitest'
+import '@/i18n'
 import { mockServer, resetMockScenarios } from './mocks'
 
 vi.stubEnv('VITE_API_BASE_URL', 'http://127.0.0.1:4173')

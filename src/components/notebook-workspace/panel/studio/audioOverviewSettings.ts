@@ -1,3 +1,4 @@
+import i18n from '@/i18n'
 import type {
   GenerateAudioOverviewParameters,
   StudioArtifactAudioOverviewStyle,
@@ -23,34 +24,38 @@ export function buildAudioOverviewRequestParams(
   return normalized
 }
 
-export const audioOverviewLanguageOptionList: { value: string; label: string }[] = [
-  { value: 'zh-CN', label: '简体中文' },
-  { value: 'en-US', label: 'English' },
-]
+export function getAudioOverviewLanguageOptionList(): { value: string; label: string }[] {
+  return [
+    { value: 'zh-CN', label: i18n.t('studio:lang.zhCN') },
+    { value: 'en-US', label: i18n.t('studio:lang.enUS') },
+  ]
+}
 
-export const audioOverviewStyleOptionList: {
+export function getAudioOverviewStyleOptionList(): {
   value: StudioArtifactAudioOverviewStyle
   label: string
   description: string
-}[] = [
-  {
-    value: 'abstract',
-    label: '摘要',
-    description: '快速提炼核心观点，适合先看全貌。',
-  },
-  {
-    value: 'deep-research',
-    label: '深度研究',
-    description: '深入展开背景与细节，信息更完整。',
-  },
-  {
-    value: 'discussion',
-    label: '讨论',
-    description: '以对谈方式串联观点，节奏更自然。',
-  },
-  {
-    value: 'debate',
-    label: '辩论',
-    description: '强调观点碰撞，适合展示不同立场。',
-  },
-]
+}[] {
+  return [
+    {
+      value: 'abstract',
+      label: i18n.t('studio:style.audio.abstract.label'),
+      description: i18n.t('studio:style.audio.abstract.description'),
+    },
+    {
+      value: 'deep-research',
+      label: i18n.t('studio:style.audio.deepResearch.label'),
+      description: i18n.t('studio:style.audio.deepResearch.description'),
+    },
+    {
+      value: 'discussion',
+      label: i18n.t('studio:style.audio.discussion.label'),
+      description: i18n.t('studio:style.audio.discussion.description'),
+    },
+    {
+      value: 'debate',
+      label: i18n.t('studio:style.audio.debate.label'),
+      description: i18n.t('studio:style.audio.debate.description'),
+    },
+  ]
+}

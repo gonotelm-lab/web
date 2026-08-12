@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded'
 import {
@@ -46,6 +47,7 @@ export function StudioArtifactPreviewOverlay({
   onRetryLoad,
   onRenameTitle,
 }: StudioArtifactPreviewOverlayProps) {
+  const { t } = useTranslation(['studio', 'common'])
   const handleCloseOverlay = useCallback(() => {
     onClose()
   }, [onClose])
@@ -59,8 +61,10 @@ export function StudioArtifactPreviewOverlay({
 
   const title = artifact
     ? resolveStudioArtifactDisplayTitle(artifact.title, artifact.kind)
-    : '产物预览'
-  const subtitle = artifact ? `基于 ${sourceCount} 个来源` : '暂无来源信息'
+    : t('studio:preview.overlayTitle')
+  const subtitle = artifact
+    ? t('studio:preview.basedOnSources', { count: sourceCount })
+    : t('studio:preview.noSourceInfo')
   const canRename = Boolean(
     artifact && artifact.status === 'completed' && onRenameTitle,
   )
@@ -216,14 +220,14 @@ export function StudioArtifactPreviewOverlay({
             )}
             <IconButton
               size="small"
-              aria-label="下载预览内容"
+              aria-label={t('common:preview.download')}
               onClick={handleDownloadContent}
               disabled={!hasDownloadableContent}
               sx={overlayActionButtonSx}
             >
               <DownloadRoundedIcon fontSize="small" />
             </IconButton>
-            <IconButton size="small" onClick={handleCloseOverlay} aria-label="关闭预览" sx={overlayActionButtonSx}>
+            <IconButton size="small" onClick={handleCloseOverlay} aria-label={t('common:preview.close')} sx={overlayActionButtonSx}>
               <CloseRoundedIcon fontSize="small" />
             </IconButton>
           </Stack>
@@ -245,7 +249,7 @@ export function StudioArtifactPreviewOverlay({
           {loading ? (
             <Stack sx={{ height: '100%', alignItems: 'center', justifyContent: 'center' }}>
               <Typography variant="body2" color="text.secondary">
-                正在加载预览内容...
+                {t('common:preview.loading')}
               </Typography>
             </Stack>
           ) : error ? (
@@ -253,14 +257,14 @@ export function StudioArtifactPreviewOverlay({
               <Alert severity="error">{error}</Alert>
               <Box>
                 <Button size="small" variant="outlined" onClick={onRetryLoad}>
-                  重试加载
+                  {t('common:preview.retryLoad')}
                 </Button>
               </Box>
             </Stack>
           ) : !artifact ? (
             <Stack sx={{ height: '100%', alignItems: 'center', justifyContent: 'center' }}>
               <Typography variant="body2" color="text.secondary">
-                暂无可预览内容。
+                {t('studio:preview.empty')}
               </Typography>
             </Stack>
           ) : (

@@ -17,6 +17,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { workspaceDialogLayout } from '../notebook-workspace/shared/ui/dialogLayoutTokens'
 import {
   workspaceLayout,
@@ -48,6 +49,7 @@ export function NotebookCard({
   onDelete,
   deleting = false,
 }: NotebookCardProps) {
+  const { t } = useTranslation(['home', 'common'])
   const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState<string | null>(null)
@@ -94,7 +96,7 @@ export function NotebookCard({
           setDeleteErrorMessage(error.message)
           return
         }
-        setDeleteErrorMessage('删除失败，请稍后重试')
+        setDeleteErrorMessage(t('common:error.deleteFailed'))
       })
   }
 
@@ -192,7 +194,7 @@ export function NotebookCard({
                 whiteSpace: 'nowrap',
               }}
             >
-              {sourceCount} 个来源
+              {t('common:sourceCount', { count: sourceCount })}
             </Typography>
             <Typography
               variant="caption"
@@ -211,7 +213,7 @@ export function NotebookCard({
       {canDelete ? (
         <IconButton
           size="small"
-          aria-label="笔记本操作"
+          aria-label={t('home:card.actionsAria')}
           onClick={handleOpenActionMenu}
           disabled={deleting}
           sx={{
@@ -239,7 +241,9 @@ export function NotebookCard({
           }}
         >
           <DeleteOutlinedIcon sx={{ fontSize: workspaceIconSize.md, color: 'text.secondary' }} />
-          <Typography sx={{ fontSize: workspaceType.xs, lineHeight: 1.2 }}>删除</Typography>
+          <Typography sx={{ fontSize: workspaceType.xs, lineHeight: 1.2 }}>
+            {t('common:action.delete')}
+          </Typography>
         </MenuItem>
       </Menu>
       <Dialog
@@ -249,10 +253,10 @@ export function NotebookCard({
         maxWidth="xs"
         slotProps={{ paper: { sx: { borderRadius: workspaceDialogLayout.paperRadius } } }}
       >
-        <DialogTitle>删除笔记本</DialogTitle>
+        <DialogTitle>{t('home:card.deleteTitle')}</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary">
-            删除后将移除聊天与来源数据，且不可恢复。
+            {t('home:card.deleteBody')}
           </Typography>
           {deleteErrorMessage ? (
             <Typography
@@ -266,7 +270,7 @@ export function NotebookCard({
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDeleteDialog} disabled={deleting}>
-            取消
+            {t('common:action.cancel')}
           </Button>
           <Button
             variant="contained"
@@ -274,7 +278,7 @@ export function NotebookCard({
             onClick={handleConfirmDelete}
             disabled={deleting}
           >
-            {deleting ? '删除中...' : '删除'}
+            {deleting ? t('common:action.deleting') : t('common:action.delete')}
           </Button>
         </DialogActions>
       </Dialog>

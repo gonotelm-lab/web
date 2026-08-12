@@ -1,4 +1,5 @@
 import { memo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Button,
@@ -22,8 +23,8 @@ import { workspaceDialogLayout } from '../../shared/ui/dialogLayoutTokens'
 import { settingsToggleButtonSx } from '../chat/chatSettings'
 import {
   defaultQuizParameters,
-  quizCountOptionList,
-  quizDifficultyOptionList,
+  getQuizCountOptionList,
+  getQuizDifficultyOptionList,
 } from './quizSettings'
 
 interface QuizSettingsDialogProps {
@@ -39,22 +40,25 @@ export const QuizSettingsDialog = memo(function QuizSettingsDialog({
   onClose,
   onGenerate,
 }: QuizSettingsDialogProps) {
+  const { t } = useTranslation(['studio', 'common'])
   const [draftParams, setDraftParams] = useState<GenerateQuizParameters>(initialParams)
+  const quizCountOptionList = getQuizCountOptionList()
+  const quizDifficultyOptionList = getQuizDifficultyOptionList()
 
   const count = draftParams.count || defaultQuizParameters.count || 'default'
   const difficulty = draftParams.difficulty || defaultQuizParameters.difficulty || 'medium'
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: workspaceDialogLayout.paperRadius } } }}>
-      <DialogTitle>生成测验</DialogTitle>
+      <DialogTitle>{t('studio:settings.quiz.title')}</DialogTitle>
       <DialogContent dividers>
         <Stack spacing={workspaceDialogLayout.sectionStackSpacing}>
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              数量风格
+              {t('studio:settings.countStyle')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: workspaceDialogLayout.helperTextMt }}>
-              引导模型偏精炼或偏细节，不固定具体题数。
+              {t('studio:settings.countStyleHelp.quiz')}
             </Typography>
             <ToggleButtonGroup
               exclusive
@@ -81,10 +85,10 @@ export const QuizSettingsDialog = memo(function QuizSettingsDialog({
 
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              难度
+              {t('studio:settings.difficulty')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: workspaceDialogLayout.helperTextMt }}>
-              控制表述深度与干扰项迷惑性。
+              {t('studio:settings.difficultyHelp.quiz')}
             </Typography>
             <ToggleButtonGroup
               exclusive
@@ -111,7 +115,7 @@ export const QuizSettingsDialog = memo(function QuizSettingsDialog({
 
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              附加提示
+              {t('studio:settings.tip')}
             </Typography>
             <TextField
               fullWidth
@@ -120,7 +124,7 @@ export const QuizSettingsDialog = memo(function QuizSettingsDialog({
               minRows={2}
               maxRows={2}
               slotProps={{ htmlInput: { maxLength: 300 } }}
-              placeholder="可补充强调重点、受众或表达要求。"
+              placeholder={t('studio:settings.tipPlaceholder.generic')}
               value={draftParams.tip || ''}
               onChange={(event) =>
                 setDraftParams((prev) => ({ ...prev, tip: event.target.value }))
@@ -131,9 +135,9 @@ export const QuizSettingsDialog = memo(function QuizSettingsDialog({
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>取消</Button>
+        <Button onClick={onClose}>{t('common:action.cancel')}</Button>
         <Button variant="contained" onClick={() => onGenerate(draftParams)}>
-          生成
+          {t('common:action.generate')}
         </Button>
       </DialogActions>
     </Dialog>

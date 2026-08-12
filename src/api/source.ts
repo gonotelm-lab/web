@@ -1,3 +1,4 @@
+import i18n from '@/i18n'
 import { ApiError, request } from '../lib/http'
 import type {
   CreateSourceRequest,
@@ -149,7 +150,11 @@ const sourceParsedContentUrlQueryKey = (url: string) =>
 async function loadParsedContentFromUrl(url: string) {
   const response = await fetch(url)
   if (!response.ok) {
-    throw new ApiError(`解析内容读取失败，HTTP ${response.status}`, -1, response.status)
+    throw new ApiError(
+      i18n.t('sources:api.parsedContentFailed', { status: response.status }),
+      -1,
+      response.status,
+    )
   }
   return response.text()
 }

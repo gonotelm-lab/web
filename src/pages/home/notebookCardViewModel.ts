@@ -1,3 +1,4 @@
+import i18n from '@/i18n'
 import type { NotebookSummary } from '@/types/api'
 import { formatNotebookDate } from './formatNotebookDate'
 
@@ -18,7 +19,7 @@ export function toNotebookCardViewModel(
   return {
     id: notebook.id,
     title: notebook.name,
-    description: notebook.desc?.trim() ? notebook.desc : '无描述',
+    description: notebook.desc?.trim() ? notebook.desc : i18n.t('home:card.noDescription'),
     sourceCount: notebook.source_count,
     dateLabel: formatNotebookDate(notebook.updated_at),
   }

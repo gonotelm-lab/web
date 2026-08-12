@@ -1,0 +1,26 @@
+{
+  "header": {
+    "backAria": "返回",
+    "namePlaceholder": "未命名笔记本",
+    "nameAria": "笔记名称",
+    "deleteAria": "删除笔记本",
+    "deleteTitle": "删除笔记本",
+    "deleteBody": "删除后将移除该笔记本及其相关聊天与来源数据，此操作不可恢复。",
+    "confirmDelete": "确认删除"
+  },
+  "mobile": {
+    "tab": {
+      "sources": "来源",
+      "chat": "对话",
+      "studio": "Studio"
+    }
+  },
+  "resize": {
+    "sourcesAria": "调整来源面板宽度",
+    "rightAria": "调整右侧面板宽度"
+  },
+  "error": {
+    "addFileFailed": "添加文件失败，请稍后重试",
+    "notReady": "工作区尚未就绪，请稍后重试。"
+  }
+}

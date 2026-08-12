@@ -1,4 +1,5 @@
 import { memo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Button,
@@ -22,8 +23,8 @@ import { workspaceDialogLayout } from '../../shared/ui/dialogLayoutTokens'
 import { settingsToggleButtonSx } from '../chat/chatSettings'
 import {
   defaultReportParameters,
-  reportLanguageOptionList,
-  reportStyleOptionList,
+  getReportLanguageOptionList,
+  getReportStyleOptionList,
 } from './reportSettings'
 
 interface ReportSettingsDialogProps {
@@ -39,22 +40,25 @@ export const ReportSettingsDialog = memo(function ReportSettingsDialog({
   onClose,
   onGenerate,
 }: ReportSettingsDialogProps) {
+  const { t } = useTranslation(['studio', 'common'])
   const [draftParams, setDraftParams] = useState<GenerateReportParameters>(initialParams)
+  const reportLanguageOptionList = getReportLanguageOptionList()
+  const reportStyleOptionList = getReportStyleOptionList()
 
   const language = draftParams.language || defaultReportParameters.language
   const style = draftParams.style || defaultReportParameters.style || 'default'
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: workspaceDialogLayout.paperRadius } } }}>
-      <DialogTitle>生成报告</DialogTitle>
+      <DialogTitle>{t('studio:settings.report.title')}</DialogTitle>
       <DialogContent dividers>
         <Stack spacing={workspaceDialogLayout.sectionStackSpacing}>
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              选择语言
+              {t('studio:settings.language')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: workspaceDialogLayout.helperTextMt }}>
-              控制报告输出的语言。
+              {t('studio:settings.languageHelp.report')}
             </Typography>
             <TextField
               select
@@ -78,10 +82,10 @@ export const ReportSettingsDialog = memo(function ReportSettingsDialog({
 
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              生成风格
+              {t('studio:settings.style')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: workspaceDialogLayout.helperTextMt }}>
-              控制报告的组织方式和内容侧重。
+              {t('studio:settings.styleHelp.report')}
             </Typography>
             <ToggleButtonGroup
               exclusive
@@ -108,7 +112,7 @@ export const ReportSettingsDialog = memo(function ReportSettingsDialog({
 
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              附加提示
+              {t('studio:settings.tip')}
             </Typography>
             <TextField
               fullWidth
@@ -117,7 +121,7 @@ export const ReportSettingsDialog = memo(function ReportSettingsDialog({
               minRows={2}
               maxRows={2}
               slotProps={{ htmlInput: { maxLength: 300 } }}
-              placeholder="可补充强调重点、受众或表达要求。"
+              placeholder={t('studio:settings.tipPlaceholder.generic')}
               value={draftParams.tip || ''}
               onChange={(event) =>
                 setDraftParams((prev) => ({ ...prev, tip: event.target.value }))
@@ -128,9 +132,9 @@ export const ReportSettingsDialog = memo(function ReportSettingsDialog({
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>取消</Button>
+        <Button onClick={onClose}>{t('common:action.cancel')}</Button>
         <Button variant="contained" onClick={() => onGenerate(draftParams)}>
-          生成
+          {t('common:action.generate')}
         </Button>
       </DialogActions>
     </Dialog>

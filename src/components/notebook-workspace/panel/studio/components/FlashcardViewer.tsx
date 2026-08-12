@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded'
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
 import NavigateBeforeRoundedIcon from '@mui/icons-material/NavigateBeforeRounded'
@@ -79,6 +80,7 @@ const cardCornerIconSx = {
 } as const
 
 export function FlashcardViewer({ content, mode = 'inline' }: FlashcardViewerProps) {
+  const { t } = useTranslation(['studio', 'common'])
   const parsed = useMemo(() => parseFlashcardContent(content), [content])
   const [index, setIndex] = useState(0)
   const [flipped, setFlipped] = useState(false)
@@ -101,7 +103,7 @@ export function FlashcardViewer({ content, mode = 'inline' }: FlashcardViewerPro
   if (!parsed) {
     return (
       <Alert severity="warning">
-        闪卡内容无法解析，请确认产物 JSON 格式为 {'{ cards: [{ front, back, hint }] }'}。
+        {t('studio:flashcard.parseError')}
       </Alert>
     )
   }
@@ -157,7 +159,7 @@ export function FlashcardViewer({ content, mode = 'inline' }: FlashcardViewerPro
           <Box
             role="button"
             tabIndex={0}
-            aria-label={flipped ? '闪卡背面，点击翻转' : '闪卡正面，点击翻转'}
+            aria-label={flipped ? t('studio:flashcard.backAria') : t('studio:flashcard.frontAria')}
             onClick={toggleFlip}
             onKeyDown={(event) => {
               if (event.key === 'Enter' || event.key === ' ') {
@@ -257,7 +259,7 @@ export function FlashcardViewer({ content, mode = 'inline' }: FlashcardViewerPro
             <>
               <IconButton
                 size="small"
-                aria-label="查看提示"
+                aria-label={t('studio:flashcard.hintAria')}
                 aria-haspopup="true"
                 aria-expanded={hintOpen}
                 onClick={(event) => setHintAnchor(event.currentTarget)}
@@ -291,7 +293,7 @@ export function FlashcardViewer({ content, mode = 'inline' }: FlashcardViewerPro
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
           <IconButton
             size="small"
-            aria-label="上一张"
+            aria-label={t('studio:flashcard.prevAria')}
             disabled={safeIndex <= 0}
             onClick={goPrev}
           >
@@ -302,7 +304,7 @@ export function FlashcardViewer({ content, mode = 'inline' }: FlashcardViewerPro
           </Typography>
           <IconButton
             size="small"
-            aria-label="下一张"
+            aria-label={t('studio:flashcard.nextAria')}
             disabled={safeIndex >= total - 1}
             onClick={goNext}
           >

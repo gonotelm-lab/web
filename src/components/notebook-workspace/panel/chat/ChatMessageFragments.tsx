@@ -2,12 +2,13 @@ import { memo, useMemo, useState } from 'react'
 import type { MouseEvent } from 'react'
 import { Box, CircularProgress, Typography } from '@mui/material'
 import { alpha, useTheme } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import { AssistantMarkdown } from './AssistantMarkdown'
 import {
   normalizeFragmentType,
   resolveStickyPhaseStatusLabel,
   shouldShowPhaseStatus,
-  THINKING_PHASE_LABEL,
+  getThinkingPhaseLabel,
   extractCombinedResponseContent,
 } from './chatMessageFragmentsHelpers'
 import { chatMessageContentTokens } from './layoutTokens'
@@ -47,6 +48,7 @@ export const ChatMessageFragments = memo(function ChatMessageFragments({
   isActiveAssistant,
   onCitationClick,
 }: ChatMessageFragmentsProps) {
+  const { t } = useTranslation(['chat', 'common'])
   const responseContent = useMemo(
     () => extractCombinedResponseContent(message.fragments),
     [message.fragments],
@@ -55,7 +57,7 @@ export const ChatMessageFragments = memo(function ChatMessageFragments({
     isActiveAssistant,
     fragments: message.fragments,
   })
-  const [stickyPhaseLabel, setStickyPhaseLabel] = useState(THINKING_PHASE_LABEL)
+  const [stickyPhaseLabel, setStickyPhaseLabel] = useState(getThinkingPhaseLabel)
   const phaseStatusLabel = resolveStickyPhaseStatusLabel(
     message,
     stickyPhaseLabel,
@@ -86,7 +88,9 @@ export const ChatMessageFragments = memo(function ChatMessageFragments({
 
   return (
     <Box>
-      {showPhaseStatus ? <PhaseStatusIndicator label={phaseStatusLabel} /> : null}
+      {showPhaseStatus ? (
+        <PhaseStatusIndicator label={phaseStatusLabel} thinkingLabel={t('chat:thinking')} />
+      ) : null}
 
       {responseContent.trim() ? (
         <AssistantMarkdown content={responseContent} onCitationClick={onCitationClick} />
@@ -95,11 +99,15 @@ export const ChatMessageFragments = memo(function ChatMessageFragments({
   )
 })
 
-const isThinkingLabel = (label: string) => label === THINKING_PHASE_LABEL
-
-function PhaseStatusIndicator({ label }: { label: string }) {
+function PhaseStatusIndicator({
+  label,
+  thinkingLabel,
+}: {
+  label: string
+  thinkingLabel: string
+}) {
   const theme = useTheme()
-  const isThinking = isThinkingLabel(label)
+  const isThinking = label === getThinkingPhaseLabel()
   const flowGradient = useMemo(
     () =>
       `linear-gradient(90deg, ${alpha(theme.palette.primary.main, 0.72)} 0%, ${alpha(theme.palette.primary.main, 0.72)} 10%, ${alpha(theme.palette.primary.main, 0.78)} 25%, ${alpha(theme.palette.primary.main, 0.88)} 40%, ${alpha(theme.palette.primary.dark, 0.98)} 50%, ${alpha(theme.palette.primary.main, 0.88)} 60%, ${alpha(theme.palette.primary.main, 0.78)} 75%, ${alpha(theme.palette.primary.main, 0.72)} 90%, ${alpha(theme.palette.primary.main, 0.72)} 100%)`,
@@ -138,7 +146,7 @@ function PhaseStatusIndicator({ label }: { label: string }) {
           animationDuration: `${phaseStatusFlowTokens.animationDurationSec}s`,
         }}
       >
-        {isThinking ? '思考中' : label}
+        {isThinking ? thinkingLabel : label}
       </Typography>
       {isThinking ? (
         <Box

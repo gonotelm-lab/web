@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import AddLinkIcon from '@mui/icons-material/AddLink'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import NotesIcon from '@mui/icons-material/Notes'
 import { Box, Paper, Stack, Typography } from '@mui/material'
+import i18n from '@/i18n'
 import { detectEncryptedSourceFile } from '../../../../../lib/detectEncryptedSourceFile'
 import { workspaceRadius, workspaceSpace } from '../../../shared/ui/layoutTokens'
 import { workspaceInteraction, workspaceTransitionPresets } from '../../../shared/ui/motionTokens'
@@ -35,22 +37,22 @@ const validateSourceFile = (file: File) => {
   const dotIndex = lowerName.lastIndexOf('.')
   const ext = dotIndex >= 0 ? lowerName.slice(dotIndex) : ''
   if (!allowedFileExtensions.has(ext)) {
-    return '仅支持 pdf、txt、markdown、csv、docx、epub、xlsx、pptx 文件'
+    return i18n.t('sources:upload.unsupportedType')
   }
   if (file.size < 1) {
-    return '文件不能为空'
+    return i18n.t('sources:upload.emptyFile')
   }
   if (file.size > maxSourceFileSizeBytes) {
-    return '文件大小不能超过 100MB'
+    return i18n.t('sources:upload.fileTooLarge')
   }
   return ''
 }
 
 function encryptedUserMessage(fileName: string, reason: string): string {
   if (reason === 'read-failed') {
-    return `${fileName}: 无法读取文件内容`
+    return i18n.t('sources:upload.readFailedNamed', { fileName })
   }
-  return `${fileName}: 文件已加密，无法处理`
+  return i18n.t('sources:upload.encrypted', { fileName })
 }
 
 export function AddSourceDialogHomeView({
@@ -59,6 +61,7 @@ export function AddSourceDialogHomeView({
   onOpenUrl,
   onOpenText,
 }: AddSourceDialogHomeViewProps) {
+  const { t } = useTranslation(['sources', 'common'])
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [fileError, setFileError] = useState<string>('')
   const [dragActive, setDragActive] = useState(false)
@@ -68,14 +71,14 @@ export function AddSourceDialogHomeView({
   const handleFilesSelected = (files: File[]) => {
     if (files.length === 0 || interactionDisabled) return
     if (files.length > maxSourceFilesPerBatch) {
-      setFileError(`一次最多选择 ${maxSourceFilesPerBatch} 个文件`)
+      setFileError(t('sources:upload.tooMany', { max: maxSourceFilesPerBatch }))
       return
     }
 
     for (const file of files) {
       const errMsg = validateSourceFile(file)
       if (errMsg) {
-        setFileError(`${file.name}: ${errMsg}`)
+        setFileError(t('sources:upload.prefixedError', { fileName: file.name, error: errMsg }))
         return
       }
     }
@@ -94,14 +97,18 @@ export function AddSourceDialogHomeView({
         await onCreateFile(files)
       } catch {
         const first = files[0]
-        setFileError(first ? `${first.name}: 无法读取文件内容` : '无法读取文件内容')
+        setFileError(
+          first
+            ? t('sources:upload.readFailedNamed', { fileName: first.name })
+            : t('sources:upload.readFailed'),
+        )
       } finally {
         setChecking(false)
       }
     })()
   }
 
-  const statusMessage = fileError || (checking ? '正在检查文件…' : '')
+  const statusMessage = fileError || (checking ? t('sources:upload.checking') : '')
 
   return (
     <Box
@@ -114,7 +121,7 @@ export function AddSourceDialogHomeView({
       }}
     >
       <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0 }}>
-        添加来源后，系统能够基于这些对您重要的信息提供回答。
+        {t('sources:dialog.intro')}
       </Typography>
 
       {/* Upload zone is the only flexible region; cards stay pinned with reserved gap. */}
@@ -174,14 +181,14 @@ export function AddSourceDialogHomeView({
         <Box sx={{ width: '100%', maxWidth: 420 }}>
           <CloudUploadIcon sx={{ fontSize: workspaceIconSize.xl, color: 'primary.main' }} />
           <Typography variant="h6" sx={{ mt: workspaceSpace.sm }}>
-            上传来源
+            {t('sources:upload.title')}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: workspaceSpace.sm }}>
-            拖放或点击选择文件，即可上传
+            {t('sources:upload.hint')}
           </Typography>
 
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: workspaceSpace.md }}>
-            支持：pdf、txt、markdown、csv、docx、epub、xlsx、pptx
+            {t('sources:upload.formats')}
           </Typography>
           <Typography
             variant="caption"
@@ -192,10 +199,10 @@ export function AddSourceDialogHomeView({
               color: theme.workspacePalette.status.warning,
             })}
           >
-            单个文件最大 100MB
+            {t('sources:upload.maxSize')}
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: workspaceSpace.sm }}>
-            一次最多选择 20 个文件
+            {t('sources:upload.maxBatchHint')}
           </Typography>
           <Typography
             variant="caption"
@@ -217,7 +224,7 @@ export function AddSourceDialogHomeView({
           type="file"
           multiple
           accept={acceptedFileTypes}
-          aria-label="选择要上传的来源文件"
+          aria-label={t('sources:upload.inputAria')}
           onChange={(e) => {
             const files = Array.from(e.target.files ?? [])
             handleFilesSelected(files)
@@ -251,13 +258,13 @@ export function AddSourceDialogHomeView({
             <Stack direction="row" spacing={workspaceSpace.sm} sx={{ alignItems: 'center' }}>
               <AddLinkIcon fontSize="small" />
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                链接
+                {t('sources:entry.link')}
               </Typography>
             </Stack>
             <Stack direction="row" spacing={workspaceSpace.sm}>
               <Box sx={{ width: 20, flexShrink: 0 }} aria-hidden />
               <Typography variant="caption" color="text.secondary">
-                网站
+                {t('sources:entry.linkHint')}
               </Typography>
             </Stack>
           </Stack>
@@ -278,13 +285,13 @@ export function AddSourceDialogHomeView({
             <Stack direction="row" spacing={workspaceSpace.sm} sx={{ alignItems: 'center' }}>
               <NotesIcon fontSize="small" />
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                粘贴文字
+                {t('sources:entry.paste')}
               </Typography>
             </Stack>
             <Stack direction="row" spacing={workspaceSpace.sm}>
               <Box sx={{ width: 20, flexShrink: 0 }} aria-hidden />
               <Typography variant="caption" color="text.secondary">
-                复制的文字
+                {t('sources:entry.pasteHint')}
               </Typography>
             </Stack>
           </Stack>

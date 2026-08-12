@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
+import '@/i18n'
 import {
+  getWorkspaceMobilePanelLabels,
   workspaceMobilePanelDefault,
-  workspaceMobilePanelLabels,
   type WorkspaceMobilePanel,
 } from './workspaceMobilePanel'
 
@@ -11,12 +12,13 @@ describe('workspaceMobilePanel', () => {
   })
 
   it('exposes Chinese labels for all panels', () => {
+    const labels = getWorkspaceMobilePanelLabels()
     const panels: WorkspaceMobilePanel[] = ['sources', 'chat', 'studio']
     for (const panel of panels) {
-      expect(workspaceMobilePanelLabels[panel].length).toBeGreaterThan(0)
+      expect(labels[panel].length).toBeGreaterThan(0)
     }
-    expect(workspaceMobilePanelLabels.sources).toBe('来源')
-    expect(workspaceMobilePanelLabels.chat).toBe('对话')
-    expect(workspaceMobilePanelLabels.studio).toBe('Studio')
+    expect(labels.sources).toBe('来源')
+    expect(labels.chat).toBe('对话')
+    expect(labels.studio).toBe('Studio')
   })
 })

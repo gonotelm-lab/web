@@ -1,4 +1,5 @@
 import { memo } from 'react'
+import { useTranslation } from 'react-i18next'
 import ArrowOutwardOutlinedIcon from '@mui/icons-material/ArrowOutwardOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import HourglassBottomOutlinedIcon from '@mui/icons-material/HourglassBottomOutlined'
@@ -30,13 +31,14 @@ export const StudioToolCard = memo(function StudioToolCard({
   onClick,
   onAdvancedClick,
 }: StudioToolCardProps) {
+  const { t } = useTranslation(['studio', 'common'])
   const interactive = Boolean(onClick) && !disabled && !pending
   const Icon = tool.icon
   const statusLabel = pending
-    ? '处理中...'
+    ? t('studio:tool.status.pending')
     : tool.availability === 'available'
-      ? '已接入'
-      : '即将支持'
+      ? t('studio:tool.status.available')
+      : t('studio:tool.status.comingSoon')
   const tooltipLabel = tool.availability === 'available'
     ? tool.description
     : statusLabel

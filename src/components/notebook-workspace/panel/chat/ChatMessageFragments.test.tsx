@@ -2,10 +2,10 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 import {
+  getThinkingPhaseLabel,
   resolvePhaseStatusLabel,
   resolveStickyPhaseStatusLabel,
   shouldShowPhaseStatus,
-  THINKING_PHASE_LABEL,
 } from './chatMessageFragmentsHelpers'
 import { ChatMessageFragments } from './ChatMessageFragments'
 import type { ChatUiMessage } from './types'
@@ -24,7 +24,7 @@ describe('resolvePhaseStatusLabel', () => {
       fragments: [],
     }
 
-    expect(resolvePhaseStatusLabel(message)).toBe(THINKING_PHASE_LABEL)
+    expect(resolvePhaseStatusLabel(message)).toBe(getThinkingPhaseLabel())
   })
 
   it('uses latest phase summary until next phase replaces it', () => {
@@ -54,7 +54,7 @@ describe('resolveStickyPhaseStatusLabel', () => {
       ],
     }
 
-    expect(resolveStickyPhaseStatusLabel(message, THINKING_PHASE_LABEL, true)).toBe('检索证据')
+    expect(resolveStickyPhaseStatusLabel(message, getThinkingPhaseLabel(), true)).toBe('检索证据')
     expect(resolveStickyPhaseStatusLabel(message, '检索证据', true)).toBe('检索证据')
   })
 })

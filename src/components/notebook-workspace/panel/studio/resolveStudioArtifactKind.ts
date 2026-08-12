@@ -1,3 +1,4 @@
+import i18n from '@/i18n'
 import type { StudioArtifactKind } from '@/types/api'
 import type { StudioToolActionId } from './types'
 
@@ -26,14 +27,14 @@ export const resolveStudioArtifactActionId = (kind: StudioArtifactKind): StudioT
 }
 
 export const resolveStudioArtifactFallbackTitle = (kind: StudioArtifactKind) => {
-  if (kind === 'report') return '报告'
-  if (kind === 'info_graphic') return '信息图'
-  if (kind === 'audio_overview') return '音频概览'
-  if (kind === 'flashcard') return '闪卡'
-  if (kind === 'quiz') return '测验'
-  if (kind === 'data_table') return '数据表'
-  if (kind === 'note') return '笔记'
-  return '思维导图'
+  if (kind === 'report') return i18n.t('studio:kind.report')
+  if (kind === 'info_graphic') return i18n.t('studio:kind.infoGraphic')
+  if (kind === 'audio_overview') return i18n.t('studio:kind.audioOverview')
+  if (kind === 'flashcard') return i18n.t('studio:kind.flashcard')
+  if (kind === 'quiz') return i18n.t('studio:kind.quiz')
+  if (kind === 'data_table') return i18n.t('studio:kind.dataTable')
+  if (kind === 'note') return i18n.t('studio:kind.note')
+  return i18n.t('studio:kind.mindmap')
 }
 
 export const resolveStudioArtifactDisplayTitle = (

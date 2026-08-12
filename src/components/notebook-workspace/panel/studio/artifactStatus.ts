@@ -1,3 +1,4 @@
+import i18n from '@/i18n'
 import type { StudioArtifactTaskStatus } from '@/types/api'
 
 const failedTaskStatusSet = new Set(['failed', 'expired'])
@@ -46,10 +47,10 @@ export const toArtifactVisualStatus = (
 export const buildTaskFailedMessage = (status: StudioArtifactTaskStatus) => {
   const normalized = normalizeStudioTaskStatus(status)
   if (normalized === 'cancelled') {
-    return '任务已取消，请重试。'
+    return i18n.t('studio:error.taskCancelled')
   }
   if (normalized === 'expired') {
-    return '任务已过期，请重新生成。'
+    return i18n.t('studio:error.taskExpired')
   }
-  return '任务执行失败，请重试。'
+  return i18n.t('studio:error.taskFailed')
 }

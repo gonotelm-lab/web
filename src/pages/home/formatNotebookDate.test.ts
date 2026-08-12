@@ -3,7 +3,7 @@ import { formatNotebookDate } from './formatNotebookDate'
 
 describe('formatNotebookDate', () => {
   it('无效时间戳返回占位文案', () => {
-    expect(formatNotebookDate(0)).toBe('Unknown date')
+    expect(formatNotebookDate(0)).toBe('未知日期')
   })
 
   it('有效时间戳返回英文短月日期', () => {

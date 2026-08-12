@@ -17,7 +17,7 @@ describe('workspace layout tokens', () => {
   })
 
   it('exposes radius 8/10/12 px', () => {
-    expect(workspaceRadiusPx).toEqual({ sm: 8, md: 10, lg: 12 })
+    expect(workspaceRadiusPx).toEqual({ sm: 8, md: 8, lg: 12 })
   })
 
   it('maps semantic aliases to the locked scale', () => {

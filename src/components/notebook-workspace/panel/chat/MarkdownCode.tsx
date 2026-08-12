@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import CheckIcon from '@mui/icons-material/Check'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import { Box, IconButton, Tooltip, Typography } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { workspaceRadius, workspaceSpace } from '../../shared/ui/layoutTokens'
@@ -80,6 +81,7 @@ const copyToClipboard = async (content: string) => {
  * - syntax-highlighted code block with copy feedback interaction
  */
 export function MarkdownCode({ inline, className, children }: MarkdownCodeProps) {
+  const { t } = useTranslation(['chat', 'common'])
   const [copied, setCopied] = useState(false)
   const copiedTimerRef = useRef<number | null>(null)
   const codeText = useMemo(() => String(children ?? '').replace(/\n$/, ''), [children])
@@ -153,7 +155,7 @@ export function MarkdownCode({ inline, className, children }: MarkdownCodeProps)
           {language}
         </Typography>
 
-        <Tooltip title={copied ? '已复制' : '复制'}>
+        <Tooltip title={copied ? t('common:action.copied') : t('common:action.copy')}>
           <span>
             <IconButton
               size="small"

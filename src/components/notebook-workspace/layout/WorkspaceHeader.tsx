@@ -13,6 +13,7 @@ import {
   InputBase,
   Typography,
 } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { workspaceRadius, workspaceSpace } from '../shared/ui/layoutTokens'
 import { workspaceTransitionPresets } from '../shared/ui/motionTokens'
@@ -43,6 +44,7 @@ export const WorkspaceHeader = memo(function WorkspaceHeader({
   onNotebookNameCommit,
   onDeleteNotebook,
 }: WorkspaceHeaderProps) {
+  const { t } = useTranslation(['workspace', 'common'])
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState<string | null>(null)
   const [draftName, setDraftName] = useState(notebookName)
@@ -86,7 +88,7 @@ export const WorkspaceHeader = memo(function WorkspaceHeader({
           setDeleteErrorMessage(error.message)
           return
         }
-        setDeleteErrorMessage('删除失败，请稍后重试')
+        setDeleteErrorMessage(t('common:error.deleteFailed'))
       })
   }
 
@@ -121,7 +123,7 @@ export const WorkspaceHeader = memo(function WorkspaceHeader({
           edge="start"
           color="inherit"
           size="small"
-          aria-label="返回"
+          aria-label={t('workspace:header.backAria')}
           sx={{
             ml: 0,
             width: headerChrome.controlHeight,
@@ -133,7 +135,7 @@ export const WorkspaceHeader = memo(function WorkspaceHeader({
         </IconButton>
         <InputBase
           value={draftName}
-          placeholder="未命名笔记本"
+          placeholder={t('workspace:header.namePlaceholder')}
           disabled={isDeletingNotebook}
           onChange={(event) => setDraftName(event.target.value)}
           onFocus={() => {
@@ -149,7 +151,7 @@ export const WorkspaceHeader = memo(function WorkspaceHeader({
             }
           }}
           inputProps={{
-            'aria-label': '笔记名称',
+            'aria-label': t('workspace:header.nameAria'),
             maxLength: 128,
           }}
           sx={{
@@ -196,7 +198,7 @@ export const WorkspaceHeader = memo(function WorkspaceHeader({
         >
           <IconButton
             size="small"
-            aria-label="删除笔记本"
+            aria-label={t('workspace:header.deleteAria')}
             onClick={handleOpenDeleteDialog}
             disabled={!canDelete || isDeletingNotebook}
             sx={{
@@ -216,10 +218,10 @@ export const WorkspaceHeader = memo(function WorkspaceHeader({
         fullWidth
         maxWidth="xs"
       >
-        <DialogTitle>删除笔记本</DialogTitle>
+        <DialogTitle>{t('workspace:header.deleteTitle')}</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary">
-            删除后将移除该笔记本及其相关聊天与来源数据，此操作不可恢复。
+            {t('workspace:header.deleteBody')}
           </Typography>
           {deleteErrorMessage ? (
             <Typography
@@ -236,7 +238,7 @@ export const WorkspaceHeader = memo(function WorkspaceHeader({
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDeleteDialog} disabled={isDeletingNotebook}>
-            取消
+            {t('common:action.cancel')}
           </Button>
           <Button
             color="error"
@@ -244,7 +246,9 @@ export const WorkspaceHeader = memo(function WorkspaceHeader({
             onClick={handleConfirmDelete}
             disabled={isDeletingNotebook}
           >
-            {isDeletingNotebook ? '删除中...' : '确认删除'}
+            {isDeletingNotebook
+              ? t('common:action.deleting')
+              : t('workspace:header.confirmDelete')}
           </Button>
         </DialogActions>
       </Dialog>

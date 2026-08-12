@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import PauseRoundedIcon from '@mui/icons-material/PauseRounded'
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import VolumeUpRoundedIcon from '@mui/icons-material/VolumeUpRounded'
@@ -40,6 +41,7 @@ function volumeIcon(value: number, muted: boolean) {
 }
 
 export function StudioAudioPlayer({ audioUrl, title, onDownload, onRetry }: StudioAudioPlayerProps) {
+  const { t } = useTranslation(['studio', 'common'])
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [volumeAnchorEl, setVolumeAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [playing, setPlaying] = useState(false)
@@ -184,7 +186,7 @@ export function StudioAudioPlayer({ audioUrl, title, onDownload, onRetry }: Stud
             {loadError ? (
               <Stack direction="row" spacing={workspaceSpace.sm} sx={{ alignItems: 'center' }}>
                 <Typography variant="caption" color="error">
-                  播放中断
+                  {t('studio:audio.interrupted')}
                 </Typography>
                 {onRetry ? (
                   <Typography
@@ -210,19 +212,19 @@ export function StudioAudioPlayer({ audioUrl, title, onDownload, onRetry }: Stud
                       '&:hover': { color: 'primary.dark' },
                     }}
                   >
-                    重新加载
+                    {t('studio:audio.reload')}
                   </Typography>
                 ) : null}
               </Stack>
             ) : !loaded ? (
               <Typography variant="caption" color="text.secondary">
-                加载中…
+                {t('studio:audio.loading')}
               </Typography>
             ) : null}
           </Stack>
 
           {onDownload ? (
-            <Tooltip title="下载音频">
+            <Tooltip title={t('studio:audio.download')}>
               <IconButton size="small" onClick={onDownload}>
                 <DownloadRoundedIcon fontSize="small" />
               </IconButton>
@@ -289,7 +291,7 @@ export function StudioAudioPlayer({ audioUrl, title, onDownload, onRetry }: Stud
             {formatAudioTime(duration)}
           </Typography>
 
-          <Tooltip title={muted || volume === 0 ? '取消静音' : '音量'}>
+          <Tooltip title={muted || volume === 0 ? t('studio:audio.unmute') : t('studio:audio.volume')}>
             <IconButton
               size="small"
               onClick={handleVolumeButtonClick}

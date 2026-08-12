@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import i18n from '@/i18n'
 import {
   cancelStudioArtifactTask,
   convertNoteToSource as convertNoteToSourceApi,
@@ -60,7 +61,7 @@ const buildArtifactActionKey = (
 
 const buildStudioErrorMessage = (
   error: unknown,
-  fallback = 'Studio 请求失败，请稍后重试。',
+  fallback = i18n.t('studio:error.requestFailed'),
 ) => {
   if (error instanceof ApiError) {
     return error.message
@@ -304,7 +305,7 @@ export function useStudioArtifactTasks({
                   status: 'failed',
                   error: buildStudioErrorMessage(
                     error,
-                    '拉取任务结果失败，请重试。',
+                    i18n.t('studio:error.fetchResult'),
                   ),
                 }
               : item,
@@ -384,7 +385,7 @@ export function useStudioArtifactTasks({
                     status: 'failed',
                     error: buildStudioErrorMessage(
                       error,
-                      '轮询任务状态失败，请重试。',
+                      i18n.t('studio:error.pollStatus'),
                     ),
                   }
                 : target,
@@ -458,7 +459,7 @@ export function useStudioArtifactTasks({
       if (historyLoadSeqRef.current !== requestSeq) {
         return
       }
-      setHistoryError(buildStudioErrorMessage(error, '加载产物列表失败，请重试。'))
+      setHistoryError(buildStudioErrorMessage(error, i18n.t('studio:error.loadHistory')))
       setArtifactItems([])
     } finally {
       if (historyLoadSeqRef.current === requestSeq) {
@@ -550,7 +551,7 @@ export function useStudioArtifactTasks({
         actionErrorToastKeyRef.current += 1
         setActionErrorToast({
           key: actionErrorToastKeyRef.current,
-          message: buildStudioErrorMessage(error, '创建产物任务失败，请重试。'),
+          message: buildStudioErrorMessage(error, i18n.t('studio:error.createTask')),
         })
       } finally {
         setPendingActions((prev) => ({ ...prev, [actionId]: false }))
@@ -603,7 +604,7 @@ export function useStudioArtifactTasks({
         actionErrorToastKeyRef.current += 1
         setActionErrorToast({
           key: actionErrorToastKeyRef.current,
-          message: buildStudioErrorMessage(error, '保存笔记失败，请重试。'),
+          message: buildStudioErrorMessage(error, i18n.t('studio:error.saveNote')),
         })
       } finally {
         setPendingActions((prev) => ({ ...prev, 'save-as-note': false }))
@@ -643,7 +644,7 @@ export function useStudioArtifactTasks({
             target.id === item.id
               ? {
                   ...target,
-                  error: buildStudioErrorMessage(error, '重试任务失败，请稍后重试。'),
+                  error: buildStudioErrorMessage(error, i18n.t('studio:error.retryTask')),
                 }
               : target,
           ),
@@ -680,7 +681,7 @@ export function useStudioArtifactTasks({
             target.id === item.id
               ? {
                   ...target,
-                  error: buildStudioErrorMessage(error, '取消任务失败，请稍后重试。'),
+                  error: buildStudioErrorMessage(error, i18n.t('studio:error.cancelTask')),
                 }
               : target,
           ),
@@ -711,7 +712,7 @@ export function useStudioArtifactTasks({
             target.id === item.id
               ? {
                   ...target,
-                  error: buildStudioErrorMessage(error, '删除产物失败，请稍后重试。'),
+                  error: buildStudioErrorMessage(error, i18n.t('studio:error.deleteArtifact')),
                 }
               : target,
           ),
@@ -736,7 +737,7 @@ export function useStudioArtifactTasks({
         actionErrorToastKeyRef.current += 1
         setActionErrorToast({
           key: actionErrorToastKeyRef.current,
-          message: buildStudioErrorMessage(error, '转换为来源失败，请稍后重试。'),
+          message: buildStudioErrorMessage(error, i18n.t('studio:error.convertToSource')),
         })
       } finally {
         setArtifactActionPending(item.id, 'convert', false)
@@ -771,7 +772,7 @@ export function useStudioArtifactTasks({
       actionErrorToastKeyRef.current += 1
       setActionErrorToast({
         key: actionErrorToastKeyRef.current,
-        message: '更新标题失败，请重试',
+        message: i18n.t('studio:error.updateTitle'),
       })
       throw error
     }

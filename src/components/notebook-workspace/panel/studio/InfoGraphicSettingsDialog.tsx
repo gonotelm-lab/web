@@ -1,4 +1,5 @@
 import { memo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Button,
@@ -24,10 +25,10 @@ import { workspaceDialogLayout } from '../../shared/ui/dialogLayoutTokens'
 import { settingsToggleButtonSx } from '../chat/chatSettings'
 import {
   defaultInfoGraphicParameters,
-  infoGraphicDetailLevelOptionList,
-  infoGraphicLanguageOptionList,
-  infoGraphicOrientationOptionList,
-  infoGraphicVisualStyleOptionList,
+  getInfoGraphicDetailLevelOptionList,
+  getInfoGraphicLanguageOptionList,
+  getInfoGraphicOrientationOptionList,
+  getInfoGraphicVisualStyleOptionList,
 } from './infoGraphicSettings'
 
 interface InfoGraphicSettingsDialogProps {
@@ -43,7 +44,12 @@ export const InfoGraphicSettingsDialog = memo(function InfoGraphicSettingsDialog
   onClose,
   onGenerate,
 }: InfoGraphicSettingsDialogProps) {
+  const { t } = useTranslation(['studio', 'common'])
   const [draftParams, setDraftParams] = useState<GenerateInfoGraphicParameters>(initialParams)
+  const infoGraphicLanguageOptionList = getInfoGraphicLanguageOptionList()
+  const infoGraphicDetailLevelOptionList = getInfoGraphicDetailLevelOptionList()
+  const infoGraphicVisualStyleOptionList = getInfoGraphicVisualStyleOptionList()
+  const infoGraphicOrientationOptionList = getInfoGraphicOrientationOptionList()
 
   const orientation = draftParams.orientation || defaultInfoGraphicParameters.orientation
   const textLanguage = draftParams.text_language || defaultInfoGraphicParameters.text_language
@@ -52,15 +58,15 @@ export const InfoGraphicSettingsDialog = memo(function InfoGraphicSettingsDialog
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: workspaceDialogLayout.paperRadius } } }}>
-      <DialogTitle>生成信息图</DialogTitle>
+      <DialogTitle>{t('studio:settings.infoGraphic.title')}</DialogTitle>
       <DialogContent dividers>
         <Stack spacing={workspaceDialogLayout.sectionStackSpacing}>
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              选择语言
+              {t('studio:settings.language')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: workspaceDialogLayout.helperTextMt }}>
-              控制信息图中可见文字的语言。
+              {t('studio:settings.languageHelp.infoGraphic')}
             </Typography>
             <TextField
               select
@@ -84,10 +90,10 @@ export const InfoGraphicSettingsDialog = memo(function InfoGraphicSettingsDialog
 
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              探索深度
+              {t('studio:settings.detailLevel')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: workspaceDialogLayout.helperTextMt }}>
-              控制模型探索来源内容的深入程度。
+              {t('studio:settings.detailLevelHelp')}
             </Typography>
             <ToggleButtonGroup
               exclusive
@@ -114,10 +120,10 @@ export const InfoGraphicSettingsDialog = memo(function InfoGraphicSettingsDialog
 
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              视觉风格
+              {t('studio:settings.visualStyle')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: workspaceDialogLayout.helperTextMt }}>
-              控制信息图的画面视觉风格。
+              {t('studio:settings.visualStyleHelp')}
             </Typography>
             <ToggleButtonGroup
               exclusive
@@ -144,10 +150,10 @@ export const InfoGraphicSettingsDialog = memo(function InfoGraphicSettingsDialog
 
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              选择方向
+              {t('studio:settings.orientation')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: workspaceDialogLayout.helperTextMt }}>
-              控制信息图的画面比例。
+              {t('studio:settings.orientationHelp')}
             </Typography>
             <ToggleButtonGroup
               exclusive
@@ -171,7 +177,7 @@ export const InfoGraphicSettingsDialog = memo(function InfoGraphicSettingsDialog
 
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              描述你想要的信息图
+              {t('studio:settings.prompt')}
             </Typography>
             <TextField
               fullWidth
@@ -180,7 +186,7 @@ export const InfoGraphicSettingsDialog = memo(function InfoGraphicSettingsDialog
               minRows={2}
               maxRows={2}
               slotProps={{ htmlInput: { maxLength: 300 } }}
-              placeholder="引导风格、配色或重点：「使用蓝色主题并突出 3 个关键数据。」"
+              placeholder={t('studio:settings.promptPlaceholder')}
               value={draftParams.extra_prompt || ''}
               onChange={(event) =>
                 setDraftParams((prev) => ({ ...prev, extra_prompt: event.target.value }))
@@ -191,9 +197,9 @@ export const InfoGraphicSettingsDialog = memo(function InfoGraphicSettingsDialog
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>取消</Button>
+        <Button onClick={onClose}>{t('common:action.cancel')}</Button>
         <Button variant="contained" onClick={() => onGenerate(draftParams)}>
-          生成
+          {t('common:action.generate')}
         </Button>
       </DialogActions>
     </Dialog>

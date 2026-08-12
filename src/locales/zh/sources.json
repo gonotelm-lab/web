@@ -1,0 +1,70 @@
+{
+  "panel": {
+    "title": "来源",
+    "collapseAria": "收起来源面板",
+    "add": "+ 添加来源",
+    "all": "所有来源"
+  },
+  "preview": {
+    "title": "预览",
+    "parentTitle": "来源",
+    "closeAria": "关闭预览",
+    "empty": "当前来源暂无可展示的解析内容。",
+    "loadFailed": "预览加载失败，请稍后重试。"
+  },
+  "dialog": {
+    "title": "添加来源",
+    "closeAria": "关闭",
+    "addFailed": "添加失败，请稍后重试",
+    "intro": "添加来源后，系统能够基于这些对您重要的信息提供回答。"
+  },
+  "upload": {
+    "title": "上传来源",
+    "hint": "拖放或点击选择文件，即可上传",
+    "formats": "支持：pdf、txt、markdown、csv、docx、epub、xlsx、pptx",
+    "maxSize": "单个文件最大 100MB",
+    "maxBatchHint": "一次最多选择 20 个文件",
+    "inputAria": "选择要上传的来源文件",
+    "checking": "正在检查文件…",
+    "unsupportedType": "仅支持 pdf、txt、markdown、csv、docx、epub、xlsx、pptx 文件",
+    "emptyFile": "文件不能为空",
+    "fileTooLarge": "文件大小不能超过 100MB",
+    "tooMany": "一次最多选择 {{max}} 个文件",
+    "readFailedNamed": "{{fileName}}: 无法读取文件内容",
+    "readFailed": "无法读取文件内容",
+    "encrypted": "{{fileName}}: 文件已加密，无法处理",
+    "prefixedError": "{{fileName}}: {{error}}"
+  },
+  "entry": {
+    "link": "链接",
+    "linkHint": "网站",
+    "paste": "粘贴文字",
+    "pasteHint": "复制的文字"
+  },
+  "editor": {
+    "backAria": "返回",
+    "urlTitle": "链接",
+    "textTitle": "粘贴文字",
+    "urlHelper": "支持公开可访问的网页链接",
+    "textPlaceholder": "粘贴你要添加的文本内容...",
+    "submit": "添加来源"
+  },
+  "row": {
+    "actionsAria": "来源操作",
+    "preview": "预览",
+    "open": "打开",
+    "download": "下载",
+    "retry": "重试",
+    "edit": "编辑",
+    "delete": "删除"
+  },
+  "editTitle": {
+    "dialog": "编辑来源标题",
+    "label": "标题",
+    "empty": "标题不能为空",
+    "failed": "更新标题失败，请稍后重试"
+  },
+  "api": {
+    "parsedContentFailed": "解析内容读取失败，HTTP {{status}}"
+  }
+}

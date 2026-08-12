@@ -44,6 +44,7 @@ vi.mock('@mui/icons-material/ChatBubbleOutlineRounded', () => ({
   default: () => null,
 }))
 
+import '@/i18n'
 import { WorkspaceMobileTabBar } from './WorkspaceMobileTabBar'
 
 describe('WorkspaceMobileTabBar', () => {

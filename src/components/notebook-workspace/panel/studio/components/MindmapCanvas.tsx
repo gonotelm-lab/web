@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import RestartAltRoundedIcon from '@mui/icons-material/RestartAltRounded'
 import { Alert, Box, IconButton, Tooltip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
@@ -164,6 +165,7 @@ function MindmapCanvasInner({
   showBorder = true,
   height = 440,
 }: MindmapCanvasProps) {
+  const { t } = useTranslation(['studio', 'common'])
   const theme = useTheme()
   const mindmapTonePalette = theme.workspacePalette.mindmap
   const tonePalette = mindmapTonePalette[tone]
@@ -404,11 +406,11 @@ function MindmapCanvasInner({
         position: 'relative',
       }}
     >
-      <Tooltip title="重置到初始视图">
+      <Tooltip title={t('studio:mindmap.reset')}>
         <IconButton
           size="small"
           onClick={handleResetView}
-          aria-label="重置思维导图视图"
+          aria-label={t('studio:mindmap.resetAria')}
           sx={{
             position: 'absolute',
             top: 8, // workspaceSpace.sm px

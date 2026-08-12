@@ -1,3 +1,4 @@
+import i18n from '@/i18n'
 import { ApiError } from '@/lib/http'
 import type { SourceDocPosition, StreamTaskEvent } from '@/types/api'
 import type {
@@ -41,7 +42,7 @@ export const getErrorMessage = (error: unknown) => {
   if (error instanceof Error) {
     return error.message
   }
-  return '请求失败，请稍后重试。'
+  return i18n.t('common:error.requestFailed')
 }
 
 export const sleep = (ms: number) =>
@@ -123,7 +124,7 @@ export const isSummaryCitationPosition = (position: ChatUiCitationPosition | nul
   !position || (position.start === 0 && position.end === 0)
 
 export const resolveCitationTypeLabel = (isSummary?: boolean) =>
-  isSummary ? '总结性引用' : '原文片段引用'
+  isSummary ? i18n.t('chat:citation.typeSummary') : i18n.t('chat:citation.typeOriginal')
 
 export const formatCitationPositionText = (
   position: CitationPositionLike,
@@ -134,7 +135,7 @@ export const formatCitationPositionText = (
     return '-'
   }
   if (isSummary && normalizedPosition.start === 0 && normalizedPosition.end === 0) {
-    return '无原文定位（总结性引用）'
+    return i18n.t('chat:citation.positionSummary')
   }
   return `${normalizedPosition.start} - ${normalizedPosition.end}`
 }

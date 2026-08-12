@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { createPortal } from 'react-dom'
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight'
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
@@ -46,7 +47,7 @@ import { defaultReportParameters } from './reportSettings'
 import { StudioToolCard } from './components/StudioToolCard'
 import { useStudioArtifactTasks } from './hooks/useStudioArtifactTasks'
 import { useStudioPreviewController } from './preview/useStudioPreviewController'
-import { studioToolCatalog } from './studioToolCatalog'
+import { getStudioToolCatalog } from './studioToolCatalog'
 import { studioToolGridContainerSx, studioToolGridSx } from './studioToolGridLayout'
 import type { SaveMessageAsNoteParams, StudioToolActionId } from './types'
 import { workspaceType } from '../../shared/ui/typeTokens'
@@ -62,7 +63,6 @@ interface StudioPanelProps {
   ) => void
 }
 
-const studioPanelTitle = '工作区'
 const studioListDividerSpacing = {
   mt: workspaceSpace.md,
   mb: workspaceSpace.sm,
@@ -76,6 +76,8 @@ export const StudioPanel = memo(function StudioPanel({
   onSourceCreated,
   onRegisterSaveMessageAsNote,
 }: StudioPanelProps) {
+  const { t } = useTranslation(['studio', 'common'])
+  const studioToolCatalog = getStudioToolCatalog()
   const readySourceIdSet = useMemo(() => new Set(readySourceIds), [readySourceIds])
   const selectedReadySourceIds = useMemo(
     () => selectedSourceIds.filter((sourceId) => readySourceIdSet.has(sourceId)),
@@ -170,12 +172,12 @@ export const StudioPanel = memo(function StudioPanel({
     void submitArtifactTask({
       kind: 'mindmap',
       sourceIds: selectedReadySourceIds,
-      title: '思维导图',
+      title: t('studio:kind.mindmap'),
       actionId: 'generate-mindmap',
       mindmap: submitParams,
     })
     setMindmapDialogOpen(false)
-  }, [canSubmitArtifactTask, mindmapParams, selectedReadySourceIds, submitArtifactTask])
+  }, [canSubmitArtifactTask, mindmapParams, selectedReadySourceIds, submitArtifactTask, t])
 
   const handleCreateReport = useCallback((params?: GenerateReportParameters) => {
     if (!canSubmitArtifactTask) {
@@ -188,12 +190,12 @@ export const StudioPanel = memo(function StudioPanel({
     void submitArtifactTask({
       kind: 'report',
       sourceIds: selectedReadySourceIds,
-      title: '报告',
+      title: t('studio:kind.report'),
       actionId: 'generate-report',
       report: submitParams,
     })
     setReportDialogOpen(false)
-  }, [canSubmitArtifactTask, reportParams, selectedReadySourceIds, submitArtifactTask])
+  }, [canSubmitArtifactTask, reportParams, selectedReadySourceIds, submitArtifactTask, t])
 
   const handleCreateAudioOverview = useCallback((params?: GenerateAudioOverviewParameters) => {
     if (!canSubmitArtifactTask) {
@@ -206,12 +208,12 @@ export const StudioPanel = memo(function StudioPanel({
     void submitArtifactTask({
       kind: 'audio_overview',
       sourceIds: selectedReadySourceIds,
-      title: '音频概览',
+      title: t('studio:kind.audioOverview'),
       actionId: 'generate-audio_overview',
       audioOverview: submitParams,
     })
     setAudioOverviewDialogOpen(false)
-  }, [audioOverviewParams, canSubmitArtifactTask, selectedReadySourceIds, submitArtifactTask])
+  }, [audioOverviewParams, canSubmitArtifactTask, selectedReadySourceIds, submitArtifactTask, t])
 
   const handleCreateInfoGraphic = useCallback((params?: GenerateInfoGraphicParameters) => {
     if (!canSubmitArtifactTask) {
@@ -224,12 +226,12 @@ export const StudioPanel = memo(function StudioPanel({
     void submitArtifactTask({
       kind: 'info_graphic',
       sourceIds: selectedReadySourceIds,
-      title: '信息图',
+      title: t('studio:kind.infoGraphic'),
       actionId: 'generate-info_graphic',
       infoGraphic: submitParams,
     })
     setInfoGraphicDialogOpen(false)
-  }, [canSubmitArtifactTask, infoGraphicParams, selectedReadySourceIds, submitArtifactTask])
+  }, [canSubmitArtifactTask, infoGraphicParams, selectedReadySourceIds, submitArtifactTask, t])
 
   const handleCreateFlashcard = useCallback((params?: GenerateFlashcardParameters) => {
     if (!canSubmitArtifactTask) {
@@ -242,12 +244,12 @@ export const StudioPanel = memo(function StudioPanel({
     void submitArtifactTask({
       kind: 'flashcard',
       sourceIds: selectedReadySourceIds,
-      title: '闪卡',
+      title: t('studio:kind.flashcard'),
       actionId: 'generate-flashcard',
       flashcard: submitParams,
     })
     setFlashcardDialogOpen(false)
-  }, [canSubmitArtifactTask, flashcardParams, selectedReadySourceIds, submitArtifactTask])
+  }, [canSubmitArtifactTask, flashcardParams, selectedReadySourceIds, submitArtifactTask, t])
 
   const handleCreateQuiz = useCallback((params?: GenerateQuizParameters) => {
     if (!canSubmitArtifactTask) {
@@ -260,12 +262,12 @@ export const StudioPanel = memo(function StudioPanel({
     void submitArtifactTask({
       kind: 'quiz',
       sourceIds: selectedReadySourceIds,
-      title: '测验',
+      title: t('studio:kind.quiz'),
       actionId: 'generate-quiz',
       quiz: submitParams,
     })
     setQuizDialogOpen(false)
-  }, [canSubmitArtifactTask, quizParams, selectedReadySourceIds, submitArtifactTask])
+  }, [canSubmitArtifactTask, quizParams, selectedReadySourceIds, submitArtifactTask, t])
 
   const handleCreateDataTable = useCallback((params?: GenerateDataTableParameters) => {
     if (!canSubmitArtifactTask) {
@@ -278,12 +280,12 @@ export const StudioPanel = memo(function StudioPanel({
     void submitArtifactTask({
       kind: 'data_table',
       sourceIds: selectedReadySourceIds,
-      title: '数据表',
+      title: t('studio:kind.dataTable'),
       actionId: 'generate-data_table',
       data_table: submitParams,
     })
     setDataTableDialogOpen(false)
-  }, [canSubmitArtifactTask, dataTableParams, selectedReadySourceIds, submitArtifactTask])
+  }, [canSubmitArtifactTask, dataTableParams, selectedReadySourceIds, submitArtifactTask, t])
 
   const handleCloseInfoGraphicDialog = useCallback(() => {
     setInfoGraphicDialogOpen(false)
@@ -442,12 +444,12 @@ export const StudioPanel = memo(function StudioPanel({
     <Stack sx={{ height: '100%', minHeight: 0 }}>
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant={panelTitleVariant} sx={panelTitleSx}>
-          {studioPanelTitle}
+          {t('studio:panel.title')}
         </Typography>
         <IconButton
           size="small"
           color="default"
-          aria-label="收起右侧面板"
+          aria-label={t('studio:panel.collapseAria')}
           onClick={onCollapse}
           sx={{ display: { xs: 'none', md: 'inline-flex' } }}
         >
@@ -487,14 +489,14 @@ export const StudioPanel = memo(function StudioPanel({
 
       <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-          产物列表
+          {t('studio:panel.artifactList')}
         </Typography>
-        <Tooltip title={historyLoading ? '刷新中' : '刷新列表'}>
+        <Tooltip title={historyLoading ? t('studio:panel.refreshing') : t('studio:panel.refresh')}>
           <span>
             <IconButton
               size="small"
               color="default"
-              aria-label="刷新产物列表"
+              aria-label={t('studio:panel.refreshAria')}
               onClick={handleReloadHistoryArtifacts}
               disabled={historyLoading}
             >
@@ -521,13 +523,13 @@ export const StudioPanel = memo(function StudioPanel({
         {historyLoading && artifactItems.length === 0 ? (
           <Stack sx={{ height: '100%', alignItems: 'center', justifyContent: 'center' }}>
             <Typography variant="body2" color="text.secondary">
-              正在加载产物列表...
+              {t('studio:panel.loading')}
             </Typography>
           </Stack>
         ) : artifactItems.length === 0 ? (
           <Stack sx={{ height: '100%', alignItems: 'center', justifyContent: 'center' }}>
             <Typography variant="body2" color="text.secondary">
-              暂无产物，点击上方按钮开始生成。
+              {t('studio:panel.empty')}
             </Typography>
           </Stack>
         ) : (
@@ -563,16 +565,16 @@ export const StudioPanel = memo(function StudioPanel({
 
   const inlineSubpage = previewState.inlineOpen && previewTarget
     ? {
-        parentTitle: '工作区',
+        parentTitle: t('studio:panel.title'),
         title: {
-          mindmap: '思维导图',
-          report: '报告',
-          info_graphic: '信息图',
-          audio_overview: '音频概览',
-          flashcard: '闪卡',
-          quiz: '测验',
-          data_table: '数据表',
-          note: '笔记',
+          mindmap: t('studio:kind.mindmap'),
+          report: t('studio:kind.report'),
+          info_graphic: t('studio:kind.infoGraphic'),
+          audio_overview: t('studio:kind.audioOverview'),
+          flashcard: t('studio:kind.flashcard'),
+          quiz: t('studio:kind.quiz'),
+          data_table: t('studio:kind.dataTable'),
+          note: t('studio:kind.note'),
         }[previewTarget.kind] || previewTarget.kind,
         content: (
           <StudioArtifactInlinePreview
@@ -588,7 +590,7 @@ export const StudioPanel = memo(function StudioPanel({
           />
         ),
         onClose: closeInlinePreview,
-        closeAriaLabel: '关闭内联预览',
+        closeAriaLabel: t('studio:preview.closeInlineAria'),
       }
     : null
 

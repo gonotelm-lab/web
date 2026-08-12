@@ -3,6 +3,7 @@ import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArro
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
 import TuneRoundedIcon from '@mui/icons-material/TuneRounded'
 import { Button, IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { workspaceSpace } from '../../shared/ui/layoutTokens'
 import { panelTitleSx, panelTitleVariant } from '../../shared/ui/panelStyles'
 import { workspaceAnimation } from '../../shared/ui/motionTokens'
@@ -40,13 +41,15 @@ export function ChatPanelHeader({
   onOpenSettingsDialog,
   rightContentPadding,
 }: ChatPanelHeaderProps) {
+  const { t } = useTranslation(['chat', 'common'])
+
   return (
     <>
       {sourcesPanelCollapsed && (
         <IconButton
           size="small"
           color="default"
-          aria-label="展开来源面板"
+          aria-label={t('chat:panel.expandSourcesAria')}
           onClick={onExpandSourcesPanel}
           sx={{
             position: 'absolute',
@@ -67,7 +70,7 @@ export function ChatPanelHeader({
         <IconButton
           size="small"
           color="default"
-          aria-label="展开右侧面板"
+          aria-label={t('chat:panel.expandStudioAria')}
           onClick={onExpandInsightsPanel}
           sx={{
             position: 'absolute',
@@ -95,10 +98,10 @@ export function ChatPanelHeader({
         }}
       >
         <Typography variant={panelTitleVariant} sx={panelTitleSx}>
-          对话
+          {t('chat:panel.title')}
         </Typography>
         <Stack direction="row" spacing={workspaceSpace.sm} sx={{ alignItems: 'center' }}>
-          <Tooltip title="刷新会话上下文">
+          <Tooltip title={t('chat:panel.refreshTooltip')}>
             <span>
               <Button
                 size="small"
@@ -137,11 +140,15 @@ export function ChatPanelHeader({
                   },
                 }}
               >
-                刷新
+                {t('chat:panel.refresh')}
               </Button>
             </span>
           </Tooltip>
-          <IconButton size="small" aria-label="打开对话设置" onClick={onOpenSettingsDialog}>
+          <IconButton
+            size="small"
+            aria-label={t('chat:panel.settingsAria')}
+            onClick={onOpenSettingsDialog}
+          >
             <TuneRoundedIcon fontSize="small" />
           </IconButton>
         </Stack>

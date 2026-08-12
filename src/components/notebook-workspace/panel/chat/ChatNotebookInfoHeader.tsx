@@ -4,6 +4,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import type { Theme } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import { chatMessageContentTokens } from './layoutTokens'
 import { workspaceRadiusPx, workspaceSpace } from '../../shared/ui/layoutTokens'
 import { workspaceTransitionPresets } from '../../shared/ui/motionTokens'
@@ -21,13 +22,6 @@ const notebookInfoTokens = {
 }
 
 const fallbackNotebookName = 'Untitled notebook'
-
-const formatSourceCountLabel = (sourceCount: number) => {
-  const normalizedCount = Number.isFinite(sourceCount) && sourceCount > 0
-    ? Math.floor(sourceCount)
-    : 0
-  return `${normalizedCount} 个来源`
-}
 
 const buildCopyActionButtonSx = (copied: boolean) => (theme: Theme) => ({
   p: 0,
@@ -52,6 +46,7 @@ export function ChatNotebookInfoHeader({
   notebookDescription,
   notebookSourceCount,
 }: ChatNotebookInfoHeaderProps) {
+  const { t } = useTranslation(['chat', 'common'])
   const [copied, setCopied] = useState(false)
   const copyResetTimerRef = useRef<number | null>(null)
   const clearCopyResetTimer = useCallback(() => {
@@ -62,7 +57,11 @@ export function ChatNotebookInfoHeader({
   }, [])
   const title = notebookName.trim() || fallbackNotebookName
   const description = notebookDescription.trim()
-  const sourceCountLabel = formatSourceCountLabel(notebookSourceCount)
+  const normalizedCount =
+    Number.isFinite(notebookSourceCount) && notebookSourceCount > 0
+      ? Math.floor(notebookSourceCount)
+      : 0
+  const sourceCountLabel = t('common:sourceCount', { count: normalizedCount })
   const copyPayload = [title, description, sourceCountLabel]
     .filter((part) => part.trim().length > 0)
     .join('\n')
@@ -165,7 +164,7 @@ export function ChatNotebookInfoHeader({
             alignItems: 'center',
           }}
         >
-          <Tooltip title={copied ? '已复制' : '复制'}>
+          <Tooltip title={copied ? t('common:action.copied') : t('common:action.copy')}>
             <span>
               <IconButton
                 data-testid="chat-notebook-copy-action"

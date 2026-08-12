@@ -1,0 +1,269 @@
+{
+  "panel": {
+    "title": "Studio",
+    "collapseAria": "Collapse right panel",
+    "artifactList": "Artifacts",
+    "refresh": "Refresh list",
+    "refreshing": "Refreshing",
+    "refreshAria": "Refresh artifact list",
+    "loading": "Loading artifacts...",
+    "empty": "No artifacts yet. Use the buttons above to generate."
+  },
+  "preview": {
+    "closeInlineAria": "Close inline preview",
+    "basedOnSources": "Based on {{count}} sources",
+    "overlayTitle": "Artifact preview",
+    "noSourceInfo": "No source info",
+    "empty": "Nothing to preview.",
+    "emptyArtifact": "This artifact has no previewable content.",
+    "emptyDisplay": "This artifact has no displayable content.",
+    "infoGraphicAlt": "Infographic preview",
+    "loadFailed": "Failed to load preview. Please retry.",
+    "taskNotDone": "Task is not finished yet. Please try again later."
+  },
+  "kind": {
+    "mindmap": "Mind map",
+    "report": "Report",
+    "audioOverview": "Audio overview",
+    "videoOverview": "Video overview",
+    "infoGraphic": "Infographic",
+    "flashcard": "Flashcards",
+    "quiz": "Quiz",
+    "dataTable": "Data table",
+    "slideDeck": "Slides",
+    "note": "Note"
+  },
+  "tool": {
+    "desc": {
+      "audioOverview": "Generate an audio overview from selected sources",
+      "mindmap": "Generate a mind map from selected sources",
+      "report": "Generate a report from selected sources",
+      "flashcard": "Generate flashcards from selected sources",
+      "quiz": "Generate a quiz from selected sources",
+      "infoGraphic": "Generate an infographic from selected sources",
+      "dataTable": "Generate a data table from selected sources",
+      "comingSoon": "Coming soon"
+    },
+    "status": {
+      "pending": "Processing...",
+      "available": "Available",
+      "comingSoon": "Coming soon"
+    }
+  },
+  "artifact": {
+    "status": {
+      "queued": "Queued",
+      "polling": "Generating",
+      "succeeded": "Done",
+      "cancelled": "Cancelled",
+      "failed": "Failed"
+    },
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "{{n}}m ago",
+      "hoursAgo": "{{n}}h ago",
+      "daysAgo": "{{n}}d ago",
+      "weeksAgo": "{{n}}w ago"
+    },
+    "meta": "{{count}} sources, {{relativeTime}}",
+    "moreActions": "More actions",
+    "moreActionsAria": "More actions {{title}}",
+    "cancel": "Cancel",
+    "cancelling": "Cancelling...",
+    "convertToSource": "Convert to source",
+    "converting": "Converting...",
+    "titleAria": "Artifact title"
+  },
+  "mindmap": {
+    "reset": "Reset to initial view",
+    "resetAria": "Reset mind map view",
+    "empty": "Mind map content is empty.",
+    "invalid": "No valid nodes parsed. Please check Mermaid mindmap syntax."
+  },
+  "audio": {
+    "interrupted": "Playback interrupted",
+    "reload": "Reload",
+    "loading": "Loading…",
+    "download": "Download audio",
+    "unmute": "Unmute",
+    "volume": "Volume"
+  },
+  "extras": {
+    "viewParams": "View generation parameters",
+    "title": "Generation parameters",
+    "label": {
+      "tip": "Extra tip",
+      "style": "Style",
+      "language": "Language",
+      "visualStyle": "Visual style",
+      "detailLevel": "Detail level",
+      "orientation": "Orientation",
+      "textLanguage": "Text language",
+      "countStyle": "Quantity",
+      "difficulty": "Difficulty",
+      "conversation": "Conversation",
+      "message": "Message"
+    }
+  },
+  "download": {
+    "failed": "Download failed, HTTP {{status}}"
+  },
+  "api": {
+    "contentFailed": "Failed to read artifact content, HTTP {{status}}"
+  },
+  "error": {
+    "requestFailed": "Studio request failed. Please try again later.",
+    "fetchResult": "Failed to fetch task result. Please retry.",
+    "pollStatus": "Failed to poll task status. Please retry.",
+    "loadHistory": "Failed to load artifacts. Please retry.",
+    "createTask": "Failed to create artifact task. Please retry.",
+    "saveNote": "Failed to save note. Please retry.",
+    "retryTask": "Failed to retry task. Please try again later.",
+    "cancelTask": "Failed to cancel task. Please try again later.",
+    "deleteArtifact": "Failed to delete artifact. Please try again later.",
+    "convertToSource": "Failed to convert to source. Please try again later.",
+    "updateTitle": "Failed to update title. Please retry.",
+    "taskCancelled": "Task was cancelled. Please retry.",
+    "taskExpired": "Task expired. Please generate again.",
+    "taskFailed": "Task failed. Please retry."
+  },
+  "settings": {
+    "report": { "title": "Generate report" },
+    "audio": { "title": "Generate audio overview" },
+    "mindmap": { "title": "Generate mind map" },
+    "infoGraphic": { "title": "Generate infographic" },
+    "flashcard": { "title": "Generate flashcards" },
+    "quiz": { "title": "Generate quiz" },
+    "dataTable": { "title": "Generate data table" },
+    "language": "Language",
+    "languageHelp": {
+      "report": "Controls the language of the report output.",
+      "audio": "Controls the language of the audio overview script.",
+      "infoGraphic": "Controls the visible text language in the infographic."
+    },
+    "style": "Generation style",
+    "styleHelp": {
+      "report": "Controls how the report is organized and what it emphasizes.",
+      "audio": "Controls the tone and organization of the audio overview."
+    },
+    "tip": "Extra tip",
+    "tipPlaceholder": {
+      "generic": "Add focus, audience, or tone requirements.",
+      "mindmap": "e.g. Emphasize the 'implementation' and 'risk' branches.",
+      "dataTable": "e.g. Compare definitions, use cases, and caveats by concept."
+    },
+    "tipHelp": {
+      "mindmap": "Add focus areas, hierarchy preferences, or structure requirements.",
+      "dataTable": "Add desired fields, comparison dimensions, or table focus."
+    },
+    "detailLevel": "Detail level",
+    "detailLevelHelp": "Controls how detailed the infographic content is.",
+    "visualStyle": "Visual style",
+    "visualStyleHelp": "Controls the visual look of the infographic.",
+    "orientation": "Orientation",
+    "orientationHelp": "Controls the aspect ratio of the infographic.",
+    "prompt": "Describe the infographic you want",
+    "promptPlaceholder": "e.g. Show key milestones and impact on a timeline.",
+    "countStyle": "Quantity",
+    "countStyleHelp": {
+      "flashcard": "Controls how many flashcards tend to be generated.",
+      "quiz": "Controls how many quiz questions tend to be generated."
+    },
+    "difficulty": "Difficulty",
+    "difficultyHelp": {
+      "flashcard": "Controls flashcard difficulty.",
+      "quiz": "Controls quiz difficulty."
+    }
+  },
+  "lang": {
+    "zhCN": "简体中文",
+    "enUS": "English"
+  },
+  "style": {
+    "report": {
+      "default": { "label": "Default", "description": "Evidence-driven report: lead with conclusions and group source points by theme." },
+      "brief": { "label": "Brief", "description": "Analyst-style skimmable bullets with key insights and citations." },
+      "studyGuide": { "label": "Study guide", "description": "Layered questions, glossary, and self-check list for active learning." },
+      "detailed": { "label": "In-depth", "description": "Narrative long-form synthesis of source points with clear structure." }
+    },
+    "audio": {
+      "abstract": { "label": "Summary", "description": "Quick core takeaways for short listening." },
+      "deepResearch": { "label": "Deep research", "description": "Expanded background and detail for systematic understanding." },
+      "discussion": { "label": "Discussion", "description": "Conversational framing that connects viewpoints." },
+      "debate": { "label": "Debate", "description": "Highlights contrasting perspectives and trade-offs." }
+    }
+  },
+  "infoGraphic": {
+    "orientation": {
+      "landscape": "Landscape",
+      "portrait": "Portrait",
+      "square": "Square"
+    },
+    "detail": {
+      "concise": { "label": "Concise", "description": "Focus on essentials for quick scanning." },
+      "standard": { "label": "Standard", "description": "Balance coverage and detail." },
+      "detailed": { "label": "Detailed", "description": "Expand points and relationships as much as possible." }
+    },
+    "visual": {
+      "default": { "label": "Default", "description": "Clear general-purpose infographic style." },
+      "handDrawn": { "label": "Hand-drawn", "description": "Sketch-like lines and annotations." },
+      "anime": { "label": "Anime", "description": "More lively illustrated expression." },
+      "cute": { "label": "Cute", "description": "Soft and approachable visual tone." },
+      "educational": { "label": "Educational", "description": "Clear composition for teaching and explainers." },
+      "minimal25d": { "label": "Minimal 2.5D", "description": "Clean modern look with subtle depth." }
+    }
+  },
+  "count": {
+    "few": { "label": "Few", "descriptionFlashcard": "Fewer cards focused on essentials.", "descriptionQuiz": "Fewer questions focused on essentials." },
+    "default": { "label": "Default", "descriptionFlashcard": "A moderate number covering key points.", "descriptionQuiz": "A moderate number covering key points." },
+    "many": { "label": "Many", "descriptionFlashcard": "More cards with broader coverage.", "descriptionQuiz": "More questions with broader coverage." }
+  },
+  "difficulty": {
+    "easy": { "label": "Easy", "descriptionFlashcard": "Basics and memory-oriented content.", "descriptionQuiz": "Basics and memory-oriented questions." },
+    "medium": { "label": "Medium", "descriptionFlashcard": "Balance understanding and application.", "descriptionQuiz": "Balance understanding and application." },
+    "hard": { "label": "Hard", "descriptionFlashcard": "Deeper and more challenging content.", "descriptionQuiz": "Deeper and more challenging questions." }
+  },
+  "quiz": {
+    "parseError": "Unable to parse quiz content. Ensure JSON includes questions / themes / follow_up_hint.",
+    "resultTitle": "Quiz results",
+    "score": "Correct {{correct}} / {{total}}",
+    "accuracy": "({{percent}}% accuracy)",
+    "themes": "Themes covered",
+    "followUp": "Follow-up study tips",
+    "review": "Review answers",
+    "retry": "Retake quiz",
+    "reviewHeader": "Review · {{correct}}/{{total}} correct",
+    "listHeader": "Questions · answered {{answered}}/{{total}}",
+    "multi": "Multi",
+    "single": "Single",
+    "multiQuestion": "Multiple choice",
+    "singleQuestion": "Single choice",
+    "correct": "Correct",
+    "wrong": "Wrong",
+    "answered": "Answered",
+    "questionN": "Question {{n}}",
+    "progress": "Question {{n}} / {{total}} · {{type}}",
+    "answerCorrect": "Correct answer",
+    "answerWrong": "Incorrect answer",
+    "thisCorrect": "This answer is correct",
+    "thisWrong": "This answer is incorrect",
+    "backSummary": "Back to summary",
+    "submit": "Submit quiz",
+    "multiHint": "You can select multiple options",
+    "explanation": "Explanation",
+    "yourAnswer": "Your answer: {{labels}}",
+    "correctAnswer": "Correct answer: {{labels}}",
+    "unanswered": "Unanswered",
+    "noExplanation": "No written explanation for this question (older artifacts may lack explanation).",
+    "prevAria": "Previous question",
+    "nextAria": "Next question"
+  },
+  "flashcard": {
+    "parseError": "Unable to parse flashcards. Ensure JSON is `{ cards: [{ front, back, hint }] }`.",
+    "frontAria": "Flashcard front, click to flip",
+    "backAria": "Flashcard back, click to flip",
+    "hintAria": "Show hint",
+    "prevAria": "Previous card",
+    "nextAria": "Next card"
+  }
+}

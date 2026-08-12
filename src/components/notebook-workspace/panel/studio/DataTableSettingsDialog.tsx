@@ -1,4 +1,5 @@
 import { memo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Button,
@@ -26,19 +27,20 @@ export const DataTableSettingsDialog = memo(function DataTableSettingsDialog({
   onClose,
   onGenerate,
 }: DataTableSettingsDialogProps) {
+  const { t } = useTranslation(['studio', 'common'])
   const [draftParams, setDraftParams] = useState<GenerateDataTableParameters>(initialParams)
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: workspaceDialogLayout.paperRadius } } }}>
-      <DialogTitle>生成数据表</DialogTitle>
+      <DialogTitle>{t('studio:settings.dataTable.title')}</DialogTitle>
       <DialogContent dividers>
         <Stack spacing={workspaceDialogLayout.sectionStackSpacing}>
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              附加提示
+              {t('studio:settings.tip')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: workspaceDialogLayout.helperTextMt }}>
-              可补充希望提取的字段、对比维度或表格侧重点。
+              {t('studio:settings.tipHelp.dataTable')}
             </Typography>
             <TextField
               fullWidth
@@ -47,7 +49,7 @@ export const DataTableSettingsDialog = memo(function DataTableSettingsDialog({
               minRows={3}
               maxRows={3}
               slotProps={{ htmlInput: { maxLength: 300 } }}
-              placeholder="例如：按概念对比定义、适用场景与注意事项。"
+              placeholder={t('studio:settings.tipPlaceholder.dataTable')}
               value={draftParams.tip || ''}
               onChange={(event) =>
                 setDraftParams((prev) => ({ ...prev, tip: event.target.value }))
@@ -58,9 +60,9 @@ export const DataTableSettingsDialog = memo(function DataTableSettingsDialog({
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>取消</Button>
+        <Button onClick={onClose}>{t('common:action.cancel')}</Button>
         <Button variant="contained" onClick={() => onGenerate(draftParams)}>
-          生成
+          {t('common:action.generate')}
         </Button>
       </DialogActions>
     </Dialog>

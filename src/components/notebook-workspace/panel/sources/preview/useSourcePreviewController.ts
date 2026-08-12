@@ -3,6 +3,7 @@ import {
   buildSourceParsedContentQueryOptions,
   buildSourceParsedContentUrlQueryOptions,
 } from '@/api/source'
+import i18n from '@/i18n'
 import { ApiError } from '@/lib/http'
 import { useQueryClient } from '@tanstack/react-query'
 import type { ChatCitationJumpRequest } from '../../chat/types'
@@ -16,8 +17,9 @@ import { getSourcePreviewCapability } from './sourcePreviewCapabilities'
 import { resolveSourcePreviewEntryMode } from './sourcePreviewRouting'
 import type { SourcePreviewViewType } from './types'
 
-const sourcePreviewEmptyNotice = '当前来源暂无可展示的解析内容。'
 const sourceMarkdownHeavyCharThreshold = 6000
+
+const getSourcePreviewEmptyNotice = () => i18n.t('sources:preview.empty')
 
 const getSourcePreviewErrorMessage = (error: unknown) => {
   if (error instanceof ApiError) {
@@ -26,7 +28,7 @@ const getSourcePreviewErrorMessage = (error: unknown) => {
   if (error instanceof Error) {
     return error.message
   }
-  return '预览加载失败，请稍后重试。'
+  return i18n.t('sources:preview.loadFailed')
 }
 
 export interface SourcePreviewRequest extends ChatCitationJumpRequest {
@@ -152,7 +154,7 @@ export function useSourcePreviewController({
               ? {
                   ...prev,
                   loading: false,
-                  notice: sourcePreviewEmptyNotice,
+                  notice: getSourcePreviewEmptyNotice(),
                 }
               : prev,
           )
@@ -171,7 +173,7 @@ export function useSourcePreviewController({
             ? {
                 ...prev,
                 loading: false,
-                notice: sourcePreviewEmptyNotice,
+                notice: getSourcePreviewEmptyNotice(),
               }
             : prev,
         )

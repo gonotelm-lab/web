@@ -11,10 +11,11 @@ import {
   ToggleButtonGroup,
   Typography,
 } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { workspaceDialogLayout } from '../../shared/ui/dialogLayoutTokens'
 import {
-  chatAnswerLengthOptionList,
-  chatStyleOptionList,
+  getChatAnswerLengthOptionList,
+  getChatStyleOptionList,
   settingsToggleButtonSx,
   type ChatAnswerLengthOption,
   type ChatStyleOption,
@@ -47,7 +48,10 @@ export function ChatSettingsDialog({
   onAnswerLengthChange,
   onEnableThinkingChange,
 }: ChatSettingsDialogProps) {
+  const { t } = useTranslation(['chat', 'common'])
   const thinkingValue: ThinkingToggleValue = enableThinking ? 'on' : 'off'
+  const chatStyleOptionList = getChatStyleOptionList()
+  const chatAnswerLengthOptionList = getChatAnswerLengthOptionList()
 
   return (
     <Dialog
@@ -57,19 +61,19 @@ export function ChatSettingsDialog({
       maxWidth="sm"
       slotProps={{ paper: { sx: { borderRadius: workspaceDialogLayout.paperRadius } } }}
     >
-      <DialogTitle>对话设置</DialogTitle>
+      <DialogTitle>{t('chat:settings.title')}</DialogTitle>
       <DialogContent dividers>
         <Stack spacing={workspaceDialogLayout.sectionStackSpacing}>
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              对话风格
+              {t('chat:settings.style')}
             </Typography>
             <Typography
               variant="body2"
               color="text.secondary"
               sx={{ mt: workspaceDialogLayout.helperTextMt }}
             >
-              控制回答语气与组织方式。
+              {t('chat:settings.styleHelp')}
             </Typography>
             <ToggleButtonGroup
               exclusive
@@ -96,14 +100,14 @@ export function ChatSettingsDialog({
           <Divider />
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              回答长度
+              {t('chat:settings.length')}
             </Typography>
             <Typography
               variant="body2"
               color="text.secondary"
               sx={{ mt: workspaceDialogLayout.helperTextMt }}
             >
-              控制回答的详略程度。
+              {t('chat:settings.lengthHelp')}
             </Typography>
             <ToggleButtonGroup
               exclusive
@@ -130,14 +134,14 @@ export function ChatSettingsDialog({
           <Divider />
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              深度思考
+              {t('chat:settings.deepThink')}
             </Typography>
             <Typography
               variant="body2"
               color="text.secondary"
               sx={{ mt: workspaceDialogLayout.helperTextMt }}
             >
-              开启后回答会更慢，但推理更充分。
+              {t('chat:settings.deepThinkHelp')}
             </Typography>
             <ToggleButtonGroup
               exclusive
@@ -157,20 +161,28 @@ export function ChatSettingsDialog({
                 border: 'none',
               }}
             >
-              <ToggleButton value="off" sx={settingsToggleButtonSx} aria-label="关闭深度思考">
-                关闭
+              <ToggleButton
+                value="off"
+                sx={settingsToggleButtonSx}
+                aria-label={t('chat:settings.deepThinkOff')}
+              >
+                {t('chat:settings.deepThinkOff')}
               </ToggleButton>
-              <ToggleButton value="on" sx={settingsToggleButtonSx} aria-label="开启深度思考">
-                开启
+              <ToggleButton
+                value="on"
+                sx={settingsToggleButtonSx}
+                aria-label={t('chat:settings.deepThinkOn')}
+              >
+                {t('chat:settings.deepThinkOn')}
               </ToggleButton>
             </ToggleButtonGroup>
           </Box>
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>取消</Button>
+        <Button onClick={onClose}>{t('common:action.cancel')}</Button>
         <Button variant="contained" onClick={onSave}>
-          保存
+          {t('common:action.save')}
         </Button>
       </DialogActions>
     </Dialog>

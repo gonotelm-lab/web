@@ -1,0 +1,36 @@
+{
+  "action": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "retry": "Retry",
+    "retrying": "Retrying...",
+    "copy": "Copy",
+    "copied": "Copied",
+    "back": "Back",
+    "close": "Close",
+    "generate": "Generate",
+    "open": "Open",
+    "download": "Download",
+    "edit": "Edit",
+    "preview": "Preview"
+  },
+  "error": {
+    "deleteFailed": "Delete failed. Please try again later.",
+    "requestFailed": "Request failed. Please try again later.",
+    "copyFailed": "Copy failed. Please copy manually."
+  },
+  "preview": {
+    "loading": "Loading preview...",
+    "retryLoad": "Retry",
+    "expand": "Expand preview",
+    "download": "Download preview",
+    "close": "Close preview"
+  },
+  "nav": {
+    "backLevel": "Go back"
+  },
+  "sourceCount": "{{count}} sources"
+}

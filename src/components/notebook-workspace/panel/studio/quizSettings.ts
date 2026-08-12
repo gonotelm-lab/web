@@ -1,3 +1,4 @@
+import i18n from '@/i18n'
 import type {
   GenerateQuizParameters,
   StudioArtifactQuizCount,
@@ -24,46 +25,50 @@ export function buildQuizRequestParams(
   return normalized
 }
 
-export const quizCountOptionList: {
+export function getQuizCountOptionList(): {
   value: StudioArtifactQuizCount
   label: string
   description: string
-}[] = [
-  {
-    value: 'few',
-    label: '少',
-    description: '优先覆盖核心概念与主线，题量精炼。',
-  },
-  {
-    value: 'default',
-    label: '默认',
-    description: '在宏观主线与关键细节之间保持平衡。',
-  },
-  {
-    value: 'many',
-    label: '多',
-    description: '多挖细节、对比、边界条件与易错点。',
-  },
-]
+}[] {
+  return [
+    {
+      value: 'few',
+      label: i18n.t('studio:count.few.label'),
+      description: i18n.t('studio:count.few.descriptionQuiz'),
+    },
+    {
+      value: 'default',
+      label: i18n.t('studio:count.default.label'),
+      description: i18n.t('studio:count.default.descriptionQuiz'),
+    },
+    {
+      value: 'many',
+      label: i18n.t('studio:count.many.label'),
+      description: i18n.t('studio:count.many.descriptionQuiz'),
+    },
+  ]
+}
 
-export const quizDifficultyOptionList: {
+export function getQuizDifficultyOptionList(): {
   value: StudioArtifactQuizDifficulty
   label: string
   description: string
-}[] = [
-  {
-    value: 'easy',
-    label: '简单',
-    description: '通俗表述，侧重基础定义与直观理解。',
-  },
-  {
-    value: 'medium',
-    label: '中等',
-    description: '兼顾定义理解与常见应用/原理。',
-  },
-  {
-    value: 'hard',
-    label: '困难',
-    description: '可包含更深入机制、边界情况与对比辨析。',
-  },
-]
+}[] {
+  return [
+    {
+      value: 'easy',
+      label: i18n.t('studio:difficulty.easy.label'),
+      description: i18n.t('studio:difficulty.easy.descriptionQuiz'),
+    },
+    {
+      value: 'medium',
+      label: i18n.t('studio:difficulty.medium.label'),
+      description: i18n.t('studio:difficulty.medium.descriptionQuiz'),
+    },
+    {
+      value: 'hard',
+      label: i18n.t('studio:difficulty.hard.label'),
+      description: i18n.t('studio:difficulty.hard.descriptionQuiz'),
+    },
+  ]
+}

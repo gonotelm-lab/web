@@ -1,0 +1,21 @@
+{
+  "create": {
+    "entry": "New notebook",
+    "dialogTitle": "New notebook",
+    "nameLabel": "Notebook name (optional)",
+    "submit": "Create",
+    "failed": "Failed to create. Please try again later."
+  },
+  "sort": {
+    "aria": "Notebook sort order",
+    "lastActive": "Recently active",
+    "createTime": "Created time"
+  },
+  "card": {
+    "actionsAria": "Notebook actions",
+    "deleteTitle": "Delete notebook",
+    "deleteBody": "This will remove chat and source data permanently.",
+    "noDescription": "No description",
+    "unknownDate": "Unknown date"
+  }
+}

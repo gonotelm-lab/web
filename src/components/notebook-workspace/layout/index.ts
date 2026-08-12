@@ -2,6 +2,6 @@ export { WorkspaceHeader } from './WorkspaceHeader'
 export { WorkspaceMobileTabBar } from './WorkspaceMobileTabBar'
 export {
   workspaceMobilePanelDefault,
-  workspaceMobilePanelLabels,
+  getWorkspaceMobilePanelLabels,
   type WorkspaceMobilePanel,
 } from './workspaceMobilePanel'

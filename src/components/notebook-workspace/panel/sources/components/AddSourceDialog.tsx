@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import CloseIcon from '@mui/icons-material/Close'
 import {
   Dialog,
@@ -40,6 +41,7 @@ export function AddSourceDialog({
   onCreateUrl,
   onCreateText,
 }: AddSourceDialogProps) {
+  const { t } = useTranslation(['sources', 'common'])
   const [view, setView] = useState<AddSourceView>('home')
   const [urlInput, setUrlInput] = useState('')
   const [textInput, setTextInput] = useState('')
@@ -79,7 +81,7 @@ export function AddSourceDialog({
       errorToastKeyRef.current += 1
       setErrorToast({
         key: errorToastKeyRef.current,
-        message: err instanceof Error ? err.message : '添加失败，请稍后重试',
+        message: err instanceof Error ? err.message : t('sources:dialog.addFailed'),
       })
     } finally {
       setSubmitting(false)
@@ -120,8 +122,8 @@ export function AddSourceDialog({
         }}
       >
         <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6">添加来源</Typography>
-          <IconButton size="small" onClick={handleDialogClose} disabled={disabled} aria-label="关闭">
+          <Typography variant="h6">{t('sources:dialog.title')}</Typography>
+          <IconButton size="small" onClick={handleDialogClose} disabled={disabled} aria-label={t('sources:dialog.closeAria')}>
             <CloseIcon fontSize="small" />
           </IconButton>
         </Stack>

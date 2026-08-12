@@ -7,6 +7,7 @@ import {
   Container,
   Stack,
 } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import type { ListNotebooksSortBy } from '@/types/api'
 import { createNotebook, deleteNotebook, listNotebooks } from '../api/notebook'
 import { CreateNotebookDialog } from '../components/home/CreateNotebookDialog'
@@ -21,6 +22,7 @@ import { buildCreateNotebookRequest } from './home/createNotebookRequest'
 import { toNotebookCardViewModel } from './home/notebookCardViewModel'
 
 export function HomePage() {
+  const { t } = useTranslation('home')
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [sortBy, setSortBy] = useState<ListNotebooksSortBy>('create_time')
@@ -78,7 +80,7 @@ export function HomePage() {
         setCreateDialogState((prev) => ({ ...prev, errorMessage: error.message }))
         return
       }
-      setCreateDialogState((prev) => ({ ...prev, errorMessage: '创建失败，请稍后重试' }))
+      setCreateDialogState((prev) => ({ ...prev, errorMessage: t('create.failed') }))
     }
   }
 

@@ -10,6 +10,8 @@ import {
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Box, Paper, Snackbar, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { useTranslation } from 'react-i18next'
+import i18n from '@/i18n'
 import {
   createSource,
   deleteSource,
@@ -145,6 +147,7 @@ const applyWorkspacePanelGridColumns = (
 }
 
 export function NotebookWorkspacePage() {
+  const { t } = useTranslation('workspace')
   const { id = '' } = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -728,7 +731,7 @@ export function NotebookWorkspacePage() {
         sourceErrorToastKeyRef.current += 1
         setSourceErrorToast({
           key: sourceErrorToastKeyRef.current,
-          message: err instanceof Error ? err.message : '添加文件失败，请稍后重试',
+          message: err instanceof Error ? err.message : i18n.t('workspace:error.addFileFailed'),
         })
       }
       console.warn('create file source failed', err)
@@ -1329,7 +1332,7 @@ export function NotebookWorkspacePage() {
   const handleSaveMessageAsNote = useCallback(async (params: SaveMessageAsNoteParams) => {
     const handler = saveMessageAsNoteRef.current
     if (!handler) {
-      throw new Error('工作区尚未就绪，请稍后重试。')
+      throw new Error(i18n.t('workspace:error.notReady'))
     }
     await handler(params)
   }, [])
@@ -1438,7 +1441,7 @@ export function NotebookWorkspacePage() {
             ref={leftResizeHandleRef}
             role="separator"
             aria-orientation="vertical"
-            aria-label="调整来源面板宽度"
+            aria-label={t('resize.sourcesAria')}
             onPointerDown={startResizeLeftPanel}
             sx={{
               display: { xs: 'none', md: 'block' },
@@ -1501,7 +1504,7 @@ export function NotebookWorkspacePage() {
             ref={rightResizeHandleRef}
             role="separator"
             aria-orientation="vertical"
-            aria-label="调整右侧面板宽度"
+            aria-label={t('resize.rightAria')}
             onPointerDown={startResizeRightPanel}
             sx={{
               display: { xs: 'none', md: 'block' },

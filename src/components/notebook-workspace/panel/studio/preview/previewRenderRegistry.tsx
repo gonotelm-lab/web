@@ -9,6 +9,7 @@ import { QuizViewer } from '../components/QuizViewer'
 import { StudioAudioPlayer } from '../components/StudioAudioPlayer'
 import { workspaceSpace } from '../../../shared/ui/layoutTokens'
 import { workspaceType } from '@/components/notebook-workspace/shared/ui/typeTokens'
+import i18n from '@/i18n'
 
 export type StudioArtifactPreviewMode = 'inline' | 'overlay'
 
@@ -45,7 +46,7 @@ const renderFallbackPreview = (content: string) => (
         color: 'text.primary',
       }}
     >
-      {content || '当前产物没有可展示内容。'}
+      {content || i18n.t('studio:preview.emptyDisplay')}
     </Typography>
   </Paper>
 )
@@ -101,7 +102,7 @@ const previewRendererByKind: Partial<Record<StudioArtifactKind, StudioArtifactPr
         <Box
           component="img"
           src={artifact.contentUrl}
-          alt={artifact.title || '信息图预览'}
+          alt={artifact.title || i18n.t('studio:preview.infoGraphicAlt')}
           sx={{
             maxWidth: '100%',
             maxHeight: '100%',

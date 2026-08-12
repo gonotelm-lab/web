@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import i18n from '@/i18n'
 import NavigateBeforeRoundedIcon from '@mui/icons-material/NavigateBeforeRounded'
 import NavigateNextRoundedIcon from '@mui/icons-material/NavigateNextRounded'
 import {
@@ -64,10 +66,11 @@ const formatOptionLabels = (indexes: number[] = []) => {
   const labels = [...indexes]
     .sort((a, b) => a - b)
     .map((idx) => optionLabels[idx] || `${idx}`)
-  return labels.length > 0 ? labels.join('、') : '未作答'
+  return labels.length > 0 ? labels.join('、') : i18n.t('studio:quiz.unanswered')
 }
 
 export function QuizViewer({ content }: QuizViewerProps) {
+  const { t } = useTranslation(['studio', 'common'])
   const parsed = useMemo(() => parseQuizContent(content), [content])
   const [activeIndex, setActiveIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<number, number[]>>({})
@@ -84,7 +87,7 @@ export function QuizViewer({ content }: QuizViewerProps) {
   if (!parsed) {
     return (
       <Alert severity="warning">
-        测验内容无法解析，请确认产物 JSON 格式包含 questions / themes / follow_up_hint。
+        {t('studio:quiz.parseError')}
       </Alert>
     )
   }
@@ -150,17 +153,19 @@ export function QuizViewer({ content }: QuizViewerProps) {
           }}
         >
           <Typography variant="h6" sx={{ fontWeight: 650 }}>
-            测验结果
+            {t('studio:quiz.resultTitle')}
           </Typography>
           <Typography variant="body1" sx={{ mt: workspaceSpace.sm }}>
-            答对 {correctCount} / {total} 题
-            （正确率 {total > 0 ? Math.round((correctCount / total) * 100) : 0}%）
+            {t('studio:quiz.score', { correct: correctCount, total })}
+            {t('studio:quiz.accuracy', {
+              percent: total > 0 ? Math.round((correctCount / total) * 100) : 0,
+            })}
           </Typography>
         </Box>
 
         <Box>
           <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: workspaceSpace.sm }}>
-            本题组覆盖主题
+            {t('studio:quiz.themes')}
           </Typography>
           <Stack direction="row" spacing={workspaceSpace.sm} useFlexGap sx={{ flexWrap: 'wrap' }}>
             {(parsed.themes || []).map((theme) => (
@@ -171,7 +176,7 @@ export function QuizViewer({ content }: QuizViewerProps) {
 
         <Box>
           <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: workspaceSpace.sm }}>
-            后续学习建议
+            {t('studio:quiz.followUp')}
           </Typography>
           <Stack spacing={workspaceSpace.sm}>
             {(parsed.follow_up_hint || []).map((hint) => (
@@ -190,10 +195,10 @@ export function QuizViewer({ content }: QuizViewerProps) {
               setPhase('review')
             }}
           >
-            查看复盘
+            {t('studio:quiz.review')}
           </Button>
           <Button variant="outlined" onClick={handleRetry}>
-            重新答题
+            {t('studio:quiz.retry')}
           </Button>
         </Stack>
       </Stack>
@@ -223,17 +228,18 @@ export function QuizViewer({ content }: QuizViewerProps) {
       >
         <Typography variant="caption" color="text.secondary" sx={{ px: workspaceSpace.md, pt: workspaceSpace.md, display: 'block' }}>
           {isReview
-            ? `复盘 · 正确 ${correctCount}/${total}`
-            : `题目列表 · 已答 ${answeredCount}/${total}`}
+            ? t('studio:quiz.reviewHeader', { correct: correctCount, total })
+            : t('studio:quiz.listHeader', { answered: answeredCount, total })}
         </Typography>
         <List dense disablePadding sx={{ py: workspaceSpace.xxs }}>
           {parsed.questions.map((item, idx) => {
             const answered = (answers[idx] || []).length > 0
             const multi = (item.answer_index?.length || 0) > 1
             const correct = sameAnswerSet(answers[idx] || [], item.answer_index || [])
+            const typeLabel = multi ? t('studio:quiz.multi') : t('studio:quiz.single')
             const secondary = isReview
-              ? `${multi ? '多选' : '单选'} · ${correct ? '正确' : '错误'}`
-              : `${multi ? '多选' : '单选'}${answered ? ' · 已答' : ''}`
+              ? `${typeLabel} · ${correct ? t('studio:quiz.correct') : t('studio:quiz.wrong')}`
+              : `${typeLabel}${answered ? ` · ${t('studio:quiz.answered')}` : ''}`
             return (
               <ListItemButton
                 key={`q-${idx}`}
@@ -251,7 +257,7 @@ export function QuizViewer({ content }: QuizViewerProps) {
                           : 'text.primary',
                       }}
                     >
-                      {`第 ${idx + 1} 题`}
+                      {t('studio:quiz.questionN', { n: idx + 1 })}
                     </Typography>
                   }
                   secondary={secondary}
@@ -277,16 +283,22 @@ export function QuizViewer({ content }: QuizViewerProps) {
       >
         <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="caption" color="text.secondary">
-            第 {safeIndex + 1} / {total} 题 · {isMulti ? '多选题' : '单选题'}
-            {isReview ? ` · ${isCurrentCorrect ? '回答正确' : '回答错误'}` : ''}
+            {t('studio:quiz.progress', {
+              n: safeIndex + 1,
+              total,
+              type: isMulti ? t('studio:quiz.multiQuestion') : t('studio:quiz.singleQuestion'),
+            })}
+            {isReview
+              ? ` · ${isCurrentCorrect ? t('studio:quiz.answerCorrect') : t('studio:quiz.answerWrong')}`
+              : ''}
           </Typography>
           {isReview ? (
             <Stack direction="row" spacing={1}>
               <Button size="small" variant="outlined" onClick={() => setPhase('summary')}>
-                返回总结
+                {t('studio:quiz.backSummary')}
               </Button>
               <Button size="small" variant="contained" onClick={handleRetry}>
-                重新答题
+                {t('studio:quiz.retry')}
               </Button>
             </Stack>
           ) : (
@@ -296,7 +308,7 @@ export function QuizViewer({ content }: QuizViewerProps) {
               onClick={handleSubmit}
               disabled={answeredCount === 0}
             >
-              提交测验
+              {t('studio:quiz.submit')}
             </Button>
           )}
         </Stack>
@@ -306,7 +318,7 @@ export function QuizViewer({ content }: QuizViewerProps) {
         </Typography>
         {!isReview && isMulti ? (
           <Typography variant="caption" color="text.secondary">
-            可选择多个选项
+            {t('studio:quiz.multiHint')}
           </Typography>
         ) : null}
 
@@ -384,13 +396,13 @@ export function QuizViewer({ content }: QuizViewerProps) {
             }}
           >
             <Typography variant="subtitle2" sx={{ fontWeight: 650, mb: workspaceSpace.sm }}>
-              答案解析
+              {t('studio:quiz.explanation')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              你的答案：{formatOptionLabels(selected)}
+              {t('studio:quiz.yourAnswer', { labels: formatOptionLabels(selected) })}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: workspaceSpace.xxs }}>
-              正确答案：{formatOptionLabels(correctIndexes)}
+              {t('studio:quiz.correctAnswer', { labels: formatOptionLabels(correctIndexes) })}
             </Typography>
             <Typography
               variant="body2"
@@ -400,7 +412,7 @@ export function QuizViewer({ content }: QuizViewerProps) {
                 fontWeight: 600,
               }}
             >
-              {isCurrentCorrect ? '本题回答正确' : '本题回答错误'}
+              {isCurrentCorrect ? t('studio:quiz.thisCorrect') : t('studio:quiz.thisWrong')}
             </Typography>
             {question.explanation?.trim() ? (
               <Typography
@@ -411,7 +423,7 @@ export function QuizViewer({ content }: QuizViewerProps) {
               </Typography>
             ) : (
               <Typography variant="body2" color="text.disabled" sx={{ mt: workspaceSpace.sm }}>
-                本题暂无文字解析（旧产物可能缺少 explanation 字段）。
+                {t('studio:quiz.noExplanation')}
               </Typography>
             )}
           </Box>
@@ -424,7 +436,7 @@ export function QuizViewer({ content }: QuizViewerProps) {
         >
           <IconButton
             size="small"
-            aria-label="上一题"
+            aria-label={t('studio:quiz.prevAria')}
             disabled={safeIndex <= 0}
             onClick={() => setActiveIndex((prev) => Math.max(0, prev - 1))}
           >
@@ -435,7 +447,7 @@ export function QuizViewer({ content }: QuizViewerProps) {
           </Typography>
           <IconButton
             size="small"
-            aria-label="下一题"
+            aria-label={t('studio:quiz.nextAria')}
             disabled={safeIndex >= total - 1}
             onClick={() => setActiveIndex((prev) => Math.min(total - 1, prev + 1))}
           >

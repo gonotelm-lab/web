@@ -7,7 +7,9 @@ import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
 import remarkBreaks from 'remark-breaks'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
+import { useTranslation } from 'react-i18next'
 import { MarkdownCode } from '@/components/notebook-workspace/panel/chat/MarkdownCode'
+import i18n from '@/i18n'
 import { workspaceRadius, workspaceSpace } from '../ui/layoutTokens'
 import { workspaceTransitionPresets } from '../ui/motionTokens'
 import { subtleScrollbarSx } from '../ui/scrollbar'
@@ -151,7 +153,7 @@ function createMarkdownComponents(
         <sup>
           <a
             href={`#cite-${citationIndex}`}
-            aria-label={`打开引用 ${citationIndex}`}
+            aria-label={i18n.t('chat:markdown.openCitationAria', { index: citationIndex })}
             onClick={(event) => {
               event.preventDefault()
               onCitationClick(event, { citationIndex })
@@ -166,7 +168,9 @@ function createMarkdownComponents(
       const citationHref = parseCitationHref(href)
       const onCitationClick = onCitationClickRef.current
       if (citationHref && onCitationClick) {
-        const fallbackLabel = href ? `打开引用定位 ${href}` : '打开引用'
+        const fallbackLabel = href
+          ? i18n.t('chat:markdown.openCitationHref', { href })
+          : i18n.t('chat:markdown.openCitation')
         return (
           <a
             {...props}
@@ -177,13 +181,15 @@ function createMarkdownComponents(
               onCitationClick(event, { citationIndex: citationHref.citationIndex })
             }}
           >
-            {children ?? href ?? '引用'}
+            {children ?? href ?? i18n.t('chat:markdown.citationFallback')}
           </a>
         )
       }
 
       const shouldOpenInNewTab = Boolean(href && !href.startsWith('#'))
-      const fallbackLabel = href ? `打开链接 ${href}` : '打开链接'
+      const fallbackLabel = href
+        ? i18n.t('chat:markdown.openLinkHref', { href })
+        : i18n.t('chat:markdown.openLink')
       return (
         <a
           {...props}
@@ -192,7 +198,7 @@ function createMarkdownComponents(
           target={shouldOpenInNewTab ? '_blank' : undefined}
           rel={shouldOpenInNewTab ? 'noopener noreferrer' : undefined}
         >
-          {children ?? href ?? '链接'}
+          {children ?? href ?? i18n.t('chat:markdown.linkFallback')}
         </a>
       )
     },
@@ -207,6 +213,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
   justifyParagraphs = false,
   onCitationClick,
 }: MarkdownRendererProps) {
+  useTranslation(['chat', 'common'])
   const onCitationClickRef = useRef(onCitationClick)
   onCitationClickRef.current = onCitationClick
 

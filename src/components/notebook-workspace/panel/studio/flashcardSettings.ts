@@ -1,3 +1,4 @@
+import i18n from '@/i18n'
 import type {
   GenerateFlashcardParameters,
   StudioArtifactFlashcardCount,
@@ -24,46 +25,50 @@ export function buildFlashcardRequestParams(
   return normalized
 }
 
-export const flashcardCountOptionList: {
+export function getFlashcardCountOptionList(): {
   value: StudioArtifactFlashcardCount
   label: string
   description: string
-}[] = [
-  {
-    value: 'few',
-    label: '少',
-    description: '偏宏观概括，覆盖核心概念与主线。',
-  },
-  {
-    value: 'default',
-    label: '默认',
-    description: '在宏观主线与关键细节之间保持平衡。',
-  },
-  {
-    value: 'many',
-    label: '多',
-    description: '多挖细节、对比、边界条件与易错点。',
-  },
-]
+}[] {
+  return [
+    {
+      value: 'few',
+      label: i18n.t('studio:count.few.label'),
+      description: i18n.t('studio:count.few.descriptionFlashcard'),
+    },
+    {
+      value: 'default',
+      label: i18n.t('studio:count.default.label'),
+      description: i18n.t('studio:count.default.descriptionFlashcard'),
+    },
+    {
+      value: 'many',
+      label: i18n.t('studio:count.many.label'),
+      description: i18n.t('studio:count.many.descriptionFlashcard'),
+    },
+  ]
+}
 
-export const flashcardDifficultyOptionList: {
+export function getFlashcardDifficultyOptionList(): {
   value: StudioArtifactFlashcardDifficulty
   label: string
   description: string
-}[] = [
-  {
-    value: 'easy',
-    label: '简单',
-    description: '通俗表述，侧重基础定义与直观理解。',
-  },
-  {
-    value: 'medium',
-    label: '中等',
-    description: '兼顾定义理解与常见应用/原理。',
-  },
-  {
-    value: 'hard',
-    label: '困难',
-    description: '可包含更深入机制、边界情况与对比辨析。',
-  },
-]
+}[] {
+  return [
+    {
+      value: 'easy',
+      label: i18n.t('studio:difficulty.easy.label'),
+      description: i18n.t('studio:difficulty.easy.descriptionFlashcard'),
+    },
+    {
+      value: 'medium',
+      label: i18n.t('studio:difficulty.medium.label'),
+      description: i18n.t('studio:difficulty.medium.descriptionFlashcard'),
+    },
+    {
+      value: 'hard',
+      label: i18n.t('studio:difficulty.hard.label'),
+      description: i18n.t('studio:difficulty.hard.descriptionFlashcard'),
+    },
+  ]
+}

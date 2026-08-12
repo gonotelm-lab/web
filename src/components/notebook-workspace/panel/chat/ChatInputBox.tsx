@@ -7,6 +7,7 @@ import {
   Paper,
   TextField,
 } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { workspaceRadius, workspaceSpace } from '../../shared/ui/layoutTokens'
 import { workspaceTransitionPresets } from '../../shared/ui/motionTokens'
 import { subtleScrollbarSx } from '../../shared/ui/scrollbar'
@@ -69,6 +70,7 @@ export function ChatInputBox({
   onAbort,
   onSuggestionSelect,
 }: ChatInputBoxProps) {
+  const { t } = useTranslation(['chat', 'common'])
   const {
     isStreaming,
     isInputDisabled,
@@ -96,7 +98,7 @@ export function ChatInputBox({
         inputRef={inputRef}
         onChange={(event) => onValueChange(event.target.value)}
         onKeyDown={onKeyDown}
-        placeholder="输入你的问题..."
+        placeholder={t('chat:input.placeholder')}
         variant="standard"
         fullWidth
         multiline

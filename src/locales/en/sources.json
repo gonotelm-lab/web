@@ -1,0 +1,70 @@
+{
+  "panel": {
+    "title": "Sources",
+    "collapseAria": "Collapse sources panel",
+    "add": "+ Add source",
+    "all": "All sources"
+  },
+  "preview": {
+    "title": "Preview",
+    "parentTitle": "Sources",
+    "closeAria": "Close preview",
+    "empty": "This source has no parsed content to display.",
+    "loadFailed": "Failed to load preview. Please try again later."
+  },
+  "dialog": {
+    "title": "Add source",
+    "closeAria": "Close",
+    "addFailed": "Failed to add. Please try again later.",
+    "intro": "After you add sources, the system can answer based on information that matters to you."
+  },
+  "upload": {
+    "title": "Upload sources",
+    "hint": "Drag and drop or click to select files",
+    "formats": "Supported: pdf, txt, markdown, csv, docx, epub, xlsx, pptx",
+    "maxSize": "Max 100MB per file",
+    "maxBatchHint": "Select up to 20 files at a time",
+    "inputAria": "Select source files to upload",
+    "checking": "Checking files…",
+    "unsupportedType": "Only pdf, txt, markdown, csv, docx, epub, xlsx, and pptx files are supported",
+    "emptyFile": "File cannot be empty",
+    "fileTooLarge": "File size cannot exceed 100MB",
+    "tooMany": "You can select up to {{max}} files at a time",
+    "readFailedNamed": "{{fileName}}: Unable to read file content",
+    "readFailed": "Unable to read file content",
+    "encrypted": "{{fileName}}: File is encrypted and cannot be processed",
+    "prefixedError": "{{fileName}}: {{error}}"
+  },
+  "entry": {
+    "link": "Link",
+    "linkHint": "Website",
+    "paste": "Paste text",
+    "pasteHint": "Copied text"
+  },
+  "editor": {
+    "backAria": "Back",
+    "urlTitle": "Link",
+    "textTitle": "Paste text",
+    "urlHelper": "Publicly accessible web URLs are supported",
+    "textPlaceholder": "Paste the text you want to add...",
+    "submit": "Add source"
+  },
+  "row": {
+    "actionsAria": "Source actions",
+    "preview": "Preview",
+    "open": "Open",
+    "download": "Download",
+    "retry": "Retry",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "editTitle": {
+    "dialog": "Edit source title",
+    "label": "Title",
+    "empty": "Title cannot be empty",
+    "failed": "Failed to update title. Please try again later."
+  },
+  "api": {
+    "parsedContentFailed": "Failed to read parsed content, HTTP {{status}}"
+  }
+}

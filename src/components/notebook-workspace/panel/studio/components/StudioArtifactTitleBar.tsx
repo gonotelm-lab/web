@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { InputBase, Typography } from '@mui/material'
 import type { StudioArtifactKind } from '@/types/api'
 import {
@@ -24,6 +25,7 @@ export function StudioArtifactTitleBar({
   onCommit,
   typographyVariant = 'h5',
 }: StudioArtifactTitleBarProps) {
+  const { t } = useTranslation(['studio', 'common'])
   const fallbackTitle = resolveStudioArtifactFallbackTitle(kind)
   const [draft, setDraft] = useState(title)
   const [committing, setCommitting] = useState(false)
@@ -80,7 +82,7 @@ export function StudioArtifactTitleBar({
         }
       }}
       inputProps={{
-        'aria-label': '产物标题',
+        'aria-label': t('studio:artifact.titleAria'),
         maxLength: 128,
       }}
       sx={{

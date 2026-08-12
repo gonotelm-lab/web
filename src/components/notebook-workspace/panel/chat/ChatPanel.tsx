@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
 import { Box, IconButton, Paper, Snackbar, Typography } from '@mui/material'
 import { alpha } from '@mui/material/styles'
@@ -8,8 +9,8 @@ import { ChatNotebookInfoHeader } from './ChatNotebookInfoHeader'
 import { ChatPanelHeader } from './ChatPanelHeader'
 import { ChatSettingsDialog } from './ChatSettingsDialog'
 import {
-  chatAnswerLengthOptionList,
-  chatStyleOptionList,
+  chatAnswerLengthOptionValues,
+  chatStyleOptionValues,
   type ChatAnswerLengthOption,
   type ChatStyleOption,
 } from './chatSettings'
@@ -29,12 +30,8 @@ const scrollToBottomButtonTokens = {
 const chatSettingsStorageKeyPrefix = 'chat-panel-settings'
 const defaultChatStyle: ChatStyleOption = 'default'
 const defaultChatAnswerLength: ChatAnswerLengthOption = 'default'
-const chatStyleOptionSet = new Set<ChatStyleOption>(
-  chatStyleOptionList.map(({ value }) => value),
-)
-const chatAnswerLengthOptionSet = new Set<ChatAnswerLengthOption>(
-  chatAnswerLengthOptionList.map(({ value }) => value),
-)
+const chatStyleOptionSet = new Set<ChatStyleOption>(chatStyleOptionValues)
+const chatAnswerLengthOptionSet = new Set<ChatAnswerLengthOption>(chatAnswerLengthOptionValues)
 
 interface PersistedChatPanelSettings {
   style?: string
@@ -152,6 +149,7 @@ function ChatPanelContent({
   onOpenCitationJump,
   onSaveMessageAsNote,
 }: ChatPanelContentProps) {
+  const { t } = useTranslation(['chat', 'common'])
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false)
   const [savingAsNoteMessageId, setSavingAsNoteMessageId] = useState<string | null>(null)
   const [chatStyle, setChatStyle] = useState<ChatStyleOption>(
@@ -269,13 +267,13 @@ function ChatPanelContent({
           key: errorToastKeyRef.current,
           message: error instanceof Error && error.message.trim()
             ? error.message
-            : '保存笔记失败，请重试。',
+            : t('chat:error.saveNote'),
         })
       } finally {
         setSavingAsNoteMessageId(null)
       }
     },
-    [chatId, onSaveMessageAsNote],
+    [chatId, onSaveMessageAsNote, t],
   )
 
   const notebookInfoHeader = useMemo(
@@ -342,7 +340,7 @@ function ChatPanelContent({
         {showScrollToBottomButton ? (
           <IconButton
             size="small"
-            aria-label="回到底部"
+            aria-label={t('chat:panel.scrollBottomAria')}
             onClick={smoothScrollToBottom}
             sx={{
               position: 'absolute',

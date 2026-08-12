@@ -1,3 +1,4 @@
+import i18n from '@/i18n'
 import type {
   GenerateReportParameters,
   StudioArtifactReportStyle,
@@ -23,34 +24,38 @@ export function buildReportRequestParams(
   return normalized
 }
 
-export const reportLanguageOptionList: { value: string; label: string }[] = [
-  { value: 'zh-CN', label: '简体中文' },
-  { value: 'en-US', label: 'English' },
-]
+export function getReportLanguageOptionList(): { value: string; label: string }[] {
+  return [
+    { value: 'zh-CN', label: i18n.t('studio:lang.zhCN') },
+    { value: 'en-US', label: i18n.t('studio:lang.enUS') },
+  ]
+}
 
-export const reportStyleOptionList: {
+export function getReportStyleOptionList(): {
   value: StudioArtifactReportStyle
   label: string
   description: string
-}[] = [
-  {
-    value: 'default',
-    label: '默认',
-    description: '证据驱动报告，结论先行，按主题聚合来源要点。',
-  },
-  {
-    value: 'brief',
-    label: '简报文档',
-    description: '分析师式要点速读，提炼核心洞见与关键引文。',
-  },
-  {
-    value: 'study-guide',
-    label: '学习指南',
-    description: '分层思考问题 + 术语词汇 + 自测清单，引导主动学习。',
-  },
-  {
-    value: 'detailed',
-    label: '深度解读',
-    description: '融汇来源要点为叙事感长文，深入浅出，有层次有节奏。',
-  },
-]
+}[] {
+  return [
+    {
+      value: 'default',
+      label: i18n.t('studio:style.report.default.label'),
+      description: i18n.t('studio:style.report.default.description'),
+    },
+    {
+      value: 'brief',
+      label: i18n.t('studio:style.report.brief.label'),
+      description: i18n.t('studio:style.report.brief.description'),
+    },
+    {
+      value: 'study-guide',
+      label: i18n.t('studio:style.report.studyGuide.label'),
+      description: i18n.t('studio:style.report.studyGuide.description'),
+    },
+    {
+      value: 'detailed',
+      label: i18n.t('studio:style.report.detailed.label'),
+      description: i18n.t('studio:style.report.detailed.description'),
+    },
+  ]
+}

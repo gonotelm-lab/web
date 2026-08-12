@@ -8,6 +8,7 @@ import {
   type MutableRefObject,
   type RefObject,
 } from 'react'
+import { useTranslation } from 'react-i18next'
 import CheckBoxIcon from '@mui/icons-material/CheckBox'
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank'
 import IndeterminateCheckBoxIcon from '@mui/icons-material/IndeterminateCheckBox'
@@ -105,6 +106,7 @@ function SourcesPanelLayout({
   previewBodyRef,
   closeOverlayPreview,
 }: SourcesPanelLayoutProps) {
+  const { t } = useTranslation(['sources', 'common'])
   const {
     collapsed,
     isBusy,
@@ -181,12 +183,12 @@ function SourcesPanelLayout({
                   }}
                 >
                   <Typography variant={panelTitleVariant} sx={panelTitleSx}>
-                    来源
+                    {t('sources:panel.title')}
                   </Typography>
                   <IconButton
                     size="small"
                     color="default"
-                    aria-label="收起来源面板"
+                    aria-label={t('sources:panel.collapseAria')}
                     onClick={onCollapse}
                     sx={{ display: { xs: 'none', md: 'inline-flex' } }}
                   >
@@ -205,7 +207,7 @@ function SourcesPanelLayout({
                     disabled={isBusy}
                     sx={{ borderStyle: 'dashed', textTransform: 'none', justifyContent: 'center' }}
                   >
-                    + 添加来源
+                    {t('sources:panel.add')}
                   </Button>
                 </Stack>
 
@@ -253,7 +255,7 @@ function SourcesPanelLayout({
                           lineHeight: 1.25,
                         }}
                       >
-                        所有来源
+                        {t('sources:panel.all')}
                       </Typography>
                       <Box
                         sx={{
@@ -371,8 +373,8 @@ function SourcesPanelLayout({
             )}
             subpage={previewState.inlineOpen
               ? {
-                  parentTitle: '来源',
-                  title: '预览',
+                  parentTitle: t('sources:preview.parentTitle'),
+                  title: t('sources:preview.title'),
                   content: (
                     <SourceInlinePreview
                       sourceName={previewState.sourceName}
@@ -391,7 +393,7 @@ function SourcesPanelLayout({
                     />
                   ),
                   onClose: closeInlinePreview,
-                  closeAriaLabel: '关闭预览',
+                  closeAriaLabel: t('sources:preview.closeAria'),
                 }
               : null}
             subpageBodyRef={previewBodyRef}

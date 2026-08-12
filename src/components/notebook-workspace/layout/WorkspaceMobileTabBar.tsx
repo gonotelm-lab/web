@@ -2,9 +2,10 @@ import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined'
 import ChatBubbleOutlineRoundedIcon from '@mui/icons-material/ChatBubbleOutlineRounded'
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { workspaceSpace } from '../shared/ui/layoutTokens'
 import {
-  workspaceMobilePanelLabels,
+  getWorkspaceMobilePanelLabels,
   type WorkspaceMobilePanel,
 } from './workspaceMobilePanel'
 
@@ -16,6 +17,9 @@ interface WorkspaceMobileTabBarProps {
 const tabMinHeightPx = 56
 
 export function WorkspaceMobileTabBar({ value, onChange }: WorkspaceMobileTabBarProps) {
+  useTranslation('workspace')
+  const labels = getWorkspaceMobilePanelLabels()
+
   return (
     <Paper
       square
@@ -51,21 +55,21 @@ export function WorkspaceMobileTabBar({ value, onChange }: WorkspaceMobileTabBar
       >
         <BottomNavigationAction
           value="sources"
-          label={workspaceMobilePanelLabels.sources}
+          label={labels.sources}
           icon={<DescriptionOutlinedIcon />}
-          aria-label={workspaceMobilePanelLabels.sources}
+          aria-label={labels.sources}
         />
         <BottomNavigationAction
           value="chat"
-          label={workspaceMobilePanelLabels.chat}
+          label={labels.chat}
           icon={<ChatBubbleOutlineRoundedIcon />}
-          aria-label={workspaceMobilePanelLabels.chat}
+          aria-label={labels.chat}
         />
         <BottomNavigationAction
           value="studio"
-          label={workspaceMobilePanelLabels.studio}
+          label={labels.studio}
           icon={<AutoAwesomeOutlinedIcon />}
-          aria-label={workspaceMobilePanelLabels.studio}
+          aria-label={labels.studio}
         />
       </BottomNavigation>
     </Paper>

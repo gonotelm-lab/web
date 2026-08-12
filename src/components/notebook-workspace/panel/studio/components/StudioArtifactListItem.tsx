@@ -1,4 +1,5 @@
 import { memo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined'
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined'
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined'
@@ -13,6 +14,7 @@ import QuizOutlinedIcon from '@mui/icons-material/QuizOutlined'
 import StyleOutlinedIcon from '@mui/icons-material/StyleOutlined'
 import TableChartOutlinedIcon from '@mui/icons-material/TableChartOutlined'
 import type { SvgIconComponent } from '@mui/icons-material'
+import i18n from '@/i18n'
 import type { StudioArtifactKind } from '@/types/api'
 import { IconButton, Menu, MenuItem, Paper, Stack, Tooltip, Typography } from '@mui/material'
 import type { Theme } from '@mui/material/styles'
@@ -50,13 +52,13 @@ interface StudioArtifactListItemProps {
   onConvertToSource: (item: StudioArtifactItem) => void
 }
 
-const statusLabelMap: Record<StudioArtifactVisualStatus, string> = {
-  queued: '排队中',
-  polling: '生成中',
-  succeeded: '已完成',
-  cancelled: '已取消',
-  failed: '失败',
-}
+const getStatusLabelMap = (): Record<StudioArtifactVisualStatus, string> => ({
+  queued: i18n.t('studio:artifact.status.queued'),
+  polling: i18n.t('studio:artifact.status.polling'),
+  succeeded: i18n.t('studio:artifact.status.succeeded'),
+  cancelled: i18n.t('studio:artifact.status.cancelled'),
+  failed: i18n.t('studio:artifact.status.failed'),
+})
 
 const resolveArtifactStatusTone = (
   visualStatus: StudioArtifactVisualStatus,
@@ -75,22 +77,22 @@ const weekMs = 7 * dayMs
 
 const formatArtifactRelativeTime = (createdAt: number) => {
   if (!Number.isFinite(createdAt) || createdAt <= 0) {
-    return '刚刚'
+    return i18n.t('studio:artifact.time.justNow')
   }
   const elapsed = Math.max(0, Date.now() - createdAt)
   if (elapsed < minuteMs) {
-    return '刚刚'
+    return i18n.t('studio:artifact.time.justNow')
   }
   if (elapsed < hourMs) {
-    return `${Math.floor(elapsed / minuteMs)}m前`
+    return i18n.t('studio:artifact.time.minutesAgo', { n: Math.floor(elapsed / minuteMs) })
   }
   if (elapsed < dayMs) {
-    return `${Math.floor(elapsed / hourMs)}h前`
+    return i18n.t('studio:artifact.time.hoursAgo', { n: Math.floor(elapsed / hourMs) })
   }
   if (elapsed < weekMs) {
-    return `${Math.floor(elapsed / dayMs)}d前`
+    return i18n.t('studio:artifact.time.daysAgo', { n: Math.floor(elapsed / dayMs) })
   }
-  return `${Math.floor(elapsed / weekMs)}w前`
+  return i18n.t('studio:artifact.time.weeksAgo', { n: Math.floor(elapsed / weekMs) })
 }
 
 const artifactKindIconMap: Record<StudioArtifactKind, SvgIconComponent> = {
@@ -139,6 +141,8 @@ export const StudioArtifactListItem = memo(function StudioArtifactListItem({
   onDelete,
   onConvertToSource,
 }: StudioArtifactListItemProps) {
+  const { t } = useTranslation(['studio', 'common'])
+  const statusLabelMap = getStatusLabelMap()
   const visualStatus = toArtifactVisualStatus(item.status)
   const isCancelled = visualStatus === 'cancelled'
   const isRunning = isStudioTaskRunning(item.status)
@@ -153,7 +157,10 @@ export const StudioArtifactListItem = memo(function StudioArtifactListItem({
   const displayTitle = resolveStudioArtifactDisplayTitle(item.title, item.kind)
   const itemMetaLabel = item.kind === 'note'
     ? formatArtifactRelativeTime(item.createdAt)
-    : `${sourceCount}个来源，${formatArtifactRelativeTime(item.createdAt)}`
+    : t('studio:artifact.meta', {
+        count: sourceCount,
+        relativeTime: formatArtifactRelativeTime(item.createdAt),
+      })
   const KindIcon = artifactKindIconMap[item.kind] ?? AccountTreeOutlinedIcon
   const [actionMenuAnchorEl, setActionMenuAnchorEl] = useState<null | HTMLElement>(null)
   const actionMenuOpen = Boolean(actionMenuAnchorEl)
@@ -274,12 +281,12 @@ export const StudioArtifactListItem = memo(function StudioArtifactListItem({
             spacing={workspaceSpace.xxs}
             sx={{ alignItems: 'center', flexShrink: 0, ml: workspaceSpace.xxs }}
           >
-            <Tooltip title="更多操作">
+            <Tooltip title={t('studio:artifact.moreActions')}>
               <span>
                 <IconButton
                   size="small"
                   color="default"
-                  aria-label={`更多操作 ${displayTitle}`}
+                  aria-label={t('studio:artifact.moreActionsAria', { title: displayTitle })}
                   onClick={(event) => {
                     event.stopPropagation()
                     setActionMenuAnchorEl(event.currentTarget)
@@ -310,7 +317,7 @@ export const StudioArtifactListItem = memo(function StudioArtifactListItem({
               >
                 <CancelOutlinedIcon sx={actionMenuIconSx} />
                 <Typography sx={actionMenuTextSx}>
-                  {cancelPending ? '取消中...' : '取消'}
+                  {cancelPending ? t('studio:artifact.cancelling') : t('studio:artifact.cancel')}
                 </Typography>
               </MenuItem>
               {item.kind !== 'note' ? (
@@ -325,7 +332,7 @@ export const StudioArtifactListItem = memo(function StudioArtifactListItem({
                 >
                   <ReplayOutlinedIcon sx={actionMenuIconSx} />
                   <Typography sx={actionMenuTextSx}>
-                    {retryPending ? '重试中...' : '重试'}
+                    {retryPending ? t('common:action.retrying') : t('common:action.retry')}
                   </Typography>
                 </MenuItem>
               ) : null}
@@ -341,7 +348,7 @@ export const StudioArtifactListItem = memo(function StudioArtifactListItem({
                 >
                   <SourceOutlinedIcon sx={actionMenuIconSx} />
                   <Typography sx={actionMenuTextSx}>
-                    {convertPending ? '转换中...' : '转换成来源'}
+                    {convertPending ? t('studio:artifact.converting') : t('studio:artifact.convertToSource')}
                   </Typography>
                 </MenuItem>
               ) : null}
@@ -356,7 +363,7 @@ export const StudioArtifactListItem = memo(function StudioArtifactListItem({
               >
                 <DeleteOutlineOutlinedIcon sx={actionMenuIconSx} />
                 <Typography sx={actionMenuTextSx}>
-                  {deletePending ? '删除中...' : '删除'}
+                  {deletePending ? t('common:action.deleting') : t('common:action.delete')}
                 </Typography>
               </MenuItem>
             </Menu>

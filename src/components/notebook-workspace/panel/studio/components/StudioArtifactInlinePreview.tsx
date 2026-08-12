@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded'
 import ZoomOutMapRoundedIcon from '@mui/icons-material/ZoomOutMapRounded'
 import {
@@ -45,6 +46,7 @@ export function StudioArtifactInlinePreview({
   onRetryLoad,
   onRenameTitle,
 }: StudioArtifactInlinePreviewProps) {
+  const { t } = useTranslation(['studio', 'common'])
   const sourceCount = artifact.sourceIds.length || artifact.sourceCount
   const isAudioOverviewArtifact = artifact.kind === 'audio_overview'
   const hasDownloadableContent = isAudioOverviewArtifact
@@ -83,7 +85,7 @@ export function StudioArtifactInlinePreview({
             color="text.secondary"
             sx={{ mt: workspaceSpace.xxs }}
           >
-            基于 {sourceCount} 个来源
+            {t('studio:preview.basedOnSources', { count: sourceCount })}
           </Typography>
         </Box>
         <Stack
@@ -96,11 +98,11 @@ export function StudioArtifactInlinePreview({
             iconSx={inlinePreviewActionIconButtonSx}
           />
           {canOpenOverlay ? (
-            <Tooltip title="放大预览">
+            <Tooltip title={t('common:preview.expand')}>
               <span>
                 <IconButton
                   size="small"
-                  aria-label="放大预览"
+                  aria-label={t('common:preview.expand')}
                   onClick={onOpenOverlay}
                   sx={inlinePreviewActionIconButtonSx}
                 >
@@ -109,11 +111,11 @@ export function StudioArtifactInlinePreview({
               </span>
             </Tooltip>
           ) : null}
-          <Tooltip title="下载预览内容">
+          <Tooltip title={t('common:preview.download')}>
             <span>
               <IconButton
                 size="small"
-                aria-label="下载预览内容"
+                aria-label={t('common:preview.download')}
                 onClick={onDownload}
                 disabled={!canDownload}
                 sx={inlinePreviewActionIconButtonSx}
@@ -136,7 +138,7 @@ export function StudioArtifactInlinePreview({
         {loading ? (
           <Stack sx={{ height: '100%', alignItems: 'center', justifyContent: 'center' }}>
             <Typography variant="body2" color="text.secondary">
-              正在加载预览内容...
+              {t('common:preview.loading')}
             </Typography>
           </Stack>
         ) : error ? (
@@ -144,7 +146,7 @@ export function StudioArtifactInlinePreview({
             <Alert severity="error">{error}</Alert>
             <Box>
               <Button size="small" variant="outlined" onClick={onRetryLoad}>
-                重试加载
+                {t('common:preview.retryLoad')}
               </Button>
             </Box>
           </Stack>

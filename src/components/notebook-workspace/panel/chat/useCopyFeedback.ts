@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
+import i18n from '@/i18n'
 import { copyFeedbackVisibleMs, writeTextWithFallback } from './chatConversationCommon'
 
 interface UseCopyFeedbackParams {
@@ -48,7 +49,7 @@ export function useCopyFeedback({
             copyFeedbackTimerRef.current = null
           }, copyFeedbackVisibleMs)
         } catch {
-          setErrorText('复制失败，请手动复制。')
+          setErrorText(i18n.t('common:error.copyFailed'))
         }
       }
 
