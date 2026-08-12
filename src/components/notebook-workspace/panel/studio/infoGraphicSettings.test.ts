@@ -1,7 +1,15 @@
-import { describe, expect, it } from 'vitest'
-import { buildInfoGraphicRequestParams, defaultInfoGraphicParameters } from './infoGraphicSettings'
+import { afterEach, describe, expect, it } from 'vitest'
+import i18n from '@/i18n'
+import {
+  buildInfoGraphicRequestParams,
+  getDefaultInfoGraphicParameters,
+} from './infoGraphicSettings'
 
 describe('buildInfoGraphicRequestParams', () => {
+  afterEach(async () => {
+    await i18n.changeLanguage('zh')
+  })
+
   it('fills backend-required defaults when params are omitted', () => {
     expect(buildInfoGraphicRequestParams()).toEqual({
       orientation: 'landscape',
@@ -29,9 +37,16 @@ describe('buildInfoGraphicRequestParams', () => {
   })
 
   it('keeps dialog defaults aligned with request defaults', () => {
-    expect(defaultInfoGraphicParameters.orientation).toBe('landscape')
-    expect(defaultInfoGraphicParameters.text_language).toBe('zh-CN')
-    expect(defaultInfoGraphicParameters.detail_level).toBe('standard')
-    expect(defaultInfoGraphicParameters.visual_style).toBe('default')
+    const defaults = getDefaultInfoGraphicParameters()
+    expect(defaults.orientation).toBe('landscape')
+    expect(defaults.text_language).toBe('zh-CN')
+    expect(defaults.detail_level).toBe('standard')
+    expect(defaults.visual_style).toBe('default')
+  })
+
+  it('follows UI locale for default text_language', async () => {
+    await i18n.changeLanguage('en')
+    expect(getDefaultInfoGraphicParameters().text_language).toBe('en-US')
+    expect(buildInfoGraphicRequestParams().text_language).toBe('en-US')
   })
 })

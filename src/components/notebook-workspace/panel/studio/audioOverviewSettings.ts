@@ -1,21 +1,29 @@
 import i18n from '@/i18n'
+import { getDefaultStudioOutputLanguage } from '@/i18n/studioOutputLanguage'
 import type {
   GenerateAudioOverviewParameters,
   StudioArtifactAudioOverviewStyle,
 } from '@/types/api'
 
-export const defaultAudioOverviewParameters: GenerateAudioOverviewParameters = {
-  language: 'zh-CN',
-  style: 'abstract',
-  tip: '',
+export function getDefaultAudioOverviewParameters(): GenerateAudioOverviewParameters {
+  return {
+    language: getDefaultStudioOutputLanguage(),
+    style: 'abstract',
+    tip: '',
+  }
 }
+
+/** Snapshot defaults; language follows current UI locale at access time. */
+export const defaultAudioOverviewParameters: GenerateAudioOverviewParameters =
+  getDefaultAudioOverviewParameters()
 
 export function buildAudioOverviewRequestParams(
   params?: GenerateAudioOverviewParameters,
 ): GenerateAudioOverviewParameters {
+  const defaults = getDefaultAudioOverviewParameters()
   const normalized: GenerateAudioOverviewParameters = {
-    language: params?.language?.trim() || defaultAudioOverviewParameters.language,
-    style: params?.style || defaultAudioOverviewParameters.style,
+    language: params?.language?.trim() || defaults.language,
+    style: params?.style || defaults.style,
   }
   const tip = params?.tip?.trim()
   if (tip) {

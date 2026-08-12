@@ -1,21 +1,29 @@
 import i18n from '@/i18n'
+import { getDefaultStudioOutputLanguage } from '@/i18n/studioOutputLanguage'
 import type {
   GenerateReportParameters,
   StudioArtifactReportStyle,
 } from '@/types/api'
 
-export const defaultReportParameters: GenerateReportParameters = {
-  style: 'default',
-  language: 'zh-CN',
-  tip: '',
+export function getDefaultReportParameters(): GenerateReportParameters {
+  return {
+    style: 'default',
+    language: getDefaultStudioOutputLanguage(),
+    tip: '',
+  }
 }
+
+/** Snapshot defaults; language follows current UI locale at access time. */
+export const defaultReportParameters: GenerateReportParameters =
+  getDefaultReportParameters()
 
 export function buildReportRequestParams(
   params?: GenerateReportParameters,
 ): GenerateReportParameters {
+  const defaults = getDefaultReportParameters()
   const normalized: GenerateReportParameters = {
-    style: params?.style || defaultReportParameters.style,
-    language: params?.language?.trim() || defaultReportParameters.language,
+    style: params?.style || defaults.style,
+    language: params?.language?.trim() || defaults.language,
   }
   const tip = params?.tip?.trim()
   if (tip) {

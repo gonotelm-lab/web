@@ -22,7 +22,7 @@ import type {
 import { workspaceDialogLayout } from '../../shared/ui/dialogLayoutTokens'
 import { settingsToggleButtonSx } from '../chat/chatSettings'
 import {
-  defaultReportParameters,
+  getDefaultReportParameters,
   getReportLanguageOptionList,
   getReportStyleOptionList,
 } from './reportSettings'
@@ -45,8 +45,9 @@ export const ReportSettingsDialog = memo(function ReportSettingsDialog({
   const reportLanguageOptionList = getReportLanguageOptionList()
   const reportStyleOptionList = getReportStyleOptionList()
 
-  const language = draftParams.language || defaultReportParameters.language
-  const style = draftParams.style || defaultReportParameters.style || 'default'
+  const defaults = getDefaultReportParameters()
+  const language = draftParams.language || defaults.language
+  const style = draftParams.style || defaults.style || 'default'
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: workspaceDialogLayout.paperRadius } } }}>

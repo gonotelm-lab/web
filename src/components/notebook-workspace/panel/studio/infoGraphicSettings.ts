@@ -1,4 +1,5 @@
 import i18n from '@/i18n'
+import { getDefaultStudioOutputLanguage } from '@/i18n/studioOutputLanguage'
 import type {
   GenerateInfoGraphicParameters,
   StudioArtifactInfoGraphicDetailLevel,
@@ -6,22 +7,29 @@ import type {
   StudioArtifactInfoGraphicVisualStyle,
 } from '@/types/api'
 
-export const defaultInfoGraphicParameters: GenerateInfoGraphicParameters = {
-  orientation: 'landscape',
-  text_language: 'zh-CN',
-  detail_level: 'standard',
-  visual_style: 'default',
-  extra_prompt: '',
+export function getDefaultInfoGraphicParameters(): GenerateInfoGraphicParameters {
+  return {
+    orientation: 'landscape',
+    text_language: getDefaultStudioOutputLanguage(),
+    detail_level: 'standard',
+    visual_style: 'default',
+    extra_prompt: '',
+  }
 }
+
+/** Snapshot defaults; text_language follows current UI locale at access time. */
+export const defaultInfoGraphicParameters: GenerateInfoGraphicParameters =
+  getDefaultInfoGraphicParameters()
 
 export function buildInfoGraphicRequestParams(
   params?: GenerateInfoGraphicParameters,
 ): GenerateInfoGraphicParameters {
+  const defaults = getDefaultInfoGraphicParameters()
   const normalized: GenerateInfoGraphicParameters = {
-    orientation: params?.orientation || defaultInfoGraphicParameters.orientation,
-    text_language: params?.text_language?.trim() || defaultInfoGraphicParameters.text_language,
-    detail_level: params?.detail_level || defaultInfoGraphicParameters.detail_level,
-    visual_style: params?.visual_style || defaultInfoGraphicParameters.visual_style,
+    orientation: params?.orientation || defaults.orientation,
+    text_language: params?.text_language?.trim() || defaults.text_language,
+    detail_level: params?.detail_level || defaults.detail_level,
+    visual_style: params?.visual_style || defaults.visual_style,
   }
   const extraPrompt = params?.extra_prompt?.trim()
   if (extraPrompt) {

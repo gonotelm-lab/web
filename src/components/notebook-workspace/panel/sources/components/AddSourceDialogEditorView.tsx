@@ -24,11 +24,24 @@ interface AddSourceDialogEditorViewProps {
 const editorHelperTextSx = {
   mx: 0,
   mt: workspaceSpace.xxs,
-  minHeight: 20,
+  minHeight: 22,
   flexShrink: 0,
-  fontSize: workspaceType.xs,
+  fontSize: workspaceType.sm,
   lineHeight: 1.25,
   fontVariantNumeric: 'tabular-nums',
+} as const
+
+/**
+ * Outlined shrink label uses transform scale(0.75) by default, so 14px reads ~10.5px.
+ * Override scale so the border legend stays closer to body size.
+ */
+const editorInputLabelSx = {
+  fontSize: workspaceType.sm,
+  '&.MuiInputLabel-shrink': {
+    fontSize: workspaceType.sm,
+    // Default: translate(14px, -9px) scale(0.75)
+    transform: 'translate(14px, -10px) scale(1)',
+  },
 } as const
 
 const editorFieldShellSx = {
@@ -42,18 +55,27 @@ const editorFieldShellSx = {
     minHeight: 0,
     display: 'flex',
     flexDirection: 'column',
+    overflow: 'visible',
   },
   '& .MuiInputBase-root': {
     flex: '1 1 auto',
     minHeight: 96,
     maxHeight: '100%',
     alignItems: 'stretch',
+    fontSize: workspaceType.sm,
   },
   '& .MuiInputBase-input': {
     height: '100% !important',
     minHeight: 0,
     overflow: 'auto !important',
+    fontSize: workspaceType.sm,
+    lineHeight: 1.5,
   },
+  // MUI notch legend defaults to 0.75em; keep 1em so scale(1) label fits the gap.
+  '& .MuiOutlinedInput-notchedOutline legend': {
+    fontSize: '1em',
+  },
+  '& .MuiInputLabel-root': editorInputLabelSx,
   '& .MuiFormHelperText-root': editorHelperTextSx,
 } as const
 
@@ -106,19 +128,28 @@ export function AddSourceDialogEditorView({
           minHeight: 0,
           display: 'flex',
           flexDirection: 'column',
+          // Clip scrollable body, but keep top padding so outlined labels are not cut off.
           overflow: 'hidden',
+          pt: 1.5,
         }}
       >
         {view === 'url' ? (
           <TextField
             fullWidth
-            size="small"
             label={t('sources:editor.urlTitle')}
             placeholder="https://example.com/article"
             value={urlInput}
             disabled={disabled}
             onChange={(e) => onUrlChange(e.target.value)}
             helperText={t('sources:editor.urlHelper')}
+            sx={{
+              '& .MuiInputBase-root': { fontSize: workspaceType.sm },
+              '& .MuiInputBase-input': { fontSize: workspaceType.sm },
+              '& .MuiInputLabel-root': editorInputLabelSx,
+              '& .MuiOutlinedInput-notchedOutline legend': {
+                fontSize: '1em',
+              },
+            }}
             slotProps={{
               inputLabel: { shrink: true },
               formHelperText: { sx: editorHelperTextSx },

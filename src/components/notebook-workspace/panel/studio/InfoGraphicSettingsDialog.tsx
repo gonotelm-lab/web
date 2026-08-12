@@ -24,7 +24,7 @@ import type {
 import { workspaceDialogLayout } from '../../shared/ui/dialogLayoutTokens'
 import { settingsToggleButtonSx } from '../chat/chatSettings'
 import {
-  defaultInfoGraphicParameters,
+  getDefaultInfoGraphicParameters,
   getInfoGraphicDetailLevelOptionList,
   getInfoGraphicLanguageOptionList,
   getInfoGraphicOrientationOptionList,
@@ -51,10 +51,11 @@ export const InfoGraphicSettingsDialog = memo(function InfoGraphicSettingsDialog
   const infoGraphicVisualStyleOptionList = getInfoGraphicVisualStyleOptionList()
   const infoGraphicOrientationOptionList = getInfoGraphicOrientationOptionList()
 
-  const orientation = draftParams.orientation || defaultInfoGraphicParameters.orientation
-  const textLanguage = draftParams.text_language || defaultInfoGraphicParameters.text_language
-  const detailLevel = draftParams.detail_level || defaultInfoGraphicParameters.detail_level || 'standard'
-  const visualStyle = draftParams.visual_style || defaultInfoGraphicParameters.visual_style || 'default'
+  const defaults = getDefaultInfoGraphicParameters()
+  const orientation = draftParams.orientation || defaults.orientation
+  const textLanguage = draftParams.text_language || defaults.text_language
+  const detailLevel = draftParams.detail_level || defaults.detail_level || 'standard'
+  const visualStyle = draftParams.visual_style || defaults.visual_style || 'default'
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: workspaceDialogLayout.paperRadius } } }}>

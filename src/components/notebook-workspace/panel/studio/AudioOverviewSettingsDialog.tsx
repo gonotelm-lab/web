@@ -22,7 +22,7 @@ import type {
 import { workspaceDialogLayout } from '../../shared/ui/dialogLayoutTokens'
 import { settingsToggleButtonSx } from '../chat/chatSettings'
 import {
-  defaultAudioOverviewParameters,
+  getDefaultAudioOverviewParameters,
   getAudioOverviewLanguageOptionList,
   getAudioOverviewStyleOptionList,
 } from './audioOverviewSettings'
@@ -45,8 +45,9 @@ export const AudioOverviewSettingsDialog = memo(function AudioOverviewSettingsDi
   const audioOverviewLanguageOptionList = getAudioOverviewLanguageOptionList()
   const audioOverviewStyleOptionList = getAudioOverviewStyleOptionList()
 
-  const language = draftParams.language || defaultAudioOverviewParameters.language
-  const style = draftParams.style || defaultAudioOverviewParameters.style || 'abstract'
+  const defaults = getDefaultAudioOverviewParameters()
+  const language = draftParams.language || defaults.language
+  const style = draftParams.style || defaults.style || 'abstract'
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: workspaceDialogLayout.paperRadius } } }}>

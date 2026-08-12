@@ -37,13 +37,14 @@ import { FlashcardSettingsDialog } from './FlashcardSettingsDialog'
 import { MindmapSettingsDialog } from './MindmapSettingsDialog'
 import { QuizSettingsDialog } from './QuizSettingsDialog'
 import { ReportSettingsDialog } from './ReportSettingsDialog'
-import { defaultAudioOverviewParameters } from './audioOverviewSettings'
+import { getDefaultStudioOutputLanguage } from '@/i18n/studioOutputLanguage'
+import { getDefaultAudioOverviewParameters } from './audioOverviewSettings'
 import { defaultDataTableParameters } from './datatableSettings'
 import { defaultFlashcardParameters } from './flashcardSettings'
-import { defaultInfoGraphicParameters } from './infoGraphicSettings'
+import { getDefaultInfoGraphicParameters } from './infoGraphicSettings'
 import { defaultMindmapParameters } from './mindmapSettings'
 import { defaultQuizParameters } from './quizSettings'
-import { defaultReportParameters } from './reportSettings'
+import { getDefaultReportParameters } from './reportSettings'
 import { StudioToolCard } from './components/StudioToolCard'
 import { useStudioArtifactTasks } from './hooks/useStudioArtifactTasks'
 import { useStudioPreviewController } from './preview/useStudioPreviewController'
@@ -76,7 +77,7 @@ export const StudioPanel = memo(function StudioPanel({
   onSourceCreated,
   onRegisterSaveMessageAsNote,
 }: StudioPanelProps) {
-  const { t } = useTranslation(['studio', 'common'])
+  const { t, i18n } = useTranslation(['studio', 'common'])
   const studioToolCatalog = getStudioToolCatalog()
   const readySourceIdSet = useMemo(() => new Set(readySourceIds), [readySourceIds])
   const selectedReadySourceIds = useMemo(
@@ -128,18 +129,34 @@ export const StudioPanel = memo(function StudioPanel({
   const [infoGraphicDialogOpen, setInfoGraphicDialogOpen] = useState(false)
   const [infoGraphicDialogKey, setInfoGraphicDialogKey] = useState(0)
   const [infoGraphicParams, setInfoGraphicParams] = useState<GenerateInfoGraphicParameters>(
-    defaultInfoGraphicParameters,
+    getDefaultInfoGraphicParameters,
   )
   const [audioOverviewDialogOpen, setAudioOverviewDialogOpen] = useState(false)
   const [audioOverviewDialogKey, setAudioOverviewDialogKey] = useState(0)
   const [audioOverviewParams, setAudioOverviewParams] = useState<GenerateAudioOverviewParameters>(
-    defaultAudioOverviewParameters,
+    getDefaultAudioOverviewParameters,
   )
   const [reportDialogOpen, setReportDialogOpen] = useState(false)
   const [reportDialogKey, setReportDialogKey] = useState(0)
   const [reportParams, setReportParams] = useState<GenerateReportParameters>(
-    defaultReportParameters,
+    getDefaultReportParameters,
   )
+
+  // Keep Studio output-language defaults aligned with UI locale (gonotelm.locale).
+  useEffect(() => {
+    const outputLanguage = getDefaultStudioOutputLanguage(i18n.language)
+    setReportParams((prev) =>
+      prev.language === outputLanguage ? prev : { ...prev, language: outputLanguage },
+    )
+    setAudioOverviewParams((prev) =>
+      prev.language === outputLanguage ? prev : { ...prev, language: outputLanguage },
+    )
+    setInfoGraphicParams((prev) =>
+      prev.text_language === outputLanguage
+        ? prev
+        : { ...prev, text_language: outputLanguage },
+    )
+  }, [i18n.language])
   const [mindmapDialogOpen, setMindmapDialogOpen] = useState(false)
   const [mindmapDialogKey, setMindmapDialogKey] = useState(0)
   const [mindmapParams, setMindmapParams] = useState<GenerateMindmapParameters>(
