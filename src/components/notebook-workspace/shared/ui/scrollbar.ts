@@ -1,6 +1,6 @@
 import type { Theme } from '@mui/material/styles'
 
-const defaultHoverThumbColor = 'rgba(21, 42, 74, 0.18)'
+const defaultHoverThumbColor = 'rgba(47, 107, 79, 0.28)'
 const scrollbarSizePx = 5
 
 const resolveHoverThumbColor = (theme: Theme) => {

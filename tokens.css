@@ -1,0 +1,68 @@
+/* Hallmark · genre: editorial · theme: Studio · design-system: design.md · designed-as-app
+ * pre-emit critique: P4 H4 E4 S4 R5 V4
+ * Audience: general · Use: home→notebook→3 panels · Tone: calm forest studio
+ */
+
+:root {
+  --color-paper: oklch(97% 0.012 90);
+  --color-paper-2: oklch(94% 0.014 90);
+  --color-paper-3: oklch(91% 0.016 90);
+  --color-ink: oklch(20% 0.02 145);
+  --color-ink-2: oklch(36% 0.018 145);
+  --color-rule: oklch(86% 0.016 95);
+  --color-rule-2: oklch(74% 0.02 95);
+  --color-muted: oklch(50% 0.016 145);
+
+  --color-accent: oklch(42% 0.11 150);
+  --color-accent-deep: oklch(34% 0.1 150);
+  --color-accent-ink: oklch(98% 0.01 90);
+  --color-focus: oklch(42% 0.11 150);
+  --color-success: oklch(48% 0.11 150);
+  --color-warning: oklch(68% 0.12 85);
+  --color-error: oklch(52% 0.16 28);
+
+  --color-paper-hex: #f7f4ed;
+  --color-paper-2-hex: #efebe2;
+  --color-paper-3-hex: #e6e1d6;
+  --color-ink-hex: #1c2a22;
+  --color-ink-2-hex: #4a5a50;
+  --color-rule-hex: #d8d2c6;
+  --color-accent-hex: #2f6b4f;
+  --color-accent-deep-hex: #24563f;
+  --color-success-hex: #2f6b4f;
+  --color-error-hex: #c24b3a;
+
+  /* UI chrome uses --font-body (Geist). --font-display is Latin accent only — not CJK UI. */
+  --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --font-body: 'Geist', 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+    'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.25rem;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --dur-micro: 120ms;
+  --dur-short: 180ms;
+  --dur-base: 220ms;
+  --dur-long: 480ms;
+
+  --radius-input: 8px;
+  --radius-button: 8px;
+  --radius-card: 12px;
+
+  --shadow-soft: 0 1px 2px oklch(20% 0.02 145 / 0.06);
+}

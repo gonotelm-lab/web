@@ -1,11 +1,15 @@
-import ArrowOutwardRoundedIcon from '@mui/icons-material/ArrowOutwardRounded'
-import EditRoundedIcon from '@mui/icons-material/EditRounded'
-import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded'
+import ArrowOutwardOutlinedIcon from '@mui/icons-material/ArrowOutwardOutlined'
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
+import HourglassBottomOutlinedIcon from '@mui/icons-material/HourglassBottomOutlined'
 import { alpha } from '@mui/material/styles'
 import { Box, ButtonBase, Stack, Tooltip, Typography } from '@mui/material'
 import type { StudioToolDefinition } from '../types'
 import { workspaceRadius, workspaceSpace } from '../../../shared/ui/layoutTokens'
 import { workspaceInteraction, workspaceMotion } from '../../../shared/ui/motionTokens'
+import {
+  resolveStudioToolTone,
+  resolveStudioToolToneKey,
+} from '../../../shared/ui/studioSemanticTones'
 import { workspaceIconSize, workspaceType } from '../../../shared/ui/typeTokens'
 
 interface StudioToolCardProps {
@@ -36,6 +40,10 @@ export function StudioToolCard({
     ? tool.description
     : statusLabel
   const showAdvancedEntry = Boolean(tool.hasAdvancedConfig)
+  const toneKey = resolveStudioToolToneKey({
+    artifactKind: tool.artifactKind,
+    toolId: tool.id,
+  })
 
   return (
     <Tooltip title={tooltipLabel} arrow placement="top" enterDelay={240}
@@ -52,40 +60,40 @@ export function StudioToolCard({
           }}
         >
           <Box
-            sx={(theme) => ({
-              width: '100%',
-              p: workspaceSpace.sm,
-              border: '1px solid',
-              borderColor: selected ? 'primary.main' : 'divider',
-              borderRadius: workspaceRadius.md,
-              opacity: disabled && !pending ? 0.62 : 1,
-              bgcolor:
-                selected
-                  ? alpha(theme.palette.primary.main, 0.12)
+            sx={(theme) => {
+              const tone = resolveStudioToolTone(theme, toneKey)
+              return {
+                width: '100%',
+                p: workspaceSpace.sm,
+                border: '1px solid',
+                borderColor: selected ? tone.accent : 'divider',
+                borderRadius: workspaceRadius.lg,
+                opacity: disabled && !pending ? 0.62 : 1,
+                bgcolor: selected
+                  ? tone.surface
                   : tool.availability === 'available'
-                    ? alpha(theme.palette.primary.main, 0.04)
-                    : theme.palette.background.default,
-              transition:
-                `border-color ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}, ` +
-                `background-color ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}, ` +
-                `box-shadow ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}, ` +
-                `opacity ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}`,
-              boxShadow: selected ? `0 0 0 1px ${alpha(theme.palette.primary.main, 0.1)}` : 'none',
-              ...(interactive
-                ? {
-                    cursor: workspaceInteraction.cursorPointer,
-                    '&:hover': {
-                      borderColor: 'primary.main',
-                      bgcolor: alpha(theme.palette.primary.main, 0.08),
-                      boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.14)}`,
-                    },
-                    '&:active': {
-                      bgcolor: alpha(theme.palette.primary.main, 0.1),
-                      boxShadow: `0 2px 6px ${alpha(theme.palette.primary.main, 0.1)}`,
-                    },
-                  }
-                : null),
-            })}
+                    ? 'background.paper'
+                    : 'background.default',
+                transition:
+                  `border-color ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}, ` +
+                  `background-color ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}, ` +
+                  `opacity ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}`,
+                boxShadow: 'none',
+                ...(interactive
+                  ? {
+                      cursor: workspaceInteraction.cursorPointer,
+                      '&:hover': {
+                        borderColor: tone.accent,
+                        bgcolor: tone.surface,
+                      },
+                      '&:active': {
+                        borderColor: tone.accent,
+                        bgcolor: alpha(tone.accent, 0.12),
+                      },
+                    }
+                  : null),
+              }
+            }}
           >
             <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', minWidth: 0 }}>
               <Stack
@@ -94,14 +102,17 @@ export function StudioToolCard({
                 sx={{ alignItems: 'center', minWidth: 0 }}
               >
                 <Box
-                  sx={{
-                    width: 20,
-                    height: 20,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    color: 'text.secondary',
+                  sx={(theme) => {
+                    const tone = resolveStudioToolTone(theme, toneKey)
+                    return {
+                      width: 20,
+                      height: 20,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      color: tool.availability === 'available' ? tone.icon : 'text.disabled',
+                    }
                   }}
                 >
                   <Icon sx={{ fontSize: workspaceIconSize.md }} />
@@ -115,7 +126,7 @@ export function StudioToolCard({
                 </Typography>
               </Stack>
               {pending ? (
-                <HourglassBottomRoundedIcon
+                <HourglassBottomOutlinedIcon
                   sx={(theme) => ({
                     fontSize: workspaceType.sm,
                     color: theme.workspacePalette.status.warning,
@@ -146,29 +157,32 @@ export function StudioToolCard({
                     e.stopPropagation()
                     onAdvancedClick?.()
                   }}
-                  sx={{
-                    width: 24,
-                    height: 24,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '50%',
-                    cursor: interactive ? workspaceInteraction.cursorPointer : 'not-allowed',
-                    color: interactive ? 'text.secondary' : 'action.disabled',
-                    '&:hover': interactive
-                      ? { color: 'primary.main', bgcolor: 'action.hover' }
-                      : undefined,
-                    '&:focus-visible': {
-                      outline: '2px solid',
-                      outlineColor: 'primary.main',
-                      outlineOffset: 1,
-                    },
+                  sx={(theme) => {
+                    const tone = resolveStudioToolTone(theme, toneKey)
+                    return {
+                      width: 24,
+                      height: 24,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: workspaceRadius.sm,
+                      cursor: interactive ? workspaceInteraction.cursorPointer : 'not-allowed',
+                      color: interactive ? 'text.secondary' : 'action.disabled',
+                      '&:hover': interactive
+                        ? { color: tone.accent, bgcolor: tone.surface }
+                        : undefined,
+                      '&:focus-visible': {
+                        outline: '2px solid',
+                        outlineColor: tone.accent,
+                        outlineOffset: 1,
+                      },
+                    }
                   }}
                 >
-                  <EditRoundedIcon sx={{ fontSize: workspaceIconSize.sm }} />
+                  <EditOutlinedIcon sx={{ fontSize: workspaceIconSize.sm }} />
                 </Box>
               ) : (
-                <ArrowOutwardRoundedIcon sx={{ fontSize: workspaceIconSize.sm, color: 'text.disabled' }} />
+                <ArrowOutwardOutlinedIcon sx={{ fontSize: workspaceIconSize.sm, color: 'text.disabled' }} />
               )}
             </Stack>
           </Box>

@@ -14,7 +14,7 @@ describe('ChatNotebookInfoHeader', () => {
 
     expect(html).toContain('Apple DMA Notebook')
     expect(html).toContain('Notebook description for chat context.')
-    expect(html).toContain('9 sources')
+    expect(html).toContain('9 个来源')
     expect(html).toContain('data-testid="chat-notebook-icon-slot"')
   })
 
@@ -29,7 +29,7 @@ describe('ChatNotebookInfoHeader', () => {
 
     expect(html).toContain('Untitled notebook')
     expect(html).not.toContain('No notebook description yet.')
-    expect(html).toContain('0 sources')
+    expect(html).toContain('0 个来源')
   })
 
   it('renders full description content without truncation fallback replacement', () => {

@@ -1,11 +1,15 @@
+/** Hallmark · Cobalt motion — sparse ease-out; no spring / press bounce. */
 export const workspaceMotion = {
-  easingStandard: 'cubic-bezier(0.2, 0, 0, 1)',
-  easingPanelGrid: 'cubic-bezier(0.2, 0, 0, 1)',
+  easingStandard: 'cubic-bezier(0.16, 1, 0.3, 1)',
+  easingOut: 'cubic-bezier(0.16, 1, 0.3, 1)',
+  easingPress: 'cubic-bezier(0.16, 1, 0.3, 1)',
+  easingPanelGrid: 'cubic-bezier(0.16, 1, 0.3, 1)',
   durationFastMs: 120,
   durationBaseMs: 180,
   durationPanelMs: 240,
   durationPanelGridMs: 280,
   durationExitMs: 240,
+  durationReducedMs: 150,
 } as const
 
 export const workspaceAnimation = {
@@ -20,6 +24,8 @@ export const workspaceAnimation = {
 export const workspaceInteraction = {
   cursorPointer: 'pointer',
   hoverTransformNone: 'none',
+  hoverLiftCard: 'none',
+  activePress: 'none',
   reducedMotionQuery: '@media (prefers-reduced-motion: reduce)',
 } as const
 
@@ -31,7 +37,6 @@ export const workspaceTransitionPresets = {
     `background-color ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}, ` +
     `border-color ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}, ` +
     `color ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}`,
-  /** Transform-free interactive hover/focus (default for clickable rows/cards). */
   interactiveColorBorder:
     `background-color ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}, ` +
     `border-color ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}, ` +
@@ -39,8 +44,10 @@ export const workspaceTransitionPresets = {
   colorBorderBgWithTransform:
     `background-color ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}, ` +
     `border-color ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}, ` +
-    `color ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}, ` +
-    `transform ${workspaceMotion.durationFastMs}ms ${workspaceMotion.easingStandard}`,
+    `color ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}`,
+  cardLift:
+    `border-color ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}, ` +
+    `background-color ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}`,
   borderBg:
     `border-color ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}, ` +
     `background-color ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}`,
@@ -52,4 +59,3 @@ export const workspaceTransitionPresets = {
     `transform ${workspaceMotion.durationPanelMs}ms ${workspaceMotion.easingStandard}, ` +
     `opacity ${workspaceMotion.durationBaseMs}ms ${workspaceMotion.easingStandard}`,
 } as const
-

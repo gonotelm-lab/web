@@ -99,7 +99,8 @@ export function HomePage() {
   return (
     <Container maxWidth="lg" sx={{ py: workspaceSpace.xl }}>
       <Stack spacing={workspaceLayout.panelPaddingY}>
-        <Typography variant="h5">我的笔记本</Typography>
+        <Stack spacing={workspaceSpace.sm}>
+        </Stack>
         <Box
           sx={{
             borderBottom: '1px solid',
@@ -117,7 +118,7 @@ export function HomePage() {
             spacing={workspaceLayout.listInlineGap}
             sx={{ alignItems: 'center' }}
           >
-            {notebooksQuery.isFetching && <CircularProgress size={14} />}
+            {notebooksQuery.isFetching && <CircularProgress size={14} color="primary" />}
             <HomeSortSelector value={sortBy} onChange={setSortBy} />
           </Stack>
         </Stack>

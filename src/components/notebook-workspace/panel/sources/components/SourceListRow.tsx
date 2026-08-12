@@ -1,20 +1,21 @@
 import { memo, useEffect, useState } from 'react'
-import AddLinkIcon from '@mui/icons-material/AddLink'
+import AddLinkOutlinedIcon from '@mui/icons-material/AddLinkOutlined'
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
 import CheckBoxIcon from '@mui/icons-material/CheckBox'
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank'
-import DeleteIcon from '@mui/icons-material/Delete'
-import DescriptionIcon from '@mui/icons-material/Description'
-import DownloadIcon from '@mui/icons-material/Download'
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined'
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
+import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
-import MenuBookIcon from '@mui/icons-material/MenuBook'
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
-import NotesIcon from '@mui/icons-material/Notes'
-import OpenInNewIcon from '@mui/icons-material/OpenInNew'
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
-import PreviewIcon from '@mui/icons-material/Preview'
-import ReplayIcon from '@mui/icons-material/Replay'
-import TableChartIcon from '@mui/icons-material/TableChart'
-import PresentToAllIcon from '@mui/icons-material/PresentToAll'
+import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
+import MoreHorizOutlinedIcon from '@mui/icons-material/MoreHorizOutlined'
+import NotesOutlinedIcon from '@mui/icons-material/NotesOutlined'
+import OpenInNewOutlinedIcon from '@mui/icons-material/OpenInNewOutlined'
+import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined'
+import PreviewOutlinedIcon from '@mui/icons-material/PreviewOutlined'
+import ReplayOutlinedIcon from '@mui/icons-material/ReplayOutlined'
+import TableChartOutlinedIcon from '@mui/icons-material/TableChartOutlined'
+import SlideshowOutlinedIcon from '@mui/icons-material/SlideshowOutlined'
 import {
   Button,
   Box,
@@ -45,6 +46,7 @@ import {
   workspaceMotion,
   workspaceTransitionPresets,
 } from '../../../shared/ui/motionTokens'
+import { resolveSourceTypeTone } from '../../../shared/ui/studioSemanticTones'
 import { workspaceIconSize, workspaceType } from '../../../shared/ui/typeTokens'
 import {
   sourceListRowHeightPx,
@@ -58,10 +60,13 @@ const sourceExitTransition =
   `transform ${workspaceMotion.durationExitMs}ms ${workspaceMotion.easingStandard}, ` +
   `height ${workspaceMotion.durationExitMs}ms ${workspaceMotion.easingStandard}, ` +
   `margin ${workspaceMotion.durationExitMs}ms ${workspaceMotion.easingStandard}`
-const sourceTypeIconSx = (theme: Theme) => ({
-  color: theme.workspacePalette?.source?.typeIcon ?? 'text.secondary',
-  fontSize: workspaceIconSize.md,
-})
+const sourceTypeIconSx = (theme: Theme, iconType: SourceListItem['iconType']) => {
+  const tone = resolveSourceTypeTone(theme, iconType)
+  return {
+    color: tone.icon,
+    fontSize: workspaceIconSize.md,
+  }
+}
 
 interface SourceListRowProps {
   item: SourceListItem
@@ -225,27 +230,30 @@ export const SourceListRow = memo(function SourceListRow({
       })
   }
 
+  const sourceTypeIconSxForItem = (theme: Theme) => sourceTypeIconSx(theme, item.iconType)
   const sourceTypeIcon =
     item.iconType === 'url' ? (
-      <AddLinkIcon sx={sourceTypeIconSx} />
+      <AddLinkOutlinedIcon sx={sourceTypeIconSxForItem} />
     ) : item.iconType === 'text' ? (
-      <NotesIcon sx={sourceTypeIconSx} />
+      <NotesOutlinedIcon sx={sourceTypeIconSxForItem} />
     ) : item.iconType === 'pdf' ? (
-      <PictureAsPdfIcon sx={sourceTypeIconSx} />
+      <PictureAsPdfOutlinedIcon sx={sourceTypeIconSxForItem} />
     ) : item.iconType === 'epub' ? (
-      <MenuBookIcon sx={sourceTypeIconSx} />
+      <MenuBookOutlinedIcon sx={sourceTypeIconSxForItem} />
     ) : item.iconType === 'txt' ? (
-      <DescriptionIcon sx={sourceTypeIconSx} />
+      <DescriptionOutlinedIcon sx={sourceTypeIconSxForItem} />
     ) : item.iconType === 'markdown' ? (
-      <DescriptionIcon sx={sourceTypeIconSx} />
+      <ArticleOutlinedIcon sx={sourceTypeIconSxForItem} />
     ) : item.iconType === 'csv' ? (
-      <DescriptionIcon sx={sourceTypeIconSx} />
+      <TableChartOutlinedIcon sx={sourceTypeIconSxForItem} />
     ) : item.iconType === 'xlsx' ? (
-      <TableChartIcon sx={sourceTypeIconSx} />
+      <TableChartOutlinedIcon sx={sourceTypeIconSxForItem} />
     ) : item.iconType === 'pptx' ? (
-      <PresentToAllIcon sx={sourceTypeIconSx} />
+      <SlideshowOutlinedIcon sx={sourceTypeIconSxForItem} />
+    ) : item.iconType === 'docx' ? (
+      <DescriptionOutlinedIcon sx={sourceTypeIconSxForItem} />
     ) : (
-      <DescriptionIcon sx={sourceTypeIconSx} />
+      <DescriptionOutlinedIcon sx={sourceTypeIconSxForItem} />
     )
 
   return (
@@ -333,7 +341,7 @@ export const SourceListRow = memo(function SourceListRow({
               transition: workspaceTransitionPresets.opacityOnly,
             }}
           >
-            <MoreHorizIcon sx={{ fontSize: workspaceIconSize.md }} />
+            <MoreHorizOutlinedIcon sx={{ fontSize: workspaceIconSize.md }} />
           </IconButton>
         </Box>
         <Typography
@@ -391,7 +399,7 @@ export const SourceListRow = memo(function SourceListRow({
           onClick={handlePreviewSource}
           sx={actionMenuItemSx}
         >
-          <PreviewIcon sx={actionMenuIconSx} />
+          <PreviewOutlinedIcon sx={actionMenuIconSx} />
           <Typography sx={actionMenuTextSx}>预览</Typography>
         </MenuItem>
         {item.kind === 'url' ? (
@@ -400,7 +408,7 @@ export const SourceListRow = memo(function SourceListRow({
             onClick={handleOpenSourceUrl}
             sx={actionMenuItemSx}
           >
-            <OpenInNewIcon sx={actionMenuIconSx} />
+            <OpenInNewOutlinedIcon sx={actionMenuIconSx} />
             <Typography sx={actionMenuTextSx}>打开</Typography>
           </MenuItem>
         ) : null}
@@ -409,7 +417,7 @@ export const SourceListRow = memo(function SourceListRow({
           onClick={handleDownloadSource}
           sx={actionMenuItemSx}
         >
-          <DownloadIcon sx={actionMenuIconSx} />
+          <DownloadOutlinedIcon sx={actionMenuIconSx} />
           <Typography sx={actionMenuTextSx}>下载</Typography>
         </MenuItem>
         {isFailed ? (
@@ -418,7 +426,7 @@ export const SourceListRow = memo(function SourceListRow({
             onClick={handleRetrySource}
             sx={actionMenuItemSx}
           >
-            <ReplayIcon sx={actionMenuIconSx} />
+            <ReplayOutlinedIcon sx={actionMenuIconSx} />
             <Typography sx={actionMenuTextSx}>重试</Typography>
           </MenuItem>
         ) : null}
@@ -435,7 +443,7 @@ export const SourceListRow = memo(function SourceListRow({
           onClick={handleDeleteSource}
           sx={actionMenuItemSx}
         >
-          <DeleteIcon sx={actionMenuIconSx} />
+          <DeleteOutlineOutlinedIcon sx={actionMenuIconSx} />
           <Typography sx={actionMenuTextSx}>删除</Typography>
         </MenuItem>
       </Menu>

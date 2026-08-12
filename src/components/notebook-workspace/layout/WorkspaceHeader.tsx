@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import DeleteIcon from '@mui/icons-material/Delete'
+import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined'
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined'
 import {
   Button,
   Box,
@@ -17,6 +17,13 @@ import { Link } from 'react-router-dom'
 import { workspaceRadius, workspaceSpace } from '../shared/ui/layoutTokens'
 import { workspaceTransitionPresets } from '../shared/ui/motionTokens'
 import { workspaceIconSize, workspaceTypeRem } from '../shared/ui/typeTokens'
+
+/** Workbench chrome: keep header thin so panels get the viewport. */
+const headerChrome = {
+  rowMinHeight: 40,
+  controlHeight: 32,
+  titleFontSize: workspaceTypeRem.sm,
+} as const
 
 interface WorkspaceHeaderProps {
   notebookName: string
@@ -89,8 +96,9 @@ export function WorkspaceHeader({
       <Box
         sx={{
           width: '100%',
-          px: { xs: workspaceSpace.sm, md: workspaceSpace.sm },
-          py: workspaceSpace.xxs,
+          minHeight: headerChrome.rowMinHeight,
+          px: workspaceSpace.sm,
+          py: 0,
           display: 'flex',
           alignItems: 'center',
           gap: workspaceSpace.xxs,
@@ -103,13 +111,18 @@ export function WorkspaceHeader({
           color="inherit"
           size="small"
           aria-label="返回"
-          sx={{ ml: 0, p: workspaceSpace.xxs }}
+          sx={{
+            ml: 0,
+            width: headerChrome.controlHeight,
+            height: headerChrome.controlHeight,
+            p: 0,
+          }}
         >
-          <ArrowBackIcon sx={{ fontSize: workspaceIconSize.md }} />
+          <ArrowBackOutlinedIcon sx={{ fontSize: workspaceIconSize.md }} />
         </IconButton>
         <InputBase
           value={notebookName}
-          placeholder="Untitled notebook"
+          placeholder="未命名笔记本"
           disabled={isDeletingNotebook}
           onChange={(event) => onNotebookNameChange(event.target.value)}
           onFocus={onNotebookNameFocus}
@@ -129,20 +142,24 @@ export function WorkspaceHeader({
             flex: 1,
             minWidth: 0,
             maxWidth: { xs: '100%', md: 560 },
+            height: headerChrome.controlHeight,
             px: workspaceSpace.sm,
-            py: workspaceSpace.xxs,
+            py: 0,
             borderRadius: workspaceRadius.md,
             border: 1,
             borderColor: 'transparent',
             bgcolor: 'background.paper',
             cursor: 'text',
-            fontSize: workspaceTypeRem.lg,
-            lineHeight: 1.35,
+            fontSize: headerChrome.titleFontSize,
+            lineHeight: 1.3,
             fontWeight: 600,
+            letterSpacing: 0,
             transition: workspaceTransitionPresets.borderBg,
             '& input': {
               cursor: 'text',
               textOverflow: 'ellipsis',
+              py: 0,
+              height: '100%',
             },
             '&:hover': {
               bgcolor: 'background.default',
@@ -168,11 +185,15 @@ export function WorkspaceHeader({
             aria-label="删除笔记本"
             onClick={handleOpenDeleteDialog}
             disabled={!canDelete || isDeletingNotebook}
-            sx={{ p: workspaceSpace.xxs }}
+            sx={{
+              width: headerChrome.controlHeight,
+              height: headerChrome.controlHeight,
+              p: 0,
+            }}
           >
-            <DeleteIcon sx={{ fontSize: workspaceIconSize.md }} />
+            <DeleteOutlineOutlinedIcon sx={{ fontSize: workspaceIconSize.md }} />
           </IconButton>
-          {(isFetching || isUpdatingName || isDeletingNotebook) && <CircularProgress size={16} />}
+          {(isFetching || isUpdatingName || isDeletingNotebook) && <CircularProgress size={14} />}
         </Box>
       </Box>
       <Dialog

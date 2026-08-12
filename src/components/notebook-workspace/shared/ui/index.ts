@@ -5,6 +5,12 @@ export { subtleScrollbarSx } from './scrollbar'
 export { FlowLoadingOverlay } from './FlowLoadingOverlay'
 export { workspaceColorPalette } from './workspaceColorPalette'
 export {
+  resolveSourceTypeTone,
+  resolveStudioToolTone,
+  resolveStudioToolToneKey,
+} from './studioSemanticTones'
+export type { StudioSemanticTone, StudioToolToneKey } from './studioSemanticTones'
+export {
   workspaceAnimation,
   workspaceInteraction,
   workspaceMotion,

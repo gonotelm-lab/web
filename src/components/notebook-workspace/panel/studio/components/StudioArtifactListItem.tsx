@@ -1,17 +1,17 @@
 import { useState } from 'react'
-import AccountTreeRoundedIcon from '@mui/icons-material/AccountTreeRounded'
-import CancelRoundedIcon from '@mui/icons-material/CancelRounded'
-import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded'
-import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded'
-import GraphicEqRoundedIcon from '@mui/icons-material/GraphicEqRounded'
-import ImageRoundedIcon from '@mui/icons-material/ImageRounded'
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
-import StickyNote2RoundedIcon from '@mui/icons-material/StickyNote2Rounded'
-import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
-import SourceRoundedIcon from '@mui/icons-material/SourceRounded'
-import QuizRoundedIcon from '@mui/icons-material/QuizRounded'
-import StyleRoundedIcon from '@mui/icons-material/StyleRounded'
-import TableChartRoundedIcon from '@mui/icons-material/TableChartRounded'
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined'
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined'
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined'
+import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
+import GraphicEqOutlinedIcon from '@mui/icons-material/GraphicEqOutlined'
+import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined'
+import MoreHorizOutlinedIcon from '@mui/icons-material/MoreHorizOutlined'
+import StickyNote2OutlinedIcon from '@mui/icons-material/StickyNote2Outlined'
+import ReplayOutlinedIcon from '@mui/icons-material/ReplayOutlined'
+import SourceOutlinedIcon from '@mui/icons-material/SourceOutlined'
+import QuizOutlinedIcon from '@mui/icons-material/QuizOutlined'
+import StyleOutlinedIcon from '@mui/icons-material/StyleOutlined'
+import TableChartOutlinedIcon from '@mui/icons-material/TableChartOutlined'
 import type { SvgIconComponent } from '@mui/icons-material'
 import type { StudioArtifactKind } from '@/types/api'
 import { IconButton, Menu, MenuItem, Paper, Stack, Tooltip, Typography } from '@mui/material'
@@ -22,6 +22,10 @@ import {
   workspaceSpace,
   workspaceTransitionPresets,
 } from '@/components/notebook-workspace/shared'
+import {
+  resolveStudioToolTone,
+  resolveStudioToolToneKey,
+} from '@/components/notebook-workspace/shared/ui/studioSemanticTones'
 import {
   isStudioTaskCompleted,
   isStudioTaskRetryable,
@@ -93,14 +97,36 @@ const formatArtifactRelativeTime = (createdAt: number) => {
 }
 
 const artifactKindIconMap: Record<StudioArtifactKind, SvgIconComponent> = {
-  mindmap: AccountTreeRoundedIcon,
-  report: MenuBookRoundedIcon,
-  info_graphic: ImageRoundedIcon,
-  audio_overview: GraphicEqRoundedIcon,
-  flashcard: StyleRoundedIcon,
-  quiz: QuizRoundedIcon,
-  data_table: TableChartRoundedIcon,
-  note: StickyNote2RoundedIcon,
+  mindmap: AccountTreeOutlinedIcon,
+  report: MenuBookOutlinedIcon,
+  info_graphic: ImageOutlinedIcon,
+  audio_overview: GraphicEqOutlinedIcon,
+  flashcard: StyleOutlinedIcon,
+  quiz: QuizOutlinedIcon,
+  data_table: TableChartOutlinedIcon,
+  note: StickyNote2OutlinedIcon,
+}
+
+const resolveListBorderTone = (
+  visualStatus: StudioArtifactVisualStatus,
+  kind: StudioArtifactKind,
+  theme: Theme,
+) => {
+  const statusTone = resolveArtifactStatusTone(visualStatus, theme)
+  const kindTone = resolveStudioToolTone(
+    theme,
+    resolveStudioToolToneKey({ artifactKind: kind }),
+  )
+  // Status wins for async / failure feedback; otherwise kind identity leads.
+  if (
+    visualStatus === 'failed' ||
+    visualStatus === 'polling' ||
+    visualStatus === 'queued' ||
+    visualStatus === 'cancelled'
+  ) {
+    return { border: statusTone.border, accent: statusTone.accent, surface: kindTone.surface }
+  }
+  return { border: kindTone.border, accent: kindTone.accent, surface: kindTone.surface }
 }
 
 export function StudioArtifactListItem({
@@ -131,7 +157,7 @@ export function StudioArtifactListItem({
   const itemMetaLabel = item.kind === 'note'
     ? formatArtifactRelativeTime(item.createdAt)
     : `${sourceCount}个来源，${formatArtifactRelativeTime(item.createdAt)}`
-  const KindIcon = artifactKindIconMap[item.kind] ?? AccountTreeRoundedIcon
+  const KindIcon = artifactKindIconMap[item.kind] ?? AccountTreeOutlinedIcon
   const [actionMenuAnchorEl, setActionMenuAnchorEl] = useState<null | HTMLElement>(null)
   const actionMenuOpen = Boolean(actionMenuAnchorEl)
   const actionMenuItemSx = {
@@ -151,31 +177,29 @@ export function StudioArtifactListItem({
   return (
     <Paper
       variant="outlined"
-      sx={(theme) => ({
-        ...(() => {
-          const statusTone = resolveArtifactStatusTone(visualStatus, theme)
-          return {
-            position: 'relative',
-            overflow: 'hidden',
-            p: workspaceSpace.md,
-            cursor: canPreview ? 'pointer' : 'default',
-            bgcolor: 'background.paper',
-            transition: workspaceTransitionPresets.interactiveColorBorder,
-            borderColor: statusTone.border,
-            '&:hover': {
-              borderColor: statusTone.accent,
-              backgroundColor: canPreview ? 'background.default' : 'background.paper',
-            },
-            '&:active': canPreview
-              ? {
-                  borderColor: statusTone.accent,
-                  backgroundColor: 'action.selected',
-                }
-              : undefined,
-            ...(previewLoading ? { borderColor: statusTone.accent } : null),
-          }
-        })(),
-      })}
+      sx={(theme) => {
+        const listTone = resolveListBorderTone(visualStatus, item.kind, theme)
+        return {
+          position: 'relative',
+          overflow: 'hidden',
+          p: workspaceSpace.md,
+          cursor: canPreview ? 'pointer' : 'default',
+          bgcolor: listTone.surface,
+          transition: workspaceTransitionPresets.interactiveColorBorder,
+          borderColor: listTone.border,
+          '&:hover': {
+            borderColor: listTone.accent,
+            backgroundColor: canPreview ? 'background.paper' : listTone.surface,
+          },
+          '&:active': canPreview
+            ? {
+                borderColor: listTone.accent,
+                backgroundColor: 'action.selected',
+              }
+            : undefined,
+          ...(previewLoading ? { borderColor: listTone.accent } : null),
+        }
+      }}
       role={canPreview ? 'button' : undefined}
       tabIndex={canPreview ? 0 : -1}
       aria-label={`${displayTitle}，${statusLabelMap[visualStatus]}`}
@@ -213,10 +237,13 @@ export function StudioArtifactListItem({
             >
               <KindIcon
                 sx={(theme) => {
-                  const statusTone = resolveArtifactStatusTone(visualStatus, theme)
+                  const kindTone = resolveStudioToolTone(
+                    theme,
+                    resolveStudioToolToneKey({ artifactKind: item.kind }),
+                  )
                   return {
                     fontSize: workspaceIconSize.md,
-                    color: isCancelled ? 'text.disabled' : statusTone.icon,
+                    color: isCancelled ? 'text.disabled' : kindTone.icon,
                     flexShrink: 0,
                   }
                 }}
@@ -261,7 +288,7 @@ export function StudioArtifactListItem({
                     setActionMenuAnchorEl(event.currentTarget)
                   }}
                 >
-                  <MoreHorizIcon sx={{ fontSize: workspaceIconSize.md }} />
+                  <MoreHorizOutlinedIcon sx={{ fontSize: workspaceIconSize.md }} />
                 </IconButton>
               </span>
             </Tooltip>
@@ -284,7 +311,7 @@ export function StudioArtifactListItem({
                   onCancel(item)
                 }}
               >
-                <CancelRoundedIcon sx={actionMenuIconSx} />
+                <CancelOutlinedIcon sx={actionMenuIconSx} />
                 <Typography sx={actionMenuTextSx}>
                   {cancelPending ? '取消中...' : '取消'}
                 </Typography>
@@ -299,7 +326,7 @@ export function StudioArtifactListItem({
                     onRetry(item)
                   }}
                 >
-                  <ReplayRoundedIcon sx={actionMenuIconSx} />
+                  <ReplayOutlinedIcon sx={actionMenuIconSx} />
                   <Typography sx={actionMenuTextSx}>
                     {retryPending ? '重试中...' : '重试'}
                   </Typography>
@@ -315,7 +342,7 @@ export function StudioArtifactListItem({
                     onConvertToSource(item)
                   }}
                 >
-                  <SourceRoundedIcon sx={actionMenuIconSx} />
+                  <SourceOutlinedIcon sx={actionMenuIconSx} />
                   <Typography sx={actionMenuTextSx}>
                     {convertPending ? '转换中...' : '转换成来源'}
                   </Typography>
@@ -330,7 +357,7 @@ export function StudioArtifactListItem({
                   onDelete(item)
                 }}
               >
-                <DeleteOutlineRoundedIcon sx={actionMenuIconSx} />
+                <DeleteOutlineOutlinedIcon sx={actionMenuIconSx} />
                 <Typography sx={actionMenuTextSx}>
                   {deletePending ? '删除中...' : '删除'}
                 </Typography>

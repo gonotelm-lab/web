@@ -1,0 +1,9 @@
+{
+  "scannedAt": "2026-08-12",
+  "framework": "Vite + React 19 + MUI 9",
+  "fontStack": "Instrument Serif + Geist + JetBrains Mono (+ Noto CJK fallback)",
+  "palette": "Studio OKLCH via tokens.css / theme.ts hex bridges",
+  "motion": "workspace motionTokens — quiet ease-out",
+  "spacing": "MUI 8pt + layoutTokens (8/12 radii)",
+  "designMd": "design.md at project root — Studio locked"
+}

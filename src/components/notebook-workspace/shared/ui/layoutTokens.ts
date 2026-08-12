@@ -7,9 +7,10 @@ export const workspaceSpace = {
   xl: 3,
 } as const
 
+/** Studio editorial radii: soft controls, calm cards — not Cobalt-tight, not Hum-pill. */
 export const workspaceRadiusPx = {
   sm: 8,
-  md: 10,
+  md: 8,
   lg: 12,
 } as const
 

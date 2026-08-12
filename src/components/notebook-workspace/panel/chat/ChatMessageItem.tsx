@@ -144,11 +144,14 @@ export const ChatMessageItem = memo(function ChatMessageItem({
 
   const isUserMessage = message.role === 'user'
   const responseText = useMemo(() => extractResponseText(message), [message])
-  const canCopy = Boolean(responseText.trim() || message.fragments.some((f) => f.type === 'REQUEST' && f.request?.content))
-  const showAssistantActions = !isStreaming || !isActiveAssistantMessage
+  const hasResponse = Boolean(responseText.trim())
+  // No RESPONSE content → hide save/copy entirely (not just disable).
+  const showAssistantActions =
+    hasResponse && (!isStreaming || !isActiveAssistantMessage)
+  const canCopy = hasResponse
   const canSaveAsNote = Boolean(
     onSaveAsNote
-      && responseText.trim()
+      && hasResponse
       && !message.id.startsWith('local-')
       && !savingAsNote,
   )

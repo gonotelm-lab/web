@@ -7,7 +7,7 @@ import type { Theme } from '@mui/material/styles'
 import { chatMessageContentTokens } from './layoutTokens'
 import { workspaceRadiusPx, workspaceSpace } from '../../shared/ui/layoutTokens'
 import { workspaceTransitionPresets } from '../../shared/ui/motionTokens'
-import { workspaceIconSize, workspaceType } from '../../shared/ui/typeTokens'
+import { workspaceIconSize, workspaceType, workspaceTypeRem } from '../../shared/ui/typeTokens'
 
 const notebookInfoTokens = {
   marginTop: 0,
@@ -26,7 +26,7 @@ const formatSourceCountLabel = (sourceCount: number) => {
   const normalizedCount = Number.isFinite(sourceCount) && sourceCount > 0
     ? Math.floor(sourceCount)
     : 0
-  return `${normalizedCount} ${normalizedCount === 1 ? 'source' : 'sources'}`
+  return `${normalizedCount} 个来源`
 }
 
 const buildCopyActionButtonSx = (copied: boolean) => (theme: Theme) => ({
@@ -119,10 +119,11 @@ export function ChatNotebookInfoHeader({
           component="h2"
           sx={{
             minWidth: 0,
-            fontSize: { xs: '1.35rem', md: '2.05rem' },
-            lineHeight: 1.2,
+            // Keep title on Geist UI scale — oversized display + tracking makes CJK look uneven.
+            fontSize: { xs: workspaceTypeRem.xl, md: '1.5rem' },
+            lineHeight: 1.35,
             fontWeight: 600,
-            letterSpacing: '0.01em',
+            letterSpacing: 0,
             overflow: 'hidden',
             display: '-webkit-box',
             WebkitLineClamp: notebookInfoTokens.titleLineClamp,
@@ -137,13 +138,12 @@ export function ChatNotebookInfoHeader({
           color="text.secondary"
           sx={{
             width: '100%',
-            lineHeight: 1.65,
+            lineHeight: 1.6,
             whiteSpace: 'pre-wrap',
             overflowWrap: 'anywhere',
-            textAlign: 'justify',
-            textJustify: 'inter-character',
-            textAlignLast: 'left',
-            minHeight: '1.65em',
+            textAlign: 'left',
+            letterSpacing: 0,
+            minHeight: '1.6em',
           }}
         >
           {description || '\u00A0'}
@@ -152,7 +152,7 @@ export function ChatNotebookInfoHeader({
         <Typography
           variant="caption"
           color="text.secondary"
-          sx={{ fontSize: workspaceType.xs, letterSpacing: 0.2 }}
+          sx={{ fontSize: workspaceType.xs, letterSpacing: 0 }}
         >
           {sourceCountLabel}
         </Typography>

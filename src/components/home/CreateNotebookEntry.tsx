@@ -1,4 +1,4 @@
-import AddRoundedIcon from '@mui/icons-material/AddRounded'
+import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
 import { Button } from '@mui/material'
 import {
   workspaceRadius,
@@ -25,7 +25,7 @@ export function CreateNotebookEntry({
       disabled={disabled}
       size={size}
       variant={variant}
-      startIcon={<AddRoundedIcon sx={{ fontSize: workspaceIconSize.sm }} />}
+      startIcon={<AddOutlinedIcon sx={{ fontSize: workspaceIconSize.sm }} />}
       sx={{
         minWidth: 80,
         height: 34,
@@ -33,7 +33,7 @@ export function CreateNotebookEntry({
         borderRadius: workspaceRadius.md,
         fontSize: workspaceType.sm,
         lineHeight: 1.2,
-        fontWeight: 500,
+        fontWeight: 600,
         whiteSpace: 'nowrap',
         '& .MuiButton-startIcon': {
           marginRight: workspaceSpace.xxs,
@@ -41,7 +41,7 @@ export function CreateNotebookEntry({
         },
       }}
     >
-      新增
+      新建笔记本
     </Button>
   )
 }

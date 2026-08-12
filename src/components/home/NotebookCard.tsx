@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import DeleteIcon from '@mui/icons-material/Delete'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
+import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
+import MoreVertOutlinedIcon from '@mui/icons-material/MoreVertOutlined'
 import {
   Button,
   Box,
@@ -22,7 +23,10 @@ import {
   workspaceRadius,
   workspaceSpace,
 } from '../notebook-workspace/shared/ui/layoutTokens'
-import { workspaceInteraction } from '../notebook-workspace/shared/ui/motionTokens'
+import {
+  workspaceInteraction,
+  workspaceTransitionPresets,
+} from '../notebook-workspace/shared/ui/motionTokens'
 import { workspaceIconSize, workspaceType } from '../notebook-workspace/shared/ui/typeTokens'
 
 interface NotebookCardProps {
@@ -102,7 +106,14 @@ export function NotebookCard({
         minHeight: 168,
         borderRadius: workspaceRadius.lg,
         borderColor: 'divider',
-        bgcolor: '#fbfcff',
+        bgcolor: 'background.paper',
+        boxShadow: 'none',
+        transition: workspaceTransitionPresets.cardLift,
+        '&:hover': deleting
+          ? undefined
+          : {
+              borderColor: 'primary.main',
+            },
       }}
     >
       <CardActionArea
@@ -130,21 +141,25 @@ export function NotebookCard({
                 width: 32,
                 height: 32,
                 borderRadius: workspaceRadius.md,
-                bgcolor: '#d9edff',
+                border: '1px solid',
+                borderColor: 'divider',
+                bgcolor: 'background.default',
+                color: 'primary.main',
                 display: 'grid',
                 placeItems: 'center',
-                fontSize: workspaceIconSize.md,
                 flexShrink: 0,
               }}
             >
-              📘
+              <MenuBookOutlinedIcon sx={{ fontSize: workspaceIconSize.md }} />
             </Box>
             <Box sx={{ width: 28, height: 28, flexShrink: 0, visibility: canDelete ? 'hidden' : 'visible' }} />
           </Stack>
           <Typography
             variant="subtitle1"
             sx={{
-              fontWeight: 700,
+              fontWeight: 600,
+              fontStyle: 'normal',
+              letterSpacing: 0,
               lineHeight: 1.2,
               display: '-webkit-box',
               WebkitLineClamp: 2,
@@ -168,13 +183,25 @@ export function NotebookCard({
             {description}
           </Typography>
           <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', minWidth: 0 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500, whiteSpace: 'nowrap' }}>
-              {sourceCount} sources
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{
+                fontWeight: 500,
+                letterSpacing: 0,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {sourceCount} 个来源
             </Typography>
             <Typography
               variant="caption"
               color="text.secondary"
-              sx={{ whiteSpace: 'nowrap', pl: workspaceSpace.sm }}
+              sx={{
+                letterSpacing: 0,
+                whiteSpace: 'nowrap',
+                pl: workspaceSpace.sm,
+              }}
             >
               {dateLabel}
             </Typography>
@@ -193,7 +220,7 @@ export function NotebookCard({
             right: 4,
           }}
         >
-          <MoreVertIcon sx={{ fontSize: workspaceIconSize.md }} />
+          <MoreVertOutlinedIcon sx={{ fontSize: workspaceIconSize.md }} />
         </IconButton>
       ) : null}
       <Menu
@@ -211,7 +238,7 @@ export function NotebookCard({
             gap: workspaceLayout.listInlineGap,
           }}
         >
-          <DeleteIcon sx={{ fontSize: workspaceIconSize.md, color: 'text.secondary' }} />
+          <DeleteOutlinedIcon sx={{ fontSize: workspaceIconSize.md, color: 'text.secondary' }} />
           <Typography sx={{ fontSize: workspaceType.xs, lineHeight: 1.2 }}>删除</Typography>
         </MenuItem>
       </Menu>
@@ -225,7 +252,7 @@ export function NotebookCard({
         <DialogTitle>删除笔记本</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary">
-            删除后将移除该笔记本及其相关聊天与来源数据，此操作不可恢复。
+            删除后将移除聊天与来源数据，且不可恢复。
           </Typography>
           {deleteErrorMessage ? (
             <Typography
