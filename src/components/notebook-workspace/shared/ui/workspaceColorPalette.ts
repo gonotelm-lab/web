@@ -12,7 +12,8 @@ export const workspaceColorPalette = {
   },
   flowLoading: {
     rgbColor: '47, 107, 79',
-    peakOpacity: 0.14,
+    /** Stronger peak so the sweep is obvious on cream paper. */
+    peakOpacity: 0.3,
   },
   source: {
     /** Fallback when a type has no entry in `sourceType`. */
@@ -142,10 +143,10 @@ export const workspaceColorPalette = {
       surface: 'rgba(106, 122, 104, 0.08)',
     },
     'video-overview': {
-      accent: '#5c4a7a',
-      border: '#c4b8d4',
-      icon: '#5c4a7a',
-      surface: 'rgba(92, 74, 122, 0.08)',
+      accent: '#3d5a80',
+      border: '#b7c4d4',
+      icon: '#3d5a80',
+      surface: 'rgba(61, 90, 128, 0.08)',
     },
     'slide-deck': {
       accent: '#8a5a3c',
