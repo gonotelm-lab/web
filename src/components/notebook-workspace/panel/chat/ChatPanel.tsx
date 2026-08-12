@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
 import { Box, IconButton, Paper, Snackbar, Typography } from '@mui/material'
 import { alpha } from '@mui/material/styles'
@@ -129,12 +129,12 @@ interface ChatPanelProps {
   onSaveMessageAsNote?: (params: { chatId: string; msgId: string }) => Promise<void>
 }
 
-export function ChatPanel({
+export const ChatPanel = memo(function ChatPanel({
   notebookId,
   ...restProps
 }: ChatPanelProps) {
   return <ChatPanelContent notebookId={notebookId} key={`${notebookId}:${restProps.chatId}`} {...restProps} />
-}
+})
 
 type ChatPanelContentProps = Omit<ChatPanelProps, never>
 
@@ -175,7 +175,6 @@ function ChatPanelContent({
   })
 
   const {
-    composerValue,
     displayMessages,
     isLoadingHistory,
     isFetchingMore,
@@ -185,15 +184,15 @@ function ChatPanelContent({
     errorText,
     isClearingContext,
     showScrollToBottomButton,
-    submitDisabled,
+    canSubmit,
     isInputDisabled,
     isAbortDisabled,
     isThinkingToggleDisabled,
     messageListRef,
-    setComposerValue,
+    composerRestoreNonce,
+    composerRestoreValue,
     onMessageListScroll,
     onCopyUserMessage,
-    onComposerKeyDown,
     onSendMessage,
     onAbortStream,
     onClearCurrentContext,
@@ -208,17 +207,26 @@ function ChatPanelContent({
     onStreamCompleted: fetchFollowup,
   })
 
-  const handleOpenSettingsDialog = () => {
+  const handleOpenSettingsDialog = useCallback(() => {
     setSettingsDialogOpen(true)
-  }
+  }, [])
 
-  const handleCloseSettingsDialog = () => {
+  const handleCloseSettingsDialog = useCallback(() => {
     setSettingsDialogOpen(false)
-  }
+  }, [])
 
-  const handleSaveSettings = () => {
+  const handleSaveSettings = useCallback(() => {
     setSettingsDialogOpen(false)
-  }
+  }, [])
+
+  const composerInteractionState = useMemo(
+    () => ({
+      isStreaming,
+      isInputDisabled,
+      isAbortDisabled,
+    }),
+    [isAbortDisabled, isInputDisabled, isStreaming],
+  )
 
   useEffect(() => {
     const wasStreaming = wasStreamingRef.current
@@ -270,6 +278,17 @@ function ChatPanelContent({
     [chatId, onSaveMessageAsNote],
   )
 
+  const notebookInfoHeader = useMemo(
+    () => (
+      <ChatNotebookInfoHeader
+        notebookName={notebookName}
+        notebookDescription={notebookDescription}
+        notebookSourceCount={notebookSourceCount}
+      />
+    ),
+    [notebookDescription, notebookName, notebookSourceCount],
+  )
+
   return (
     <Paper
       variant="outlined"
@@ -305,13 +324,7 @@ function ChatPanelContent({
       <ChatMessagesList
         messageListRef={messageListRef}
         selectedSourceIds={selectedSourceIds}
-        notebookInfoHeader={(
-          <ChatNotebookInfoHeader
-            notebookName={notebookName}
-            notebookDescription={notebookDescription}
-            notebookSourceCount={notebookSourceCount}
-          />
-        )}
+        notebookInfoHeader={notebookInfoHeader}
         messages={displayMessages}
         isLoadingHistory={isLoadingHistory}
         isFetchingMore={isFetchingMore}
@@ -353,16 +366,11 @@ function ChatPanelContent({
         ) : null}
 
         <ChatComposer
-          value={composerValue}
           inputRef={chatInputRef}
-          interactionState={{
-            isStreaming,
-            isInputDisabled,
-            isSubmitDisabled: submitDisabled,
-            isAbortDisabled,
-          }}
-          onValueChange={setComposerValue}
-          onKeyDown={onComposerKeyDown}
+          interactionState={composerInteractionState}
+          canSubmit={canSubmit}
+          restoreNonce={composerRestoreNonce}
+          restoreValue={composerRestoreValue}
           onSend={onSendMessage}
           onAbort={onAbortStream}
           suggestions={suggestions}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   cancelStudioArtifactTask,
   convertNoteToSource as convertNoteToSourceApi,
@@ -334,31 +334,46 @@ export function useStudioArtifactTasks({
               return applyTaskResult(item.taskId, notebookSnapshot)
             }
             if (isStudioTaskFailed(statusResp.status)) {
-              setArtifactItems((prev) =>
-                prev.map((target) =>
-                  target.id === item.id
-                    ? {
-                        ...target,
-                        status: statusResp.status,
-                        error: buildTaskFailedMessage(statusResp.status),
-                      }
-                    : target,
-                ),
-              )
+              const failedMessage = buildTaskFailedMessage(statusResp.status)
+              setArtifactItems((prev) => {
+                let changed = false
+                const next = prev.map((target) => {
+                  if (target.id !== item.id) {
+                    return target
+                  }
+                  if (target.status === statusResp.status && target.error === failedMessage) {
+                    return target
+                  }
+                  changed = true
+                  return {
+                    ...target,
+                    status: statusResp.status,
+                    error: failedMessage,
+                  }
+                })
+                return changed ? next : prev
+              })
               return
             }
 
-            setArtifactItems((prev) =>
-              prev.map((target) =>
-                target.id === item.id
-                  ? {
-                      ...target,
-                      status: statusResp.status,
-                      error: '',
-                    }
-                  : target,
-              ),
-            )
+            setArtifactItems((prev) => {
+              let changed = false
+              const next = prev.map((target) => {
+                if (target.id !== item.id) {
+                  return target
+                }
+                if (target.status === statusResp.status && !target.error) {
+                  return target
+                }
+                changed = true
+                return {
+                  ...target,
+                  status: statusResp.status,
+                  error: '',
+                }
+              })
+              return changed ? next : prev
+            })
           }
         } catch (error) {
           setArtifactItems((prev) =>
@@ -381,8 +396,18 @@ export function useStudioArtifactTasks({
     return true
   }, [applyTaskResult])
 
+  const hasPendingArtifacts = useMemo(
+    () =>
+      artifactItems.some(
+        (item) =>
+          Boolean(item.taskId) && shouldStudioTaskKeepPolling(item.status),
+      ),
+    [artifactItems],
+  )
+
   useAdaptivePollingLoop({
-    enabled: Boolean(notebookId),
+    // Wake when new in-flight artifacts appear; stay off while the list is idle.
+    enabled: Boolean(notebookId) && hasPendingArtifacts,
     restartKey: notebookId,
     baseIntervalMs: studioArtifactPollBaseIntervalMs,
     maxIntervalMs: studioArtifactPollMaxIntervalMs,

@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from 'react'
+import { memo, useState } from 'react'
 import AddLinkOutlinedIcon from '@mui/icons-material/AddLinkOutlined'
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
 import CheckBoxIcon from '@mui/icons-material/CheckBox'
@@ -106,16 +106,6 @@ export const SourceListRow = memo(function SourceListRow({
   const [titleDraft, setTitleDraft] = useState(item.title)
   const [titleErrorText, setTitleErrorText] = useState('')
   const [isUpdatingTitle, setIsUpdatingTitle] = useState(false)
-  const [optimisticChecked, setOptimisticChecked] = useState(checked)
-
-  useEffect(() => {
-    if (optimisticChecked === checked) {
-      return
-    }
-    queueMicrotask(() => {
-      setOptimisticChecked(checked)
-    })
-  }, [checked, optimisticChecked])
 
   const actionMenuOpen = Boolean(actionAnchorEl)
   const actionMenuItemSx = {
@@ -133,14 +123,13 @@ export const SourceListRow = memo(function SourceListRow({
   }
 
   const commitToggleSelection = (nextChecked: boolean) => {
-    setOptimisticChecked(nextChecked)
     onToggleItem(item.id, nextChecked)
   }
 
   const handleToggleRow = () => {
     if (editDialogOpen) return
     if (!rowSelectable) return
-    commitToggleSelection(!optimisticChecked)
+    commitToggleSelection(!checked)
   }
 
   const openActionMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -262,7 +251,8 @@ export const SourceListRow = memo(function SourceListRow({
       sx={{
         boxSizing: 'border-box',
         height: removing ? 0 : sourceListRowHeightPx,
-        px: workspaceSpace.xxs,
+        pl: workspaceSpace.xxs,
+        pr: 0,
         opacity: removing ? 0 : 1,
         transform: removing ? 'translateX(-4px)' : 'none',
         position: 'relative',
@@ -365,7 +355,7 @@ export const SourceListRow = memo(function SourceListRow({
           minWidth: selectionColumnWidth,
           height: '100%',
           display: 'inline-flex',
-          justifyContent: 'center',
+          justifyContent: 'flex-end',
           alignItems: 'center',
           flexShrink: 0,
           position: 'relative',
@@ -377,7 +367,7 @@ export const SourceListRow = memo(function SourceListRow({
         ) : (
           <Checkbox
             size="small"
-            checked={optimisticChecked}
+            checked={checked}
             disableRipple
             icon={<CheckBoxOutlineBlankIcon sx={{ fontSize: workspaceIconSize.md }} />}
             checkedIcon={<CheckBoxIcon sx={{ fontSize: workspaceIconSize.md }} />}

@@ -282,7 +282,6 @@ export const ChatMessageItem = memo(function ChatMessageItem({
       >
         <ChatMessageFragments
           message={message}
-          isStreaming={isStreaming}
           isActiveAssistant={isActiveAssistantMessage}
           onCitationClick={handleCitationClick}
         />

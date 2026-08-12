@@ -96,27 +96,34 @@ export const ChatMessagesList = memo(function ChatMessagesList({
           {isLoadingHistory || isFetchingMore ? <CircularProgress size={loadingIndicatorSize} /> : null}
         </Box>
 
-        {messages.map((message, index) => (
-          <Box
-            key={message.clientKey ?? message.id}
-            data-message-id={message.id}
-            sx={{ mb: index === messages.length - 1 ? 0 : messageItemSpacing }}
-          >
-            <ChatMessageItem
-              message={message}
-              selectedSourceIds={selectedSourceIds}
-              isStreaming={isStreaming}
-              isActiveAssistantMessage={
-                activeAssistantMessageId === (message.clientKey ?? message.id)
-              }
-              copied={copiedUserMessageId === message.id}
-              savingAsNote={savingAsNoteMessageId === message.id}
-              onCopyUserMessage={onCopyUserMessage}
-              onSaveAsNote={onSaveAsNote}
-              onOpenCitationJump={onOpenCitationJump}
-            />
-          </Box>
-        ))}
+        {messages.map((message, index) => {
+          const messageKey = message.clientKey ?? message.id
+          const isActiveAssistantMessage = activeAssistantMessageId === messageKey
+          return (
+            <Box
+              key={messageKey}
+              data-message-id={message.id}
+              sx={{
+                mb: index === messages.length - 1 ? 0 : messageItemSpacing,
+                // Skip layout work for offscreen history (rendering-content-visibility).
+                contentVisibility: 'auto',
+                containIntrinsicSize: '0 120px',
+              }}
+            >
+              <ChatMessageItem
+                message={message}
+                selectedSourceIds={selectedSourceIds}
+                isStreaming={isStreaming && isActiveAssistantMessage}
+                isActiveAssistantMessage={isActiveAssistantMessage}
+                copied={copiedUserMessageId === message.id}
+                savingAsNote={savingAsNoteMessageId === message.id}
+                onCopyUserMessage={onCopyUserMessage}
+                onSaveAsNote={onSaveAsNote}
+                onOpenCitationJump={onOpenCitationJump}
+              />
+            </Box>
+          )
+        })}
       </Box>
     </Stack>
   )

@@ -1,6 +1,6 @@
 import type { CSSObject, Theme } from '@mui/material/styles'
 import { describe, expect, it } from 'vitest'
-import { subtleScrollbarSx } from './scrollbar'
+import { hiddenScrollbarSx, subtleScrollbarSx } from './scrollbar'
 import { workspaceColorPalette } from './workspaceColorPalette'
 
 describe('subtleScrollbarSx', () => {
@@ -21,5 +21,17 @@ describe('subtleScrollbarSx', () => {
       scrollbarColor: 'transparent transparent',
     })
     expect(sx['& textarea::-webkit-scrollbar']).toEqual({ width: 5, height: 5 })
+  })
+})
+
+describe('hiddenScrollbarSx', () => {
+  it('hides the host scrollbar while keeping scrollability', () => {
+    const sx = hiddenScrollbarSx() as CSSObject
+    expect(sx.scrollbarWidth).toBe('none')
+    expect(sx['&::-webkit-scrollbar']).toEqual({
+      width: 0,
+      height: 0,
+      display: 'none',
+    })
   })
 })

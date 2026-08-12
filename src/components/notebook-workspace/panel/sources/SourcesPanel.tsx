@@ -1,5 +1,8 @@
 import {
+  memo,
+  useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type MutableRefObject,
@@ -27,7 +30,7 @@ import { SourcePreviewOverlay } from './components/SourcePreviewOverlay'
 import { PanelSubpageLayout } from '../../shared/ui/PanelSubpageLayout'
 import { workspaceLayout, workspaceSpace } from '../../shared/ui/layoutTokens'
 import { panelTitleSx, panelTitleToBodySpacing, panelTitleVariant } from '../../shared/ui/panelStyles'
-import { subtleScrollbarSx } from '../../shared/ui/scrollbar'
+import { hiddenScrollbarSx } from '../../shared/ui/scrollbar'
 import type { SourceListItem } from './types/sourceTypes'
 import { useSourcePreviewController, type SourcePreviewRequest, type SourcePreviewState } from './preview/useSourcePreviewController'
 import { workspaceIconSize, workspaceType } from '../../shared/ui/typeTokens'
@@ -209,17 +212,17 @@ function SourcesPanelLayout({
                 <Divider sx={{ my: workspaceLayout.panelPaddingY, flexShrink: 0 }} />
 
                 {/*
-                  「所有来源」必须与列表同处一个 overflow 容器：F12 贴底后视口变矮会出滚动条，
-                  若表头在滚动区外，列表勾选列会被滚动条占宽顶偏，出现错位。
+                  「所有来源」与列表同处 overflow 容器，保证勾选列与表头对齐；
+                  隐藏滚动条以免占宽把复选框顶离右缘。
                 */}
                 <Box
-                  sx={(theme) => ({
+                  sx={{
                     flex: 1,
                     minHeight: 0,
                     overflowY: 'auto',
                     overflowX: 'hidden',
-                    ...subtleScrollbarSx(theme),
-                  })}
+                    ...hiddenScrollbarSx(),
+                  }}
                 >
                   <Box>
                     <Box
@@ -231,7 +234,8 @@ function SourcesPanelLayout({
                         boxSizing: 'border-box',
                         height: sourceListRowHeightPx,
                         minWidth: 0,
-                        px: workspaceSpace.xxs,
+                        pl: workspaceSpace.xxs,
+                        pr: 0,
                         display: 'flex',
                         alignItems: 'center',
                         columnGap: workspaceLayout.listInlineGap,
@@ -257,7 +261,7 @@ function SourcesPanelLayout({
                           minWidth: sourceSelectionColumnWidthPx,
                           height: '100%',
                           display: 'inline-flex',
-                          justifyContent: 'center',
+                          justifyContent: 'flex-end',
                           alignItems: 'center',
                           flexShrink: 0,
                         }}
@@ -283,7 +287,8 @@ function SourcesPanelLayout({
                             sx={{
                               boxSizing: 'border-box',
                               height: sourceListRowHeightPx,
-                              px: workspaceSpace.xxs,
+                              pl: workspaceSpace.xxs,
+                              pr: 0,
                               display: 'flex',
                               alignItems: 'center',
                               columnGap: workspaceLayout.listInlineGap,
@@ -323,7 +328,7 @@ function SourcesPanelLayout({
                                 minWidth: sourceSelectionColumnWidthPx,
                                 height: '100%',
                                 display: 'inline-flex',
-                                justifyContent: 'center',
+                                justifyContent: 'flex-end',
                                 alignItems: 'center',
                                 flexShrink: 0,
                               }}
@@ -334,23 +339,30 @@ function SourcesPanelLayout({
                         ))
                       : sourceListItems.length > 0
                         ? sourceListItems.map((item) => (
-                            <SourceListRow
+                            <Box
                               key={item.id}
-                              item={item}
-                              checked={Boolean(checkedMap[item.id])}
-                              removing={Boolean(removingMap[item.id])}
-                              isBusy={isBusy}
-                              onToggleItem={onToggleItem}
-                              onDeleteItem={onDeleteItem}
-                              onRetryItem={onRetryItem}
-                              onRenameItem={onRenameItem}
-                              onPreviewItem={openPreviewFromMenu}
-                              selectionColumnWidth={sourceSelectionColumnWidthPx}
-                              previewLoading={Boolean(
-                                previewState.loading &&
-                                previewState.sourceId === item.id,
-                              )}
-                            />
+                              sx={{
+                                contentVisibility: 'auto',
+                                containIntrinsicSize: `0 ${sourceListRowHeightPx}px`,
+                              }}
+                            >
+                              <SourceListRow
+                                item={item}
+                                checked={Boolean(checkedMap[item.id])}
+                                removing={Boolean(removingMap[item.id])}
+                                isBusy={isBusy}
+                                onToggleItem={onToggleItem}
+                                onDeleteItem={onDeleteItem}
+                                onRetryItem={onRetryItem}
+                                onRenameItem={onRenameItem}
+                                onPreviewItem={openPreviewFromMenu}
+                                selectionColumnWidth={sourceSelectionColumnWidthPx}
+                                previewLoading={Boolean(
+                                  previewState.loading &&
+                                  previewState.sourceId === item.id,
+                                )}
+                              />
+                            </Box>
                           ))
                         : null}
                   </Box>
@@ -478,7 +490,8 @@ const usePreviewInitialFocus = ({
       if (maxScrollTop <= 0) {
         return
       }
-      const totalRunes = Math.max(Array.from(previewState.rawMarkdown).length, 1)
+      // UTF-16 length is enough for scroll ratio; avoid allocating a full rune array.
+      const totalRunes = Math.max(previewState.rawMarkdown.length, 1)
       const ratio = Math.min(Math.max(start / totalRunes, 0), 1)
       scrollContainer.scrollTop = Math.round(maxScrollTop * ratio)
       scrollContainer.scrollLeft = 0
@@ -491,18 +504,28 @@ const usePreviewInitialFocus = ({
   }, [previewBodyRef, previewInitialFocusPendingRef, previewState])
 }
 
-export function SourcesPanel(props: SourcesPanelProps) {
+const isSourceRowSelectable = (item: SourceListItem, removing: boolean) =>
+  !removing && item.status !== 'uploading' && item.status !== 'preparing'
+
+export const SourcesPanel = memo(function SourcesPanel(props: SourcesPanelProps) {
   const {
     isHydrating,
     loadingSkeletonCount,
     sourceListItems,
     previewRequest,
+    checkedMap,
+    removingMap,
+    onToggleItem,
+    onToggleAll,
   } = props
   const [dialogOpen, setDialogOpen] = useState(false)
+  // Local mirror so header "所有来源" and row checkboxes paint from one state.
+  const [uiCheckedMap, setUiCheckedMap] = useState(checkedMap)
   const handledPreviewRequestIdRef = useRef<number>(0)
   const previewBodyRef = useRef<HTMLDivElement | null>(null)
   const previewInitialFocusPendingRef = useRef(false)
-  const skeletonItemCount = Math.max(loadingSkeletonCount, 0)
+  // Cap skeleton rows so a large source_count does not mount dozens of placeholders.
+  const skeletonItemCount = Math.min(Math.max(loadingSkeletonCount, 0), 8)
   const showListLoadingSkeleton =
     isHydrating && sourceListItems.length === 0 && skeletonItemCount > 0
   const {
@@ -518,6 +541,51 @@ export function SourcesPanel(props: SourcesPanelProps) {
   } = useSourcePreviewController({
     sourceListItems,
   })
+
+  useEffect(() => {
+    setUiCheckedMap(checkedMap)
+  }, [checkedMap])
+
+  const selectableSourceItems = useMemo(
+    () =>
+      sourceListItems.filter((item) =>
+        isSourceRowSelectable(item, Boolean(removingMap[item.id])),
+      ),
+    [removingMap, sourceListItems],
+  )
+
+  const allSourcesChecked =
+    selectableSourceItems.length > 0
+    && selectableSourceItems.every((item) => Boolean(uiCheckedMap[item.id]))
+
+  const someSourcesChecked =
+    !allSourcesChecked
+    && selectableSourceItems.some((item) => Boolean(uiCheckedMap[item.id]))
+
+  const handleToggleItem = useCallback(
+    (id: string, checked: boolean) => {
+      setUiCheckedMap((prev) => ({
+        ...prev,
+        [id]: checked,
+      }))
+      onToggleItem(id, checked)
+    },
+    [onToggleItem],
+  )
+
+  const handleToggleAll = useCallback(
+    (checked: boolean) => {
+      setUiCheckedMap((prev) => {
+        const next = { ...prev }
+        selectableSourceItems.forEach((item) => {
+          next[item.id] = checked
+        })
+        return next
+      })
+      onToggleAll(checked)
+    },
+    [onToggleAll, selectableSourceItems],
+  )
 
   useEffect(() => {
     if (!previewRequest) {
@@ -550,21 +618,49 @@ export function SourcesPanel(props: SourcesPanelProps) {
   const canDownload = activeCapability.downloadable &&
     previewState.viewType === 'content' &&
     Boolean(previewState.rawMarkdown.trim() || previewState.markdown.trim())
-  const handleCloseInlinePreview = () => {
+  const handleCloseInlinePreview = useCallback(() => {
     previewInitialFocusPendingRef.current = false
     closeInlinePreview()
-  }
-  const handleOpenPreviewFromMenu = (item: SourceListItem) => {
+  }, [closeInlinePreview])
+
+  const handleOpenPreviewFromMenu = useCallback((item: SourceListItem) => {
     previewInitialFocusPendingRef.current = false
     openPreviewFromMenu(item)
-  }
+  }, [openPreviewFromMenu])
+
+  const handleDialogOpen = useCallback(() => {
+    setDialogOpen(true)
+  }, [])
+
+  const handleDialogClose = useCallback(() => {
+    setDialogOpen(false)
+  }, [])
+
+  const layoutPanelProps = useMemo(
+    () => ({
+      ...props,
+      checkedMap: uiCheckedMap,
+      allSourcesChecked,
+      someSourcesChecked,
+      onToggleItem: handleToggleItem,
+      onToggleAll: handleToggleAll,
+    }),
+    [
+      allSourcesChecked,
+      handleToggleAll,
+      handleToggleItem,
+      props,
+      someSourcesChecked,
+      uiCheckedMap,
+    ],
+  )
 
   return (
     <SourcesPanelLayout
-      panelProps={props}
+      panelProps={layoutPanelProps}
       dialogOpen={dialogOpen}
-      onDialogOpen={() => setDialogOpen(true)}
-      onDialogClose={() => setDialogOpen(false)}
+      onDialogOpen={handleDialogOpen}
+      onDialogClose={handleDialogClose}
       previewState={previewState}
       canOpenOverlay={canOpenOverlay}
       canDownload={canDownload}
@@ -580,4 +676,4 @@ export function SourcesPanel(props: SourcesPanelProps) {
       closeOverlayPreview={closeOverlayPreview}
     />
   )
-}
+})

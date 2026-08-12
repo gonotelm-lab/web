@@ -142,7 +142,7 @@ describe('ChatMessageFragments', () => {
     }
 
     const html = renderToStaticMarkup(
-      <ChatMessageFragments message={message} isStreaming isActiveAssistant />,
+      <ChatMessageFragments message={message} isActiveAssistant />,
     )
 
     expect(html).toContain('assistant-markdown')
@@ -280,7 +280,7 @@ describe('ChatMessageFragments', () => {
     }
 
     const html = renderToStaticMarkup(
-      <ChatMessageFragments message={message} isStreaming isActiveAssistant />,
+      <ChatMessageFragments message={message} isActiveAssistant />,
     )
 
     expect(html).not.toContain('检索证据')

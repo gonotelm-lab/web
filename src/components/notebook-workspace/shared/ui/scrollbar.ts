@@ -20,6 +20,33 @@ export type SubtleScrollbarOptions = {
 }
 
 /**
+ * Hide scrollbars while keeping overflow scroll/wheel/touch scrolling.
+ * Use when a panel should not reserve gutter for the thumb (e.g. Sources list).
+ */
+export const hiddenScrollbarSx = (options?: SubtleScrollbarOptions) => {
+  const within = options?.within
+  const target = within ?? '&'
+  const webkit = (pseudo: string) => `${target}${pseudo}`
+
+  return {
+    ...(within
+      ? {
+          [within]: {
+            scrollbarWidth: 'none' as const,
+          },
+        }
+      : {
+          scrollbarWidth: 'none' as const,
+        }),
+    [webkit('::-webkit-scrollbar')]: {
+      width: 0,
+      height: 0,
+      display: 'none',
+    },
+  }
+}
+
+/**
  * Shared workspace scrollbar: thin, transparent until hover.
  * Apply on every overflow:auto/scroll container for visual consistency.
  */

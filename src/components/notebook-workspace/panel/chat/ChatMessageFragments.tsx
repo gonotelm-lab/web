@@ -19,7 +19,6 @@ import type { CitationClickTarget } from '../../shared/markdown/MarkdownRenderer
 
 interface ChatMessageFragmentsProps {
   message: ChatUiMessage
-  isStreaming?: boolean
   isActiveAssistant?: boolean
   onCitationClick?: (
     event: MouseEvent<HTMLAnchorElement | HTMLElement>,
@@ -125,21 +124,18 @@ function PhaseStatusIndicator({ label }: { label: string }) {
       />
       <Typography
         variant="body2"
+        className="phase-status-text-flow"
         sx={{
           fontSize: phaseStatusTokens.textFontSize,
           fontWeight: 600,
-          letterSpacing: phaseStatusTokens.textLetterSpacing,
+          letterSpacing: 0,
           color: 'transparent',
           background: flowGradient,
           backgroundSize: phaseStatusFlowTokens.backgroundSize,
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
-          animation: `phase-status-text-flow ${phaseStatusFlowTokens.animationDurationSec}s linear infinite`,
-          '@keyframes phase-status-text-flow': {
-            from: { backgroundPosition: phaseStatusFlowTokens.backgroundStartPosition },
-            to: { backgroundPosition: phaseStatusFlowTokens.backgroundEndPosition },
-          },
+          animationDuration: `${phaseStatusFlowTokens.animationDurationSec}s`,
         }}
       >
         {isThinking ? '思考中' : label}
@@ -158,14 +154,10 @@ function PhaseStatusIndicator({ label }: { label: string }) {
             <Box
               key={i}
               component="span"
+              className="phase-dot-pulse"
               sx={{
                 opacity: 0,
-                animation: `phase-dot-pulse 1.4s ease-in-out ${i * 0.2}s infinite`,
-                '@keyframes phase-dot-pulse': {
-                  '0%, 40%': { opacity: 0 },
-                  '50%': { opacity: 1 },
-                  '90%, 100%': { opacity: 0 },
-                },
+                animationDelay: `${i * 0.2}s`,
                 color: 'primary.main',
                 fontSize: phaseStatusTokens.textFontSize,
                 fontWeight: 700,

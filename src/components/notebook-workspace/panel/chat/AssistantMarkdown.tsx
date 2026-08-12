@@ -1,4 +1,4 @@
-import type { MouseEvent } from 'react'
+import { memo, useDeferredValue, type MouseEvent } from 'react'
 import {
   MarkdownRenderer,
   type CitationClickTarget,
@@ -12,13 +12,21 @@ interface AssistantMarkdownProps {
   ) => void
 }
 
-export function AssistantMarkdown({ content, onCitationClick }: AssistantMarkdownProps) {
+/**
+ * Defers heavy markdown re-parse during stream flushes so input/scroll stay responsive
+ * (rerender-use-deferred-value). Left-aligned — no inter-character justify.
+ */
+export const AssistantMarkdown = memo(function AssistantMarkdown({
+  content,
+  onCitationClick,
+}: AssistantMarkdownProps) {
+  const deferredContent = useDeferredValue(content)
+
   return (
     <MarkdownRenderer
-      content={content}
+      content={deferredContent}
       renderCitationAsSuperscript
-      justifyParagraphs
       onCitationClick={onCitationClick}
     />
   )
-}
+})

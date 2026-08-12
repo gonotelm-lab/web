@@ -1,6 +1,6 @@
-import { useMemo, type MouseEvent, type ReactNode } from 'react'
+import { memo, useMemo, useRef, type MouseEvent, type ReactNode } from 'react'
 import { Box } from '@mui/material'
-import ReactMarkdown from 'react-markdown'
+import ReactMarkdown, { type Components } from 'react-markdown'
 import rehypeKatex from 'rehype-katex'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
@@ -78,6 +78,10 @@ const markdownSanitizeSchema = {
   },
 }
 
+/** Hoisted: stream flushes must not rebuild plugin graphs. */
+const remarkPlugins = [[remarkGfm, { singleTilde: false }], remarkBreaks, remarkMath]
+const rehypePlugins = [rehypeRaw, [rehypeSanitize, markdownSanitizeSchema], rehypeKatex]
+
 const citationPattern = /<sup>\s*(\d+)\s*<\/sup>/gi
 const bracketCitationPattern = /\[\[\s*(\d+)\s*\]\]/g
 const markdownCodeSegmentPattern = /(```[\s\S]*?```|`[^`\n]*`)/g
@@ -130,13 +134,87 @@ const readCitationIndexFromChildren = (children: ReactNode) => {
   return text.trim()
 }
 
-export function MarkdownRenderer({
+type CitationClickHandler = NonNullable<MarkdownRendererProps['onCitationClick']>
+
+function createMarkdownComponents(
+  onCitationClickRef: { current: CitationClickHandler | undefined },
+): Components {
+  return {
+    sup: ({ children }) => {
+      const citationIndex = readCitationIndexFromChildren(children)
+      const onCitationClick = onCitationClickRef.current
+      if (!/^\d+$/.test(citationIndex) || !onCitationClick) {
+        return <sup>{children}</sup>
+      }
+
+      return (
+        <sup>
+          <a
+            href={`#cite-${citationIndex}`}
+            aria-label={`打开引用 ${citationIndex}`}
+            onClick={(event) => {
+              event.preventDefault()
+              onCitationClick(event, { citationIndex })
+            }}
+          >
+            {citationIndex}
+          </a>
+        </sup>
+      )
+    },
+    a: ({ href, children, ...props }) => {
+      const citationHref = parseCitationHref(href)
+      const onCitationClick = onCitationClickRef.current
+      if (citationHref && onCitationClick) {
+        const fallbackLabel = href ? `打开引用定位 ${href}` : '打开引用'
+        return (
+          <a
+            {...props}
+            href={href}
+            aria-label={props['aria-label'] ?? fallbackLabel}
+            onClick={(event) => {
+              event.preventDefault()
+              onCitationClick(event, { citationIndex: citationHref.citationIndex })
+            }}
+          >
+            {children ?? href ?? '引用'}
+          </a>
+        )
+      }
+
+      const shouldOpenInNewTab = Boolean(href && !href.startsWith('#'))
+      const fallbackLabel = href ? `打开链接 ${href}` : '打开链接'
+      return (
+        <a
+          {...props}
+          href={href}
+          aria-label={props['aria-label'] ?? fallbackLabel}
+          target={shouldOpenInNewTab ? '_blank' : undefined}
+          rel={shouldOpenInNewTab ? 'noopener noreferrer' : undefined}
+        >
+          {children ?? href ?? '链接'}
+        </a>
+      )
+    },
+    code: MarkdownCode,
+  }
+}
+
+export const MarkdownRenderer = memo(function MarkdownRenderer({
   content,
   fontSize = workspaceType.sm,
   renderCitationAsSuperscript = false,
   justifyParagraphs = false,
   onCitationClick,
 }: MarkdownRendererProps) {
+  const onCitationClickRef = useRef(onCitationClick)
+  onCitationClickRef.current = onCitationClick
+
+  const markdownComponents = useMemo(
+    () => createMarkdownComponents(onCitationClickRef),
+    [],
+  )
+
   const normalizedContent = useMemo(
     () => normalizeMarkdownDelimiters(content),
     [content],
@@ -162,7 +240,7 @@ export function MarkdownRenderer({
           m: 0,
           fontWeight: 700,
           lineHeight: 1.35,
-          letterSpacing: 0.1,
+          letterSpacing: 0,
         },
         '& h1': markdownHeadingStyles.h1,
         '& h2': markdownHeadingStyles.h2,
@@ -174,9 +252,9 @@ export function MarkdownRenderer({
           wordBreak: 'break-word',
           ...(justifyParagraphs
             ? {
-                textAlign: 'justify',
-                textJustify: 'inter-character',
-                textAlignLast: 'left',
+                textAlign: 'justify' as const,
+                textJustify: 'inter-character' as const,
+                textAlignLast: 'left' as const,
               }
             : null),
         },
@@ -239,7 +317,7 @@ export function MarkdownRenderer({
           fontSize: '0.72em',
           lineHeight: 1,
           verticalAlign: 'super',
-          letterSpacing: '0.01em',
+          letterSpacing: 0,
           textDecoration: 'none',
           cursor: 'pointer',
           transition: workspaceTransitionPresets.colorOnly,
@@ -286,68 +364,12 @@ export function MarkdownRenderer({
       })}
     >
       <ReactMarkdown
-        remarkPlugins={[[remarkGfm, { singleTilde: false }], remarkBreaks, remarkMath]}
-        rehypePlugins={[rehypeRaw, [rehypeSanitize, markdownSanitizeSchema], rehypeKatex]}
-        components={{
-          sup: ({ children }) => {
-            const citationIndex = readCitationIndexFromChildren(children)
-            if (!/^\d+$/.test(citationIndex) || !onCitationClick) {
-              return <sup>{children}</sup>
-            }
-
-            return (
-              <sup>
-                <a
-                  href={`#cite-${citationIndex}`}
-                  aria-label={`打开引用 ${citationIndex}`}
-                  onClick={(event) => {
-                    event.preventDefault()
-                    onCitationClick(event, { citationIndex })
-                  }}
-                >
-                  {citationIndex}
-                </a>
-              </sup>
-            )
-          },
-          a: ({ href, children, ...props }) => {
-            const citationHref = parseCitationHref(href)
-            if (citationHref && onCitationClick) {
-              const fallbackLabel = href ? `打开引用定位 ${href}` : '打开引用'
-              return (
-                <a
-                  {...props}
-                  href={href}
-                  aria-label={props['aria-label'] ?? fallbackLabel}
-                  onClick={(event) => {
-                    event.preventDefault()
-                    onCitationClick(event, { citationIndex: citationHref.citationIndex })
-                  }}
-                >
-                  {children ?? href ?? '引用'}
-                </a>
-              )
-            }
-
-            const shouldOpenInNewTab = Boolean(href && !href.startsWith('#'))
-            const fallbackLabel = href ? `打开链接 ${href}` : '打开链接'
-            return (
-              <a
-                {...props}
-                href={href}
-                aria-label={props['aria-label'] ?? fallbackLabel}
-                target={shouldOpenInNewTab ? '_blank' : undefined}
-                rel={shouldOpenInNewTab ? 'noopener noreferrer' : undefined}
-              >
-                {children ?? href ?? '链接'}
-              </a>
-            )
-          },
-          code: MarkdownCode,
-        }}
+        remarkPlugins={remarkPlugins as never}
+        rehypePlugins={rehypePlugins as never}
+        components={markdownComponents}
       >
         {renderedContent}
       </ReactMarkdown>
     </Box>
   )
-}
+})

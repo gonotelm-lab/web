@@ -12,7 +12,8 @@ export const streamReconnectDelayMs = 600
 export const streamStatusMinVisibleMs = 900
 export const streamAutoScrollThresholdPx = 42
 export const streamReconnectMaxRetries = 1
-export const streamUiFlushIntervalMs = 80
+/** Slightly coarser than 1 frame: fewer markdown re-parses while still feeling live. */
+export const streamUiFlushIntervalMs = 120
 export const smoothScrollDeltaEpsilonPx = 1
 
 /** 服务端流式任务的终止事件：done=true 或 error 非空 */

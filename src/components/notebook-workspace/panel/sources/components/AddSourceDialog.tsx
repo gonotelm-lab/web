@@ -103,13 +103,22 @@ export function AddSourceDialog({
             borderRadius: workspaceRadius.lg,
             width: '760px',
             maxWidth: 'calc(100vw - 32px)',
-            height: '620px',
-            maxHeight: 'calc(100vh - 32px)',
+            // Prefer dvh so F12 / mobile chrome shrinks the shell instead of clipping internals.
+            height: 'min(620px, calc(100dvh - 32px))',
+            maxHeight: 'calc(100dvh - 32px)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
           },
         },
       }}
     >
-      <DialogTitle sx={{ pb: workspaceDialogLayout.titlePaddingBottom }}>
+      <DialogTitle
+        sx={{
+          pb: workspaceDialogLayout.titlePaddingBottom,
+          flexShrink: 0,
+        }}
+      >
         <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h6">添加来源</Typography>
           <IconButton size="small" onClick={handleDialogClose} disabled={disabled} aria-label="关闭">
@@ -120,6 +129,9 @@ export function AddSourceDialog({
       <DialogContent
         sx={{
           pt: workspaceDialogLayout.contentPaddingTop,
+          pb: workspaceSpace.md,
+          flex: 1,
+          minHeight: 0,
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',

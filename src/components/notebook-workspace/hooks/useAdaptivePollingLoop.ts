@@ -5,6 +5,7 @@ interface UseAdaptivePollingLoopOptions {
   restartKey?: unknown
   baseIntervalMs: number
   maxIntervalMs: number
+  /** Return true while work remains; false pauses the loop until enabled/restartKey changes. */
   tick: () => Promise<boolean> | boolean
 }
 
@@ -27,7 +28,7 @@ export function useAdaptivePollingLoop({
     }
 
     let cancelled = false
-    let timeoutId: number | null = null
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
     let attempt = 0
 
     const scheduleNext = () => {
@@ -38,7 +39,7 @@ export function useAdaptivePollingLoop({
         baseIntervalMs * Math.pow(2, attempt),
         maxIntervalMs,
       )
-      timeoutId = window.setTimeout(() => {
+      timeoutId = setTimeout(() => {
         void runTick()
       }, delay)
     }
@@ -50,7 +51,15 @@ export function useAdaptivePollingLoop({
 
       try {
         const hasActiveWork = await tickRef.current()
-        attempt = hasActiveWork ? attempt + 1 : 0
+        if (cancelled) {
+          return
+        }
+        if (!hasActiveWork) {
+          // Idle: stop scheduling. Callers should flip `enabled` when new work appears.
+          attempt = 0
+          return
+        }
+        attempt += 1
       } catch {
         // Polling loop never throws to UI layer.
         attempt += 1
@@ -63,7 +72,7 @@ export function useAdaptivePollingLoop({
     return () => {
       cancelled = true
       if (timeoutId !== null) {
-        window.clearTimeout(timeoutId)
+        clearTimeout(timeoutId)
       }
     }
   }, [baseIntervalMs, enabled, maxIntervalMs, restartKey])

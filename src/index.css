@@ -19,6 +19,59 @@ a {
   color: inherit;
 }
 
+/* Shared workspace animations — keep out of MUI sx to avoid per-render keyframes. */
+/* translate3d stays on the compositor — avoids background-position stepping. */
+@keyframes flow-loading-wave {
+  0% {
+    transform: translate3d(-100%, 0, 0);
+  }
+  100% {
+    transform: translate3d(340%, 0, 0);
+  }
+}
+
+.flow-loading-wave {
+  animation-name: flow-loading-wave;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes phase-status-text-flow {
+  from {
+    background-position: 160% 0;
+  }
+  to {
+    background-position: -160% 0;
+  }
+}
+
+.phase-status-text-flow {
+  animation-name: phase-status-text-flow;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes phase-dot-pulse {
+  0%,
+  40% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  90%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.phase-dot-pulse {
+  animation-name: phase-dot-pulse;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-duration: 1.4s;
+}
+
 .chat-messages-scroll::-webkit-scrollbar-button,
 .chat-messages-scroll::-webkit-scrollbar-button:single-button,
 .chat-messages-scroll::-webkit-scrollbar-button:vertical:start:decrement,

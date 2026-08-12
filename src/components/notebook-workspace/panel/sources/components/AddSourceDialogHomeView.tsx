@@ -101,128 +101,138 @@ export function AddSourceDialogHomeView({
     })()
   }
 
+  const statusMessage = fileError || (checking ? '正在检查文件…' : '')
+
   return (
-    <>
-      <Typography variant="body2" color="text.secondary">
-        添加来源后，NotebookLM 能够基于这些对您重要的信息提供回答。
+    <Box
+      sx={{
+        flex: 1,
+        minHeight: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }}
+    >
+      <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0 }}>
+        添加来源后，系统能够基于这些对您重要的信息提供回答。
       </Typography>
 
-      <Box sx={{ mt: workspaceSpace.lg, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-        <Box
-          sx={{
-            border: 1,
-            borderStyle: 'dashed',
-            borderColor: dragActive ? 'primary.main' : 'divider',
-            borderRadius: workspaceRadius.lg,
-            px: workspaceSpace.lg,
-            flex: 1,
-            minHeight: 0,
-            display: 'grid',
-            placeItems: 'center',
-            textAlign: 'center',
-            cursor: interactionDisabled ? 'default' : workspaceInteraction.cursorPointer,
-            bgcolor: dragActive ? 'action.hover' : 'transparent',
-            transition: workspaceTransitionPresets.borderBg,
-          }}
-          onClick={() => {
-            if (!interactionDisabled) {
-              fileInputRef.current?.click()
-            }
-          }}
-          onDragEnter={(event) => {
-            if (interactionDisabled) return
-            event.preventDefault()
-            event.stopPropagation()
+      {/* Upload zone is the only flexible region; cards stay pinned with reserved gap. */}
+      <Box
+        sx={{
+          mt: { xs: workspaceSpace.sm, md: workspaceSpace.md },
+          flex: 1,
+          minHeight: 120,
+          border: 1,
+          borderStyle: 'dashed',
+          borderColor: dragActive ? 'primary.main' : 'divider',
+          borderRadius: workspaceRadius.lg,
+          px: workspaceSpace.lg,
+          py: workspaceSpace.md,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textAlign: 'center',
+          overflow: 'auto',
+          cursor: interactionDisabled ? 'default' : workspaceInteraction.cursorPointer,
+          bgcolor: dragActive ? 'action.hover' : 'transparent',
+          transition: workspaceTransitionPresets.borderBg,
+        }}
+        onClick={() => {
+          if (!interactionDisabled) {
+            fileInputRef.current?.click()
+          }
+        }}
+        onDragEnter={(event) => {
+          if (interactionDisabled) return
+          event.preventDefault()
+          event.stopPropagation()
+          setDragActive(true)
+        }}
+        onDragOver={(event) => {
+          if (interactionDisabled) return
+          event.preventDefault()
+          event.stopPropagation()
+          if (!dragActive) {
             setDragActive(true)
-          }}
-          onDragOver={(event) => {
-            if (interactionDisabled) return
-            event.preventDefault()
-            event.stopPropagation()
-            if (!dragActive) {
-              setDragActive(true)
-            }
-          }}
-          onDragLeave={(event) => {
-            if (interactionDisabled) return
-            event.preventDefault()
-            event.stopPropagation()
-            setDragActive(false)
-          }}
-          onDrop={(event) => {
-            if (interactionDisabled) return
-            event.preventDefault()
-            event.stopPropagation()
-            setDragActive(false)
-            handleFilesSelected(Array.from(event.dataTransfer.files ?? []))
-          }}
-        >
-          <Box>
-            <CloudUploadIcon sx={{ fontSize: workspaceIconSize.xl, color: 'primary.main' }} />
-            <Typography variant="h6" sx={{ mt: workspaceSpace.sm }}>
-              上传来源
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: workspaceSpace.sm }}>
-              拖放或点击选择文件，即可上传
-            </Typography>
+          }
+        }}
+        onDragLeave={(event) => {
+          if (interactionDisabled) return
+          event.preventDefault()
+          event.stopPropagation()
+          setDragActive(false)
+        }}
+        onDrop={(event) => {
+          if (interactionDisabled) return
+          event.preventDefault()
+          event.stopPropagation()
+          setDragActive(false)
+          handleFilesSelected(Array.from(event.dataTransfer.files ?? []))
+        }}
+      >
+        <Box sx={{ width: '100%', maxWidth: 420 }}>
+          <CloudUploadIcon sx={{ fontSize: workspaceIconSize.xl, color: 'primary.main' }} />
+          <Typography variant="h6" sx={{ mt: workspaceSpace.sm }}>
+            上传来源
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: workspaceSpace.sm }}>
+            拖放或点击选择文件，即可上传
+          </Typography>
 
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: workspaceSpace.md }}>
-              支持：pdf、txt、markdown、csv、docx、epub、xlsx、pptx
-            </Typography>
-            <Typography
-              variant="caption"
-              sx={(theme) => ({
-                display: 'block',
-                mt: workspaceSpace.sm,
-                fontWeight: 600,
-                color: theme.workspacePalette.status.warning,
-              })}
-            >
-              单个文件最大 100MB
-            </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: workspaceSpace.sm }}>
-              一次最多选择 20 个文件
-            </Typography>
-            {checking && (
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: workspaceSpace.sm }}>
-                正在检查文件…
-              </Typography>
-            )}
-            {fileError && (
-              <Typography
-                variant="caption"
-                sx={(theme) => ({
-                  display: 'block',
-                  mt: workspaceSpace.sm,
-                  color: theme.workspacePalette.status.error,
-                })}
-              >
-                {fileError}
-              </Typography>
-            )}
-          </Box>
-          <input
-            ref={fileInputRef}
-            hidden
-            type="file"
-            multiple
-            accept={acceptedFileTypes}
-            aria-label="选择要上传的来源文件"
-            onChange={(e) => {
-              const files = Array.from(e.target.files ?? [])
-              handleFilesSelected(files)
-              e.currentTarget.value = ''
-            }}
-          />
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: workspaceSpace.md }}>
+            支持：pdf、txt、markdown、csv、docx、epub、xlsx、pptx
+          </Typography>
+          <Typography
+            variant="caption"
+            sx={(theme) => ({
+              display: 'block',
+              mt: workspaceSpace.sm,
+              fontWeight: 600,
+              color: theme.workspacePalette.status.warning,
+            })}
+          >
+            单个文件最大 100MB
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: workspaceSpace.sm }}>
+            一次最多选择 20 个文件
+          </Typography>
+          <Typography
+            variant="caption"
+            sx={(theme) => ({
+              display: 'block',
+              mt: workspaceSpace.sm,
+              minHeight: 18,
+              color: fileError
+                ? theme.workspacePalette.status.error
+                : 'text.secondary',
+            })}
+          >
+            {statusMessage || '\u00a0'}
+          </Typography>
         </Box>
+        <input
+          ref={fileInputRef}
+          hidden
+          type="file"
+          multiple
+          accept={acceptedFileTypes}
+          aria-label="选择要上传的来源文件"
+          onChange={(e) => {
+            const files = Array.from(e.target.files ?? [])
+            handleFilesSelected(files)
+            e.currentTarget.value = ''
+          }}
+        />
       </Box>
 
       <Box
         sx={{
-          mt: workspaceSpace.lg,
+          mt: { xs: workspaceSpace.sm, md: workspaceSpace.md },
           display: 'grid',
           gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' },
           gap: workspaceSpace.md,
+          flexShrink: 0,
         }}
       >
         <Paper
@@ -230,7 +240,7 @@ export function AddSourceDialogHomeView({
           onClick={onOpenUrl}
           sx={{
             p: workspaceSpace.md,
-            minHeight: 88,
+            minHeight: { xs: 72, md: 88 },
             borderRadius: workspaceRadius.lg,
             cursor: workspaceInteraction.cursorPointer,
             borderStyle: 'dashed',
@@ -257,7 +267,7 @@ export function AddSourceDialogHomeView({
           onClick={onOpenText}
           sx={{
             p: workspaceSpace.md,
-            minHeight: 88,
+            minHeight: { xs: 72, md: 88 },
             borderRadius: workspaceRadius.lg,
             cursor: workspaceInteraction.cursorPointer,
             borderStyle: 'dashed',
@@ -280,6 +290,6 @@ export function AddSourceDialogHomeView({
           </Stack>
         </Paper>
       </Box>
-    </>
+    </Box>
   )
 }

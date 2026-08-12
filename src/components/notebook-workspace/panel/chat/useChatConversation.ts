@@ -5,8 +5,9 @@ import {
   useMemo,
   useRef,
   useState,
-  type KeyboardEvent,
+  type Dispatch,
   type RefObject,
+  type SetStateAction,
 } from 'react'
 import { useInfiniteQuery, useMutation } from '@tanstack/react-query'
 import {
@@ -54,12 +55,7 @@ interface UseChatConversationParams {
 }
 
 interface UseChatConversationResult {
-  composerValue: string
   displayMessages: ChatUiMessage[]
-  streamStatus: string
-  streamPhaseType: StreamDisplayPhaseType
-  showStreamStatus: boolean
-  showStreamFlowAnimation: boolean
   isLoadingHistory: boolean
   isFetchingMore: boolean
   isStreaming: boolean
@@ -68,16 +64,16 @@ interface UseChatConversationResult {
   errorText: string
   isClearingContext: boolean
   showScrollToBottomButton: boolean
-  submitDisabled: boolean
+  canSubmit: boolean
   isInputDisabled: boolean
   isAbortDisabled: boolean
   isThinkingToggleDisabled: boolean
   messageListRef: RefObject<HTMLDivElement | null>
-  setComposerValue: (value: string) => void
+  composerRestoreNonce: number
+  composerRestoreValue: string
   onMessageListScroll: () => void
   onCopyUserMessage: (messageId: string, text: string) => void
-  onComposerKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void
-  onSendMessage: () => void
+  onSendMessage: (prompt: string) => void
   onAbortStream: () => void
   onClearCurrentContext: () => void
   smoothScrollToBottom: () => void
@@ -128,10 +124,21 @@ export function useChatConversation({
   enableThinking,
   onStreamCompleted,
 }: UseChatConversationParams): UseChatConversationResult {
-  const [composerValue, setComposerValue] = useState('')
   const [liveMessages, setLiveMessages] = useState<ChatUiMessage[]>([])
-  const [streamStatus, setStreamStatus] = useState('')
-  const [streamPhaseType, setStreamPhaseType] = useState<StreamDisplayPhaseType>(null)
+  // Phase/status text is rendered from message fragments; keep these off React state
+  // so stream phase ticks do not re-render ChatPanel (rerender-use-ref-transient-values).
+  const streamStatusRef = useRef('')
+  const streamPhaseTypeRef = useRef<StreamDisplayPhaseType>(null)
+  const setStreamStatus = useCallback<Dispatch<SetStateAction<string>>>((value) => {
+    streamStatusRef.current =
+      typeof value === 'function' ? value(streamStatusRef.current) : value
+  }, [])
+  const setStreamPhaseType = useCallback<Dispatch<SetStateAction<StreamDisplayPhaseType>>>((value) => {
+    streamPhaseTypeRef.current =
+      typeof value === 'function' ? value(streamPhaseTypeRef.current) : value
+  }, [])
+  const [composerRestoreNonce, setComposerRestoreNonce] = useState(0)
+  const [composerRestoreValue, setComposerRestoreValue] = useState('')
   const [errorText, setErrorText] = useState('')
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null)
   const [activeAssistantMessageId, setActiveAssistantMessageId] = useState<string | null>(null)
@@ -141,6 +148,7 @@ export function useChatConversation({
   const streamAbortControllerRef = useRef<AbortController | null>(null)
   const abortRequestedRef = useRef(false)
   const loadingMoreHistoryRef = useRef(false)
+  const messageListScrollRafRef = useRef<number | null>(null)
   const pendingScrollRestoreRef = useRef<{
     prevHeight: number
     prevTop: number
@@ -551,15 +559,14 @@ export function useChatConversation({
    * Sends a user prompt optimistically, creates temporary local bubbles,
    * then hands over to stream runner for incremental assistant updates.
    */
-  const handleSendMessage = useCallback(async (promptOverride?: string) => {
+  const handleSendMessage = useCallback(async (promptInput: string) => {
     if (!chatId) return
     if (isStreaming || createMessageMutation.isPending) return
 
-    const prompt = (promptOverride ?? composerValue).trimEnd()
+    const prompt = promptInput.trimEnd()
     if (!prompt.trim()) return
 
     setErrorText('')
-    setComposerValue('')
     shouldAutoScrollToBottomRef.current = true
 
     const userMessageId = `local-user-${Date.now()}`
@@ -593,7 +600,8 @@ export function useChatConversation({
       await runStreamSession(created.task_id, assistantMessageId)
     } catch (error) {
       setErrorText(getErrorMessage(error))
-      setComposerValue(prompt)
+      setComposerRestoreValue(prompt)
+      setComposerRestoreNonce((prev) => prev + 1)
       setActiveAssistantMessageId(null)
       setLiveMessages((prev) =>
         prev.filter(
@@ -603,7 +611,6 @@ export function useChatConversation({
       )
     }
   }, [
-    composerValue,
     createMessageMutation,
     chatId,
     isStreaming,
@@ -641,84 +648,94 @@ export function useChatConversation({
     setAbortRequestedFlag,
   ])
 
+  const hasNextHistoryPage = messagesQuery.hasNextPage
+  const isFetchingNextHistoryPage = messagesQuery.isFetchingNextPage
+  const isLoadingHistoryMessages = messagesQuery.isLoading
+  const historyPageCount = messagesQuery.data?.pages.length ?? 0
+  const fetchNextHistoryPage = messagesQuery.fetchNextPage
+
   const handleMessageListScroll = useCallback(() => {
-    const container = messageListRef.current
-    if (!container) return
-
-    if (isProgrammaticScrollToBottomRef.current) {
-      return
-    }
-    syncScrollToBottomButtonVisibility()
-
-    const {
-      firstVisibleMessageIndex,
-      totalMessageCount,
-      firstVisibleMessageId,
-      firstVisibleMessageOffsetTop,
-    } = getVisibleMessageStats(container)
-    const loadMoreFirstVisibleMessageThreshold = Math.max(
-      1,
-      Math.floor(totalMessageCount / 4),
-    )
-    const shouldLoadMoreByVisibleCount =
-      firstVisibleMessageIndex >= 0 &&
-      firstVisibleMessageIndex <= loadMoreFirstVisibleMessageThreshold
-
-    if (
-      !shouldLoadMoreByVisibleCount ||
-      !messagesQuery.hasNextPage ||
-      loadingMoreHistoryRef.current ||
-      messagesQuery.isFetchingNextPage ||
-      messagesQuery.isLoading
-    ) {
+    if (messageListScrollRafRef.current !== null) {
       return
     }
 
-    pendingScrollRestoreRef.current = {
-      // Keep viewport anchored when prepending older history pages at the top.
-      prevHeight: container.scrollHeight,
-      prevTop: container.scrollTop,
-      anchorMessageId: firstVisibleMessageId,
-      anchorOffsetTop: firstVisibleMessageOffsetTop,
-      historyPageCount: messagesQuery.data?.pages.length ?? 0,
-    }
-    setErrorText('')
-    shouldAutoScrollToBottomRef.current = false
-    loadingMoreHistoryRef.current = true
-    void messagesQuery.fetchNextPage()
-      .then((result) => {
-        if (result.isError || result.isFetchNextPageError) {
+    messageListScrollRafRef.current = window.requestAnimationFrame(() => {
+      messageListScrollRafRef.current = null
+      const container = messageListRef.current
+      if (!container) return
+
+      if (isProgrammaticScrollToBottomRef.current) {
+        return
+      }
+      syncScrollToBottomButtonVisibility()
+
+      const {
+        firstVisibleMessageIndex,
+        totalMessageCount,
+        firstVisibleMessageId,
+        firstVisibleMessageOffsetTop,
+      } = getVisibleMessageStats(container)
+      const loadMoreFirstVisibleMessageThreshold = Math.max(
+        1,
+        Math.floor(totalMessageCount / 4),
+      )
+      const shouldLoadMoreByVisibleCount =
+        firstVisibleMessageIndex >= 0 &&
+        firstVisibleMessageIndex <= loadMoreFirstVisibleMessageThreshold
+
+      if (
+        !shouldLoadMoreByVisibleCount ||
+        !hasNextHistoryPage ||
+        loadingMoreHistoryRef.current ||
+        isFetchingNextHistoryPage ||
+        isLoadingHistoryMessages
+      ) {
+        return
+      }
+
+      pendingScrollRestoreRef.current = {
+        // Keep viewport anchored when prepending older history pages at the top.
+        prevHeight: container.scrollHeight,
+        prevTop: container.scrollTop,
+        anchorMessageId: firstVisibleMessageId,
+        anchorOffsetTop: firstVisibleMessageOffsetTop,
+        historyPageCount,
+      }
+      setErrorText('')
+      shouldAutoScrollToBottomRef.current = false
+      loadingMoreHistoryRef.current = true
+      void fetchNextHistoryPage()
+        .then((result) => {
+          if (result.isError || result.isFetchNextPageError) {
+            pendingScrollRestoreRef.current = null
+            setErrorText(getErrorMessage(result.error))
+          }
+        })
+        .catch((error) => {
           pendingScrollRestoreRef.current = null
-          setErrorText(getErrorMessage(result.error))
-        }
-      })
-      .catch((error) => {
-        pendingScrollRestoreRef.current = null
-        setErrorText(getErrorMessage(error))
-      })
-      .finally(() => {
-        loadingMoreHistoryRef.current = false
-      })
-  }, [isProgrammaticScrollToBottomRef, messagesQuery, syncScrollToBottomButtonVisibility])
+          setErrorText(getErrorMessage(error))
+        })
+        .finally(() => {
+          loadingMoreHistoryRef.current = false
+        })
+    })
+  }, [
+    fetchNextHistoryPage,
+    hasNextHistoryPage,
+    historyPageCount,
+    isFetchingNextHistoryPage,
+    isLoadingHistoryMessages,
+    isProgrammaticScrollToBottomRef,
+    syncScrollToBottomButtonVisibility,
+  ])
 
-  const onSendMessage = useCallback(() => {
-    void handleSendMessage()
+  const onSendMessage = useCallback((prompt: string) => {
+    void handleSendMessage(prompt)
   }, [handleSendMessage])
 
   const sendPrompt = useCallback((prompt: string) => {
     void handleSendMessage(prompt)
   }, [handleSendMessage])
-
-  const onComposerKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      if (event.key !== 'Enter' || event.shiftKey) {
-        return
-      }
-      event.preventDefault()
-      onSendMessage()
-    },
-    [onSendMessage],
-  )
 
   const onAbortStream = useCallback(() => {
     void handleAbortStream()
@@ -750,21 +767,8 @@ export function useChatConversation({
     void clearContext()
   }, [chatId, isClearingContext, isStreaming])
 
-  const submitDisabled =
-    !composerValue.trim() ||
-    isStreaming ||
-    createMessageMutation.isPending ||
-    !chatId
-  const showStreamStatus = Boolean(isStreaming && streamStatus && streamPhaseType === 'phase')
-  const showStreamFlowAnimation = Boolean(isStreaming && streamPhaseType === 'phase')
-
   return {
-    composerValue,
     displayMessages,
-    streamStatus,
-    streamPhaseType,
-    showStreamStatus,
-    showStreamFlowAnimation,
     isLoadingHistory: messagesQuery.isLoading,
     isFetchingMore: messagesQuery.isFetchingNextPage,
     isStreaming,
@@ -773,15 +777,15 @@ export function useChatConversation({
     errorText,
     isClearingContext,
     showScrollToBottomButton,
-    submitDisabled,
+    canSubmit: Boolean(chatId) && !isStreaming && !createMessageMutation.isPending,
     isInputDisabled: !chatId || isStreaming,
     isAbortDisabled: abortStreamMutation.isPending || !activeTaskId,
     isThinkingToggleDisabled: isStreaming || createMessageMutation.isPending,
     messageListRef,
-    setComposerValue,
+    composerRestoreNonce,
+    composerRestoreValue,
     onMessageListScroll: handleMessageListScroll,
     onCopyUserMessage,
-    onComposerKeyDown,
     onSendMessage,
     onAbortStream,
     onClearCurrentContext,

@@ -1,1 +1,1 @@
-export { FlowLoadingOverlay } from '../../../shared'
+export { FlowLoadingOverlay } from '../../../shared/ui/FlowLoadingOverlay'

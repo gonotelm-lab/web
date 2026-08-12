@@ -1,4 +1,12 @@
-import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  startTransition,
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Box, Paper, Snackbar, Typography, useMediaQuery, useTheme } from '@mui/material'
@@ -158,8 +166,6 @@ export function NotebookWorkspacePage() {
   const [selectedSourceIds, setSelectedSourceIds] = useState<Record<string, boolean>>({})
   const [removingSourceIds, setRemovingSourceIds] = useState<Record<string, boolean>>({})
   const [isHydratingSources, setIsHydratingSources] = useState(false)
-  const [notebookNameDraft, setNotebookNameDraft] = useState('')
-  const [isNotebookNameEditing, setIsNotebookNameEditing] = useState(false)
   const [citationPreviewRequest, setCitationPreviewRequest] = useState<
     (ChatCitationJumpRequest & { requestId: number }) | null
   >(null)
@@ -411,39 +417,49 @@ export function NotebookWorkspacePage() {
     refetchOnReconnect: false,
   })
 
-  useEffect(() => {
-    const notebook = notebookQuery.data
-    if (!notebook) return
+  const notebookIdFromQuery = notebookQuery.data?.id
+  const notebookNameFromQuery = notebookQuery.data?.name ?? ''
+  const notebookDescFromQuery = notebookQuery.data?.desc ?? ''
+  const notebookSourceCountFromQuery = notebookQuery.data?.source_count
 
-    // 编辑中且 store 仍有名称时保留本地输入；store 已被 reset 清空时仍用 query 回填
-    const currentStoreName = useWorkspaceStore.getState().notebookMeta.name
-    const shouldKeepEditingName =
-      isNotebookNameEditing && currentStoreName.trim().length > 0
+  useEffect(() => {
+    if (!notebookIdFromQuery || notebookSourceCountFromQuery === undefined) {
+      return
+    }
 
     patchNotebookMeta({
-      id: notebook.id,
-      desc: notebook.desc ?? '',
-      sourceCount: notebook.source_count,
-      ...(shouldKeepEditingName ? {} : { name: notebook.name ?? '' }),
+      id: notebookIdFromQuery,
+      desc: notebookDescFromQuery,
+      sourceCount: notebookSourceCountFromQuery,
+      name: notebookNameFromQuery,
     })
-  }, [isNotebookNameEditing, notebookQuery.data, patchNotebookMeta])
+  }, [
+    notebookDescFromQuery,
+    notebookIdFromQuery,
+    notebookNameFromQuery,
+    notebookSourceCountFromQuery,
+    patchNotebookMeta,
+  ])
 
+  // Hydrate on notebook id / source_count only — rename/refetch of same count must not
+  // wipe & re-download the entire sources list.
   useEffect(() => {
-    const notebook = notebookQuery.data
-    if (!id || !notebook) return
+    if (!id || notebookSourceCountFromQuery === undefined) {
+      return
+    }
 
     let cancelled = false
     // eslint-disable-next-line react-hooks/set-state-in-effect
     beginHydratingSources()
     const hydrateNotebookSources = async () => {
-      if (notebook.source_count <= 0) {
+      if (notebookSourceCountFromQuery <= 0) {
         setSources([])
         return
       }
 
       let merged: SourceCard[] = []
       let offset = 0
-      while (offset < notebook.source_count) {
+      while (offset < notebookSourceCountFromQuery) {
         const page = await listNotebookSources(id, {
           limit: notebookSourcesPageLimit,
           offset,
@@ -485,7 +501,7 @@ export function NotebookWorkspacePage() {
     return () => {
       cancelled = true
     }
-  }, [beginHydratingSources, id, notebookQuery.data, setSources])
+  }, [beginHydratingSources, id, notebookSourceCountFromQuery, setSources])
 
   const createSourceMutation = useMutation({
     mutationFn: ({
@@ -532,20 +548,43 @@ export function NotebookWorkspacePage() {
     ],
   )
 
+  const sourceListItemCacheRef = useRef<Map<string, SourceListItem>>(new Map())
   const sourceListItems = useMemo<SourceListItem[]>(() => {
-    return sources.map((source) => ({
-      id: source.id,
-      kind: source.kind,
-      title: source.title ?? '',
-      name: source.title?.trim() ? source.title : source.id,
-      iconType: detectSourceIconType(source.kind, source.fileFormat),
-      status: source.status,
-      textContent: source.textContent,
-      urlContent: source.urlContent,
-      fileFormat: source.fileFormat,
-      fileUrl: source.fileUrl,
-      parsedContentUrl: source.parsedContentUrl,
-    }))
+    const nextCache = new Map<string, SourceListItem>()
+    const items = sources.map((source) => {
+      const nextItem: SourceListItem = {
+        id: source.id,
+        kind: source.kind,
+        title: source.title ?? '',
+        name: source.title?.trim() ? source.title : source.id,
+        iconType: detectSourceIconType(source.kind, source.fileFormat),
+        status: source.status,
+        textContent: source.textContent,
+        urlContent: source.urlContent,
+        fileFormat: source.fileFormat,
+        fileUrl: source.fileUrl,
+        parsedContentUrl: source.parsedContentUrl,
+      }
+      const prevItem = sourceListItemCacheRef.current.get(source.id)
+      const stableItem =
+        prevItem
+        && prevItem.kind === nextItem.kind
+        && prevItem.title === nextItem.title
+        && prevItem.name === nextItem.name
+        && prevItem.iconType === nextItem.iconType
+        && prevItem.status === nextItem.status
+        && prevItem.textContent === nextItem.textContent
+        && prevItem.urlContent === nextItem.urlContent
+        && prevItem.fileFormat === nextItem.fileFormat
+        && prevItem.fileUrl === nextItem.fileUrl
+        && prevItem.parsedContentUrl === nextItem.parsedContentUrl
+          ? prevItem
+          : nextItem
+      nextCache.set(source.id, stableItem)
+      return stableItem
+    })
+    sourceListItemCacheRef.current = nextCache
+    return items
   }, [sources])
 
   const selectableSourceItems = useMemo(
@@ -562,26 +601,47 @@ export function NotebookWorkspacePage() {
     !allSourcesChecked &&
     selectableSourceItems.some((item) => Boolean(selectedSourceIds[item.id]))
 
-  const selectedSourceIdList = useMemo(
+  const selectedSourceIdListRaw = useMemo(
     () =>
       Object.keys(selectedSourceIds).filter((sourceId) => Boolean(selectedSourceIds[sourceId])),
     [selectedSourceIds],
   )
-  const readySourceIdList = useMemo(
+  const readySourceIdListRaw = useMemo(
     () =>
       sourceListItems
         .filter((item) => item.status === 'ready')
         .map((item) => item.id),
     [sourceListItems],
   )
+  // Keep referential equality when polling refreshes sources but id sets are unchanged.
+  const selectedSourceIdListRef = useRef(selectedSourceIdListRaw)
+  if (
+    selectedSourceIdListRaw.length !== selectedSourceIdListRef.current.length
+    || selectedSourceIdListRaw.some((id, index) => id !== selectedSourceIdListRef.current[index])
+  ) {
+    selectedSourceIdListRef.current = selectedSourceIdListRaw
+  }
+  const selectedSourceIdList = selectedSourceIdListRef.current
 
-  const toggleAllSourceChecked = (checked: boolean) => {
+  const readySourceIdListRef = useRef(readySourceIdListRaw)
+  if (
+    readySourceIdListRaw.length !== readySourceIdListRef.current.length
+    || readySourceIdListRaw.some((id, index) => id !== readySourceIdListRef.current[index])
+  ) {
+    readySourceIdListRef.current = readySourceIdListRaw
+  }
+  const readySourceIdList = readySourceIdListRef.current
+  // Chat/Studio only need selection for submit/generate — defer so Sources checkbox stays snappy.
+  const deferredSelectedSourceIdList = useDeferredValue(selectedSourceIdList)
+
+  const toggleAllSourceChecked = useCallback((checked: boolean) => {
     const next: Record<string, boolean> = {}
     selectableSourceItems.forEach((item) => {
       next[item.id] = checked
     })
+    // Sources panel mirrors this locally for checkbox sync; Chat/Studio read deferredSelectedSourceIdList.
     setSelectedSourceIds(next)
-  }
+  }, [selectableSourceItems])
 
   const toggleSourceItemChecked = useCallback((id: string, checked: boolean) => {
     setSelectedSourceIds((prev) => ({
@@ -590,7 +650,7 @@ export function NotebookWorkspacePage() {
     }))
   }, [])
 
-  const handleCreateSimpleSource = async (
+  const handleCreateSimpleSource = useCallback(async (
     kind: Extract<SourceKind, 'text' | 'url'>,
     content: string,
   ) => {
@@ -619,9 +679,9 @@ export function NotebookWorkspacePage() {
       console.warn('create source failed', err)
       throw err
     }
-  }
+  }, [addSource, createSourceMutation, id])
 
-  const handleCreateFileSource = async (file: File) => {
+  const handleCreateFileSource = useCallback(async (file: File) => {
     if (!id) return
     let createdSourceId = ''
     try {
@@ -673,17 +733,27 @@ export function NotebookWorkspacePage() {
       }
       console.warn('create file source failed', err)
     }
-  }
+  }, [addSource, createSourceMutation, id, setSourceStatus, uploadSourceMutation])
 
-  const handleCreateFileSources = async (files: File[]) => {
+  const handleCreateFileSources = useCallback(async (files: File[]) => {
     await Promise.all(
       files.map(async (file) => {
         await handleCreateFileSource(file)
       }),
     )
-  }
+  }, [handleCreateFileSource])
 
-  const handleDeleteSource = async (sourceId: string) => {
+  const handleCreateUrlSource = useCallback(
+    (url: string) => handleCreateSimpleSource('url', url),
+    [handleCreateSimpleSource],
+  )
+
+  const handleCreateTextSource = useCallback(
+    (text: string) => handleCreateSimpleSource('text', text),
+    [handleCreateSimpleSource],
+  )
+
+  const handleDeleteSource = useCallback(async (sourceId: string) => {
     if (!sourceId) return
     if (removingSourceIds[sourceId]) return
 
@@ -715,9 +785,9 @@ export function NotebookWorkspacePage() {
     } catch (err) {
       console.warn('delete source failed', sourceId, err)
     }
-  }
+  }, [deleteSourceMutation, removeSource, removingSourceIds])
 
-  const handleRetrySource = async (sourceId: string) => {
+  const handleRetrySource = useCallback(async (sourceId: string) => {
     if (!sourceId) return
     if (removingSourceIds[sourceId]) return
 
@@ -733,9 +803,9 @@ export function NotebookWorkspacePage() {
     } catch (err) {
       console.warn('retry source preparation failed', sourceId, err)
     }
-  }
+  }, [removingSourceIds, retrySourceMutation, setSourceStatus, sources])
 
-  const handleRenameSourceTitle = async (sourceId: string, nextTitle: string) => {
+  const handleRenameSourceTitle = useCallback(async (sourceId: string, nextTitle: string) => {
     const normalizedTitle = nextTitle.trim()
     if (!normalizedTitle) {
       return
@@ -762,80 +832,69 @@ export function NotebookWorkspacePage() {
       console.warn('update source title failed', sourceId, error)
       throw error
     }
-  }
+  }, [patchSource, sources, updateSourceTitleMutation])
 
   const displayNotebookName = useMemo(
     () =>
       resolveNotebookWorkspaceTitle({
-        isEditing: isNotebookNameEditing,
-        draftName: notebookNameDraft,
+        isEditing: false,
+        draftName: '',
         storeName: notebookMeta.name,
         queryName: notebookQuery.data?.name,
       }),
-    [
-      isNotebookNameEditing,
-      notebookMeta.name,
-      notebookNameDraft,
-      notebookQuery.data?.name,
-    ],
+    [notebookMeta.name, notebookQuery.data?.name],
   )
 
-  const handleNotebookNameChange = (value: string) => {
-    setNotebookNameDraft(value)
-    patchNotebookMeta({ name: value })
-  }
-
-  const handleNotebookNameFocus = () => {
-    const currentName = notebookQuery.data?.name ?? notebookMeta.name
-    setNotebookNameDraft(currentName)
-    patchNotebookMeta({ name: currentName })
-    setIsNotebookNameEditing(true)
-  }
-
-  const handleNotebookNameBlur = async () => {
+  const handleNotebookNameCommit = useCallback((rawName: string) => {
     if (!id) {
-      setIsNotebookNameEditing(false)
       return
     }
 
     const currentName = notebookQuery.data?.name ?? notebookMeta.name
-    const nextName = notebookNameDraft.trim()
+    const nextName = rawName.trim()
     if (!nextName || nextName === currentName) {
-      setNotebookNameDraft(currentName)
-      patchNotebookMeta({ name: currentName })
-      setIsNotebookNameEditing(false)
+      // No-op commit: avoid re-rendering Chat/Studio just to exit edit mode.
       return
     }
 
-    setIsNotebookNameEditing(false)
-    queryClient.setQueryData<Notebook>(['notebook', id], (prev) => {
-      if (!prev) return prev
-      return {
-        ...prev,
-        name: nextName,
-      }
-    })
-    patchNotebookMeta({ name: nextName })
-
-    try {
-      await updateNotebookNameMutation.mutateAsync({
-        notebookId: id,
-        name: nextName,
-      })
-      setNotebookNameDraft(nextName)
-    } catch (error) {
+    // Header already left edit mode locally; defer store/query fan-out.
+    startTransition(() => {
       queryClient.setQueryData<Notebook>(['notebook', id], (prev) => {
         if (!prev) return prev
         return {
           ...prev,
-          name: currentName,
+          name: nextName,
         }
       })
-      setNotebookNameDraft(currentName)
-      patchNotebookMeta({ name: currentName })
-      console.warn('update notebook name failed', error)
-    }
-  }
+      patchNotebookMeta({ name: nextName })
+    })
+
+    void updateNotebookNameMutation
+      .mutateAsync({
+        notebookId: id,
+        name: nextName,
+      })
+      .catch((error) => {
+        startTransition(() => {
+          queryClient.setQueryData<Notebook>(['notebook', id], (prev) => {
+            if (!prev) return prev
+            return {
+              ...prev,
+              name: currentName,
+            }
+          })
+          patchNotebookMeta({ name: currentName })
+        })
+        console.warn('update notebook name failed', error)
+      })
+  }, [
+    id,
+    notebookMeta.name,
+    notebookQuery.data?.name,
+    patchNotebookMeta,
+    queryClient,
+    updateNotebookNameMutation,
+  ])
 
   const handleDeleteNotebook = async () => {
     if (!id || deleteNotebookMutation.isPending) {
@@ -1126,6 +1185,20 @@ export function NotebookWorkspacePage() {
     [getLeftPanelWidthBounds, getRightPanelWidthBounds],
   )
 
+  const startResizeLeftPanel = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      startResizePanel('left')(event)
+    },
+    [startResizePanel],
+  )
+
+  const startResizeRightPanel = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      startResizePanel('right')(event)
+    },
+    [startResizePanel],
+  )
+
   const handleCollapseSourcesPanel = useCallback(() => {
     sourcesPanelCollapsedRef.current = true
     syncWorkspacePanelGridFromRefs({ sourcesCollapsed: true })
@@ -1288,11 +1361,7 @@ export function NotebookWorkspacePage() {
         isFetching={notebookQuery.isFetching}
         isUpdatingName={updateNotebookNameMutation.isPending}
         isDeletingNotebook={deleteNotebookMutation.isPending}
-        onNotebookNameChange={handleNotebookNameChange}
-        onNotebookNameFocus={handleNotebookNameFocus}
-        onNotebookNameBlur={() => {
-          void handleNotebookNameBlur()
-        }}
+        onNotebookNameCommit={handleNotebookNameCommit}
         onDeleteNotebook={handleDeleteNotebook}
       />
 
@@ -1353,8 +1422,8 @@ export function NotebookWorkspacePage() {
               someSourcesChecked={someSourcesChecked}
               onCollapse={handleCollapseSourcesPanel}
               onCreateFile={handleCreateFileSources}
-              onCreateUrl={(url) => handleCreateSimpleSource('url', url)}
-              onCreateText={(text) => handleCreateSimpleSource('text', text)}
+              onCreateUrl={handleCreateUrlSource}
+              onCreateText={handleCreateTextSource}
               onToggleAll={toggleAllSourceChecked}
               onToggleItem={toggleSourceItemChecked}
               onDeleteItem={handleDeleteSource}
@@ -1370,7 +1439,7 @@ export function NotebookWorkspacePage() {
             role="separator"
             aria-orientation="vertical"
             aria-label="调整来源面板宽度"
-            onPointerDown={startResizePanel('left')}
+            onPointerDown={startResizeLeftPanel}
             sx={{
               display: { xs: 'none', md: 'block' },
               cursor: isSourcesPanelCollapsed ? 'default' : 'col-resize',
@@ -1417,7 +1486,7 @@ export function NotebookWorkspacePage() {
               notebookName={displayNotebookName}
               notebookDescription={notebookMeta.desc}
               notebookSourceCount={notebookMeta.sourceCount}
-              selectedSourceIds={selectedSourceIdList}
+              selectedSourceIds={deferredSelectedSourceIdList}
               readySourceIds={readySourceIdList}
               sourcesPanelCollapsed={isSourcesPanelCollapsed}
               insightsPanelCollapsed={isInsightsPanelCollapsed}
@@ -1433,7 +1502,7 @@ export function NotebookWorkspacePage() {
             role="separator"
             aria-orientation="vertical"
             aria-label="调整右侧面板宽度"
-            onPointerDown={startResizePanel('right')}
+            onPointerDown={startResizeRightPanel}
             sx={{
               display: { xs: 'none', md: 'block' },
               cursor: isInsightsPanelCollapsed ? 'default' : 'col-resize',
@@ -1483,7 +1552,7 @@ export function NotebookWorkspacePage() {
           >
             <StudioPanel
               notebookId={id}
-              selectedSourceIds={selectedSourceIdList}
+              selectedSourceIds={deferredSelectedSourceIdList}
               readySourceIds={readySourceIdList}
               onCollapse={handleCollapseInsightsPanel}
               onSourceCreated={handleSourceCreated}

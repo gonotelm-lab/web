@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { pollSourceStatus } from '@/api/source'
 import type { SourceCard } from '@/store/workspace'
 import type { SourceStatus } from '@/types/api'
@@ -46,6 +46,15 @@ export function useSourcePolling({
     onSourceReadyRef.current = onSourceReady
   }, [onSourceReady])
 
+  const hasPendingSources = useMemo(
+    () =>
+      sources.some(
+        (source) =>
+          !isTerminalStatus(source.status) && !removingSourceIds[source.id],
+      ),
+    [removingSourceIds, sources],
+  )
+
   const pollSourceTick = useCallback(async () => {
     const pendingSources = sourcesRef.current.filter(
       (source) =>
@@ -65,7 +74,10 @@ export function useSourcePolling({
           if (source.status !== 'ready' && status.status === 'ready') {
             hasSourceReady = true
           }
-          setSourceStatusRef.current(source.id, status.status)
+          // Skip no-op writes; store also short-circuits, but avoid the call when unchanged.
+          if (source.status !== status.status) {
+            setSourceStatusRef.current(source.id, status.status)
+          }
         } catch (error) {
           // keep silent for polling loop to avoid noisy snackbars
           console.warn('poll source status failed', source.id, error)
@@ -79,7 +91,8 @@ export function useSourcePolling({
   }, [])
 
   useAdaptivePollingLoop({
-    enabled: Boolean(notebookId),
+    // Wake when new non-terminal sources appear; stay off while idle.
+    enabled: Boolean(notebookId) && hasPendingSources,
     restartKey: notebookId,
     baseIntervalMs: sourceStatusPollBaseIntervalMs,
     maxIntervalMs: sourceStatusPollMaxIntervalMs,

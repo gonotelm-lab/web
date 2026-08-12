@@ -13,7 +13,8 @@ export const workspaceMotion = {
 } as const
 
 export const workspaceAnimation = {
-  flowLoadingWaveDurationMs: 1500,
+  /** Linear transform sweep duration (compositor-friendly). */
+  flowLoadingWaveDurationMs: 2400,
   refreshSpinDurationMs: 1200,
   pendingEllipsisDurationMs: 1600,
   streamStatusFlowDurationSec: 3.1,

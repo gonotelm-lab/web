@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined'
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined'
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined'
@@ -16,12 +16,9 @@ import type { SvgIconComponent } from '@mui/icons-material'
 import type { StudioArtifactKind } from '@/types/api'
 import { IconButton, Menu, MenuItem, Paper, Stack, Tooltip, Typography } from '@mui/material'
 import type { Theme } from '@mui/material/styles'
-import {
-  FlowLoadingOverlay,
-  workspaceLayout,
-  workspaceSpace,
-  workspaceTransitionPresets,
-} from '@/components/notebook-workspace/shared'
+import { FlowLoadingOverlay } from '@/components/notebook-workspace/shared/ui/FlowLoadingOverlay'
+import { workspaceLayout, workspaceSpace } from '@/components/notebook-workspace/shared/ui/layoutTokens'
+import { workspaceTransitionPresets } from '@/components/notebook-workspace/shared/ui/motionTokens'
 import {
   resolveStudioToolTone,
   resolveStudioToolToneKey,
@@ -129,7 +126,7 @@ const resolveListBorderTone = (
   return { border: kindTone.border, accent: kindTone.accent, surface: kindTone.surface }
 }
 
-export function StudioArtifactListItem({
+export const StudioArtifactListItem = memo(function StudioArtifactListItem({
   item,
   previewLoading,
   retryPending,
@@ -368,4 +365,4 @@ export function StudioArtifactListItem({
       </Stack>
     </Paper>
   )
-}
+})

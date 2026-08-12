@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight'
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
@@ -68,7 +68,7 @@ const studioListDividerSpacing = {
   mb: workspaceSpace.sm,
 }
 
-export function StudioPanel({
+export const StudioPanel = memo(function StudioPanel({
   notebookId,
   selectedSourceIds,
   readySourceIds,
@@ -348,27 +348,95 @@ export function StudioPanel({
     setDataTableDialogOpen(false)
   }, [])
 
-  const actionHandlers: Record<StudioToolActionId, () => void> = {
-    'generate-mindmap': () => handleCreateMindmap(),
-    'generate-report': () => handleCreateReport(),
-    'generate-info_graphic': () => handleCreateInfoGraphic(),
-    'generate-audio_overview': () => handleCreateAudioOverview(),
-    'generate-flashcard': () => handleCreateFlashcard(),
-    'generate-quiz': () => handleCreateQuiz(),
-    'generate-data_table': () => handleCreateDataTable(),
-    // note 从 chat 侧触发，不经 Studio 工具入口
-    'save-as-note': () => undefined,
-  }
+  const actionHandlers = useMemo<Record<StudioToolActionId, () => void>>(
+    () => ({
+      'generate-mindmap': () => {
+        void handleCreateMindmap()
+      },
+      'generate-report': () => {
+        void handleCreateReport()
+      },
+      'generate-info_graphic': () => {
+        void handleCreateInfoGraphic()
+      },
+      'generate-audio_overview': () => {
+        void handleCreateAudioOverview()
+      },
+      'generate-flashcard': () => {
+        void handleCreateFlashcard()
+      },
+      'generate-quiz': () => {
+        void handleCreateQuiz()
+      },
+      'generate-data_table': () => {
+        void handleCreateDataTable()
+      },
+      // note 从 chat 侧触发，不经 Studio 工具入口
+      'save-as-note': () => undefined,
+    }),
+    [
+      handleCreateMindmap,
+      handleCreateReport,
+      handleCreateInfoGraphic,
+      handleCreateAudioOverview,
+      handleCreateFlashcard,
+      handleCreateQuiz,
+      handleCreateDataTable,
+    ],
+  )
 
-  const advancedActionHandlers: Partial<Record<StudioToolActionId, () => void>> = {
-    'generate-mindmap': handleOpenMindmapDialog,
-    'generate-report': handleOpenReportDialog,
-    'generate-info_graphic': handleOpenInfoGraphicDialog,
-    'generate-audio_overview': handleOpenAudioOverviewDialog,
-    'generate-flashcard': handleOpenFlashcardDialog,
-    'generate-quiz': handleOpenQuizDialog,
-    'generate-data_table': handleOpenDataTableDialog,
-  }
+  const advancedActionHandlers = useMemo<Partial<Record<StudioToolActionId, () => void>>>(
+    () => ({
+      'generate-mindmap': handleOpenMindmapDialog,
+      'generate-report': handleOpenReportDialog,
+      'generate-info_graphic': handleOpenInfoGraphicDialog,
+      'generate-audio_overview': handleOpenAudioOverviewDialog,
+      'generate-flashcard': handleOpenFlashcardDialog,
+      'generate-quiz': handleOpenQuizDialog,
+      'generate-data_table': handleOpenDataTableDialog,
+    }),
+    [
+      handleOpenMindmapDialog,
+      handleOpenReportDialog,
+      handleOpenInfoGraphicDialog,
+      handleOpenAudioOverviewDialog,
+      handleOpenFlashcardDialog,
+      handleOpenQuizDialog,
+      handleOpenDataTableDialog,
+    ],
+  )
+
+  const handleRetryArtifact = useCallback(
+    (target: Parameters<typeof retryArtifact>[0]) => {
+      void retryArtifact(target)
+    },
+    [retryArtifact],
+  )
+
+  const handleCancelArtifact = useCallback(
+    (target: Parameters<typeof cancelArtifact>[0]) => {
+      void cancelArtifact(target)
+    },
+    [cancelArtifact],
+  )
+
+  const handleDeleteArtifact = useCallback(
+    (target: Parameters<typeof deleteArtifact>[0]) => {
+      void deleteArtifact(target)
+    },
+    [deleteArtifact],
+  )
+
+  const handleConvertNoteToSource = useCallback(
+    (target: Parameters<typeof convertNoteToSource>[0]) => {
+      void convertNoteToSource(target)
+    },
+    [convertNoteToSource],
+  )
+
+  const handleReloadHistoryArtifacts = useCallback(() => {
+    void reloadHistoryArtifacts()
+  }, [reloadHistoryArtifacts])
 
   const primaryContent = (
     <Stack sx={{ height: '100%', minHeight: 0 }}>
@@ -427,9 +495,7 @@ export function StudioPanel({
               size="small"
               color="default"
               aria-label="刷新产物列表"
-              onClick={() => {
-                void reloadHistoryArtifacts()
-              }}
+              onClick={handleReloadHistoryArtifacts}
               disabled={historyLoading}
             >
               <RefreshRoundedIcon fontSize="small" />
@@ -467,28 +533,27 @@ export function StudioPanel({
         ) : (
           <Stack spacing={workspaceLayout.listRowGap} sx={{ pr: workspaceSpace.xxs }}>
             {artifactItems.map((item) => (
-              <StudioArtifactListItem
+              <Box
                 key={item.id}
-                item={item}
-                previewLoading={previewState.loading && previewState.targetId === item.id}
-                onPreview={openPreviewByItemClick}
-                retryPending={isArtifactActionPending(item.id, 'retry')}
-                cancelPending={isArtifactActionPending(item.id, 'cancel')}
-                deletePending={isArtifactActionPending(item.id, 'delete')}
-                convertPending={isArtifactActionPending(item.id, 'convert')}
-                onRetry={(target) => {
-                  void retryArtifact(target)
+                sx={{
+                  contentVisibility: 'auto',
+                  containIntrinsicSize: '0 72px',
                 }}
-                onCancel={(target) => {
-                  void cancelArtifact(target)
-                }}
-                onDelete={(target) => {
-                  void deleteArtifact(target)
-                }}
-                onConvertToSource={(target) => {
-                  void convertNoteToSource(target)
-                }}
-              />
+              >
+                <StudioArtifactListItem
+                  item={item}
+                  previewLoading={previewState.loading && previewState.targetId === item.id}
+                  onPreview={openPreviewByItemClick}
+                  retryPending={isArtifactActionPending(item.id, 'retry')}
+                  cancelPending={isArtifactActionPending(item.id, 'cancel')}
+                  deletePending={isArtifactActionPending(item.id, 'delete')}
+                  convertPending={isArtifactActionPending(item.id, 'convert')}
+                  onRetry={handleRetryArtifact}
+                  onCancel={handleCancelArtifact}
+                  onDelete={handleDeleteArtifact}
+                  onConvertToSource={handleConvertNoteToSource}
+                />
+              </Box>
             ))}
           </Stack>
         )}
@@ -670,4 +735,4 @@ export function StudioPanel({
         : null}
     </Paper>
   )
-}
+})

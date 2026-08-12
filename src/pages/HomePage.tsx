@@ -6,7 +6,6 @@ import {
   CircularProgress,
   Container,
   Stack,
-  Typography,
 } from '@mui/material'
 import type { ListNotebooksSortBy } from '@/types/api'
 import { createNotebook, deleteNotebook, listNotebooks } from '../api/notebook'

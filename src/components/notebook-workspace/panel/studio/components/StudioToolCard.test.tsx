@@ -4,6 +4,16 @@ import { describe, expect, it, vi } from 'vitest'
 import { StudioToolCard } from './StudioToolCard'
 import type { StudioToolDefinition } from '../types'
 
+vi.mock('../../../shared/ui/studioSemanticTones', () => ({
+  resolveStudioToolToneKey: () => 'default',
+  resolveStudioToolTone: () => ({
+    accent: '#2f6b4f',
+    border: 'rgba(47, 107, 79, 0.28)',
+    icon: '#2f6b4f',
+    surface: 'rgba(47, 107, 79, 0.1)',
+  }),
+}))
+
 const toolWithAdvancedConfig: StudioToolDefinition = {
   id: 'info_graphic',
   title: '信息图',

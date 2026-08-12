@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined'
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined'
 import {
@@ -30,25 +30,31 @@ interface WorkspaceHeaderProps {
   isFetching: boolean
   isUpdatingName: boolean
   isDeletingNotebook?: boolean
-  onNotebookNameChange: (value: string) => void
-  onNotebookNameFocus: () => void
-  onNotebookNameBlur: () => void
+  /** Commit only on blur / Enter — keeps keystrokes out of the workspace page tree. */
+  onNotebookNameCommit: (value: string) => void
   onDeleteNotebook?: () => Promise<void>
 }
 
-export function WorkspaceHeader({
+export const WorkspaceHeader = memo(function WorkspaceHeader({
   notebookName,
   isFetching,
   isUpdatingName,
   isDeletingNotebook = false,
-  onNotebookNameChange,
-  onNotebookNameFocus,
-  onNotebookNameBlur,
+  onNotebookNameCommit,
   onDeleteNotebook,
 }: WorkspaceHeaderProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState<string | null>(null)
+  const [draftName, setDraftName] = useState(notebookName)
+  const [isEditing, setIsEditing] = useState(false)
   const canDelete = typeof onDeleteNotebook === 'function'
+
+  useEffect(() => {
+    if (isEditing) {
+      return
+    }
+    setDraftName(notebookName)
+  }, [isEditing, notebookName])
 
   const handleOpenDeleteDialog = () => {
     if (!canDelete) {
@@ -82,6 +88,11 @@ export function WorkspaceHeader({
         }
         setDeleteErrorMessage('删除失败，请稍后重试')
       })
+  }
+
+  const commitDraft = () => {
+    setIsEditing(false)
+    onNotebookNameCommit(draftName)
   }
 
   return (
@@ -121,12 +132,15 @@ export function WorkspaceHeader({
           <ArrowBackOutlinedIcon sx={{ fontSize: workspaceIconSize.md }} />
         </IconButton>
         <InputBase
-          value={notebookName}
+          value={draftName}
           placeholder="未命名笔记本"
           disabled={isDeletingNotebook}
-          onChange={(event) => onNotebookNameChange(event.target.value)}
-          onFocus={onNotebookNameFocus}
-          onBlur={onNotebookNameBlur}
+          onChange={(event) => setDraftName(event.target.value)}
+          onFocus={() => {
+            setDraftName(notebookName)
+            setIsEditing(true)
+          }}
+          onBlur={commitDraft}
           onKeyDown={(event) => {
             if (event.key === 'Enter') {
               event.preventDefault()
@@ -225,20 +239,15 @@ export function WorkspaceHeader({
             取消
           </Button>
           <Button
+            color="error"
             variant="contained"
             onClick={handleConfirmDelete}
             disabled={isDeletingNotebook}
-            sx={(theme) => ({
-              bgcolor: theme.workspacePalette.status.error,
-              '&:hover': {
-                bgcolor: theme.palette.error.dark,
-              },
-            })}
           >
-            {isDeletingNotebook ? '删除中...' : '删除'}
+            {isDeletingNotebook ? '删除中...' : '确认删除'}
           </Button>
         </DialogActions>
       </Dialog>
     </Box>
   )
-}
+})

@@ -8,6 +8,15 @@ vi.mock('./FlowLoadingOverlay', () => ({
   FlowLoadingOverlay: () => null,
 }))
 
+vi.mock('../../../shared/ui/studioSemanticTones', () => ({
+  resolveSourceTypeTone: () => ({
+    accent: '#2f6b4f',
+    border: 'rgba(47, 107, 79, 0.28)',
+    icon: '#2f6b4f',
+    surface: 'rgba(47, 107, 79, 0.1)',
+  }),
+}))
+
 const sourceItem: SourceListItem = {
   id: 'source-1',
   kind: 'text',
@@ -43,7 +52,7 @@ const createRenderer = () => {
 }
 
 describe('SourceListRow', () => {
-  it('点击复选框后应立即反馈勾选状态', () => {
+  it('点击复选框后应通知父级切换勾选', () => {
     const { renderer, onToggleItem } = createRenderer()
 
     const checkbox = renderer.root.findByType(Checkbox)
@@ -55,8 +64,6 @@ describe('SourceListRow', () => {
       })
     })
 
-    const nextCheckbox = renderer.root.findByType(Checkbox)
-    expect(nextCheckbox.props.checked).toBe(true)
     expect(onToggleItem).toHaveBeenCalledWith('source-1', true)
   })
 })

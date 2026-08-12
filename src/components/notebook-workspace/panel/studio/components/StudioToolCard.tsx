@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import ArrowOutwardOutlinedIcon from '@mui/icons-material/ArrowOutwardOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import HourglassBottomOutlinedIcon from '@mui/icons-material/HourglassBottomOutlined'
@@ -21,7 +22,7 @@ interface StudioToolCardProps {
   onAdvancedClick?: () => void
 }
 
-export function StudioToolCard({
+export const StudioToolCard = memo(function StudioToolCard({
   tool,
   selected = false,
   disabled = false,
@@ -190,4 +191,4 @@ export function StudioToolCard({
       </Box>
     </Tooltip>
   )
-}
+})

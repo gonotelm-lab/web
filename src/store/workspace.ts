@@ -49,36 +49,66 @@ export const useWorkspaceStore = create<WorkspaceStore>((set) => ({
       sources: [source, ...state.sources.filter((item) => item.id !== source.id)],
     })),
   patchSource: (id, patch) =>
-    set((state) => ({
-      sources: state.sources.map((item) =>
-        item.id === id ? { ...item, ...patch } : item,
-      ),
-    })),
-  removeSource: (id) =>
-    set((state) => ({
-      sources: state.sources.filter((item) => item.id !== id),
-    })),
-  setSources: (sources) =>
-    set({
-      sources,
+    set((state) => {
+      const index = state.sources.findIndex((item) => item.id === id)
+      if (index < 0) {
+        return state
+      }
+      const current = state.sources[index]
+      const next = { ...current, ...patch }
+      const unchanged = (Object.keys(patch) as Array<keyof SourceCard>).every(
+        (key) => current[key] === next[key],
+      )
+      if (unchanged) {
+        return state
+      }
+      const sources = state.sources.slice()
+      sources[index] = next
+      return { sources }
     }),
+  removeSource: (id) =>
+    set((state) => {
+      if (!state.sources.some((item) => item.id === id)) {
+        return state
+      }
+      return {
+        sources: state.sources.filter((item) => item.id !== id),
+      }
+    }),
+  setSources: (sources) =>
+    set((state) => (state.sources === sources ? state : { sources })),
   setSourceStatus: (id, status) =>
-    set((state) => ({
-      sources: state.sources.map((item) =>
-        item.id === id ? { ...item, status } : item,
-      ),
-    })),
+    set((state) => {
+      const index = state.sources.findIndex((item) => item.id === id)
+      if (index < 0) {
+        return state
+      }
+      const current = state.sources[index]
+      if (current.status === status) {
+        return state
+      }
+      const sources = state.sources.slice()
+      sources[index] = { ...current, status }
+      return { sources }
+    }),
   setNotebookMeta: (notebookMeta) =>
     set({
       notebookMeta,
     }),
   patchNotebookMeta: (patch) =>
-    set((state) => ({
-      notebookMeta: {
+    set((state) => {
+      const next = {
         ...state.notebookMeta,
         ...patch,
-      },
-    })),
+      }
+      const unchanged = (Object.keys(patch) as Array<keyof NotebookMeta>).every(
+        (key) => state.notebookMeta[key] === next[key],
+      )
+      if (unchanged) {
+        return state
+      }
+      return { notebookMeta: next }
+    }),
   reset: () =>
     set({
       sources: [],
