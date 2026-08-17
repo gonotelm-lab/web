@@ -32,6 +32,7 @@ interface StudioArtifactPreviewOverlayProps {
   loading: boolean
   error: string
   content: string
+  initialSlideIndex?: number
   onClose: () => void
   onRetryLoad: () => void
   onRenameTitle?: (title: string) => Promise<void>
@@ -43,6 +44,7 @@ export function StudioArtifactPreviewOverlay({
   loading,
   error,
   content,
+  initialSlideIndex = 0,
   onClose,
   onRetryLoad,
   onRenameTitle,
@@ -71,6 +73,7 @@ export function StudioArtifactPreviewOverlay({
   const isMindmapArtifact = artifact?.kind === 'mindmap'
   const isReportArtifact = artifact?.kind === 'report'
   const isInfographicArtifact = artifact?.kind === 'info_graphic'
+  const isSlidesArtifact = artifact?.kind === 'slides'
 
   const hasDownloadableContent = artifact
     ? hasStudioArtifactPreviewContent(artifact.kind, content, artifact.contentUrl)
@@ -111,6 +114,20 @@ export function StudioArtifactPreviewOverlay({
         const anchor = document.createElement('a')
         anchor.href = audioUrl
         anchor.download = `${safeName}.wav`
+        document.body.appendChild(anchor)
+        anchor.click()
+        anchor.remove()
+      })
+      return
+    }
+
+    if (artifact.kind === 'slides') {
+      const pptxUrl = artifact.contentUrl
+      if (!pptxUrl.trim()) return
+      void downloadFileFromUrl(pptxUrl, `${safeName}.pptx`).catch(() => {
+        const anchor = document.createElement('a')
+        anchor.href = pptxUrl
+        anchor.download = `${safeName}.pptx`
         document.body.appendChild(anchor)
         anchor.click()
         anchor.remove()
@@ -237,13 +254,17 @@ export function StudioArtifactPreviewOverlay({
           sx={(theme) => ({
             flex: 1,
             minHeight: 0,
-            overflow: 'auto',
-            ...(isMindmapArtifact || isInfographicArtifact
+            overflow: isMindmapArtifact || isInfographicArtifact || isSlidesArtifact
+              ? 'hidden'
+              : 'auto',
+            ...(isMindmapArtifact || isInfographicArtifact || isSlidesArtifact
               ? { p: 0 }
               : isReportArtifact
                 ? { px: workspaceSpace.xl, py: workspaceSpace.md }
                 : { p: workspaceSpace.md }),
-            ...subtleScrollbarSx(theme),
+            ...(isMindmapArtifact || isInfographicArtifact || isSlidesArtifact
+              ? null
+              : subtleScrollbarSx(theme)),
           })}
         >
           {loading ? (
@@ -273,6 +294,7 @@ export function StudioArtifactPreviewOverlay({
                 artifact,
                 content,
                 mode: 'overlay',
+                initialSlideIndex,
               })}
             </Box>
           )}

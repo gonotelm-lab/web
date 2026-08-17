@@ -42,6 +42,7 @@
       "quiz": "Generate a quiz from selected sources",
       "infoGraphic": "Generate an infographic from selected sources",
       "dataTable": "Generate a data table from selected sources",
+      "slides": "Generate a slide deck (PPTX) from selected sources",
       "comingSoon": "Coming soon"
     },
     "status": {
@@ -135,6 +136,7 @@
     "flashcard": { "title": "Generate flashcards" },
     "quiz": { "title": "Generate quiz" },
     "dataTable": { "title": "Generate data table" },
+    "slides": { "title": "Generate slides" },
     "language": "Language",
     "languageHelp": {
       "report": "Controls the language of the report output.",
@@ -150,11 +152,13 @@
     "tipPlaceholder": {
       "generic": "Add focus, audience, or tone requirements.",
       "mindmap": "e.g. Emphasize the 'implementation' and 'risk' branches.",
-      "dataTable": "e.g. Compare definitions, use cases, and caveats by concept."
+      "dataTable": "e.g. Compare definitions, use cases, and caveats by concept.",
+      "slides": "e.g. Focus on key takeaways, audience, or slide structure."
     },
     "tipHelp": {
       "mindmap": "Add focus areas, hierarchy preferences, or structure requirements.",
-      "dataTable": "Add desired fields, comparison dimensions, or table focus."
+      "dataTable": "Add desired fields, comparison dimensions, or table focus.",
+      "slides": "Add focus areas, audience, or outline/structure preferences."
     },
     "detailLevel": "Detail level",
     "detailLevelHelp": "Controls how detailed the infographic content is.",
@@ -265,5 +269,14 @@
     "hintAria": "Show hint",
     "prevAria": "Previous card",
     "nextAria": "Next card"
+  },
+  "slides": {
+    "title": "Slide deck (PPTX)",
+    "downloadHint": "Slides are exported as a PowerPoint file.",
+    "download": "Download PPTX",
+    "loading": "Parsing slides…",
+    "parseFailed": "Could not parse the slide deck. Retry or download the file.",
+    "emptyUrl": "No slide file URL available.",
+    "openSlideAria": "Open slide {{n}} in large preview"
   }
 }

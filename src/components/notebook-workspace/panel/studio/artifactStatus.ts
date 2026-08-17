@@ -7,11 +7,21 @@ const retryableTaskStatusSet = new Set(['failed', 'cancelled'])
 const pendingTaskStatusSet = new Set(['pending', 'running'])
 export type StudioArtifactVisualStatus = 'queued' | 'polling' | 'succeeded' | 'failed' | 'cancelled'
 
+/** Backend flow may still retry; tolerate this many consecutive soft failures before UI gives up. */
+export const STUDIO_ARTIFACT_STATUS_MAX_CONSECUTIVE_FAILURES = 3
+
 const normalizeStudioTaskStatus = (status: StudioArtifactTaskStatus) =>
   String(status || '').trim().toLowerCase()
 
 export const isStudioTaskCompleted = (status: StudioArtifactTaskStatus) =>
   normalizeStudioTaskStatus(status) === 'completed'
+
+export const isStudioTaskCancelled = (status: StudioArtifactTaskStatus) =>
+  normalizeStudioTaskStatus(status) === 'cancelled'
+
+/** failed/expired may be transient while backend retries; cancelled is not soft. */
+export const isStudioTaskSoftFailed = (status: StudioArtifactTaskStatus) =>
+  failedTaskStatusSet.has(normalizeStudioTaskStatus(status))
 
 export const isStudioTaskFailed = (status: StudioArtifactTaskStatus) =>
   failedLikeTaskStatusSet.has(normalizeStudioTaskStatus(status))
@@ -24,6 +34,9 @@ export const shouldStudioTaskKeepPolling = (status: StudioArtifactTaskStatus) =>
 
 export const isStudioTaskRunning = (status: StudioArtifactTaskStatus) =>
   normalizeStudioTaskStatus(status) === 'running'
+
+export const shouldFinalizeStatusPollFailure = (consecutiveFailures: number) =>
+  consecutiveFailures >= STUDIO_ARTIFACT_STATUS_MAX_CONSECUTIVE_FAILURES
 
 export const toArtifactVisualStatus = (
   status: StudioArtifactTaskStatus,

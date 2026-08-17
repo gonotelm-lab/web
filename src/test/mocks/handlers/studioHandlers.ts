@@ -32,6 +32,7 @@ const buildArtifactTitle = (kind: string) => {
   if (kind === 'mindmap') return 'Mind Map'
   if (kind === 'report') return 'Report'
   if (kind === 'info_graphic') return '信息图'
+  if (kind === 'slides') return '幻灯片'
   if (kind === 'note') return '笔记'
   return 'Studio Artifact'
 }
@@ -78,6 +79,23 @@ const buildArtifactResultPayload = (
       extras: {
         chat_id: 'chat-1',
         msg_id: 'msg-1',
+      },
+    }
+  }
+
+  if (artifactKind === 'slides') {
+    return {
+      notebook_id: notebookId,
+      task_id: taskId,
+      kind: artifactKind,
+      status: 'completed',
+      title,
+      source_ids: sourceIds,
+      timestamp,
+      content_url: 'https://example.com/mock-slides.pptx',
+      content_kind: 'storage',
+      extras: {
+        tip: 'mock tip',
       },
     }
   }

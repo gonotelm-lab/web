@@ -83,9 +83,11 @@ export function getStudioToolCatalog(): StudioToolDefinition[] {
     {
       id: 'slide-deck',
       title: i18n.t('studio:kind.slideDeck'),
-      description: i18n.t('studio:tool.desc.comingSoon'),
+      description: i18n.t('studio:tool.desc.slides'),
       icon: SlideshowOutlinedIcon,
-      availability: 'coming-soon',
+      availability: 'available',
+      actionId: 'generate-slides',
+      artifactKind: 'slides',
       hasAdvancedConfig: true,
     },
     {

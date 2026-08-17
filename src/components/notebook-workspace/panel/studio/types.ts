@@ -8,6 +8,7 @@ import type {
   NoteArtifactExtras,
   QuizArtifactExtras,
   ReportArtifactExtras,
+  SlidesArtifactExtras,
   StudioArtifactContentKind,
   StudioArtifactKind,
   StudioArtifactTaskStatus,
@@ -21,6 +22,7 @@ export type StudioArtifactExtras =
   | FlashcardArtifactExtras
   | QuizArtifactExtras
   | DataTableArtifactExtras
+  | SlidesArtifactExtras
   | NoteArtifactExtras
 
 export type StudioToolActionId =
@@ -31,6 +33,7 @@ export type StudioToolActionId =
   | 'generate-flashcard'
   | 'generate-quiz'
   | 'generate-data_table'
+  | 'generate-slides'
   | 'save-as-note'
 
 export interface SaveMessageAsNoteParams {

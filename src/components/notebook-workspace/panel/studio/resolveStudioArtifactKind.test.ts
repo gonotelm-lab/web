@@ -50,3 +50,11 @@ describe('resolveStudioArtifactKind note', () => {
     expect(resolveStudioArtifactActionId('note')).toBe('save-as-note')
   })
 })
+
+describe('resolveStudioArtifactKind slides', () => {
+  it('maps slides kind', () => {
+    expect(resolveStudioArtifactKind('slides')).toBe('slides')
+    expect(resolveStudioArtifactActionId('slides')).toBe('generate-slides')
+    expect(resolveStudioArtifactFallbackTitle('slides')).toBe('幻灯片')
+  })
+})

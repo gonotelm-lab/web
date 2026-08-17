@@ -26,6 +26,8 @@ export interface StudioPreviewState {
   content: string
   contentUrl: string
   error: string
+  /** overlay 打开时定位到的 slides 页（0-based） */
+  overlaySlideIndex: number
 }
 
 const defaultStudioPreviewState: StudioPreviewState = {
@@ -36,6 +38,7 @@ const defaultStudioPreviewState: StudioPreviewState = {
   content: '',
   contentUrl: '',
   error: '',
+  overlaySlideIndex: 0,
 }
 
 interface UseStudioPreviewControllerParams {
@@ -146,7 +149,7 @@ export function useStudioPreviewController({
         return
       }
 
-      if (!content && contentUrl && latestItem.kind !== 'info_graphic' && latestItem.kind !== 'audio_overview') {
+      if (!content && contentUrl && latestItem.kind !== 'info_graphic' && latestItem.kind !== 'audio_overview' && latestItem.kind !== 'slides') {
         content = await loadStudioArtifactContentFromUrl(contentUrl)
         if (previewLoadSeqRef.current !== requestSeq) {
           return
@@ -193,10 +196,14 @@ export function useStudioPreviewController({
     }
   }, [loadPreviewForItem])
 
-  const openOverlayFromInline = useCallback(() => {
+  const openOverlayFromInline = useCallback((slideIndex?: number) => {
     if (!previewTarget || !previewCapability?.overlay) {
       return
     }
+    const nextSlideIndex =
+      typeof slideIndex === 'number' && Number.isFinite(slideIndex) && slideIndex >= 0
+        ? Math.floor(slideIndex)
+        : 0
     if (
       previewState.targetId === previewTarget.id &&
       !previewState.loading &&
@@ -207,9 +214,17 @@ export function useStudioPreviewController({
         previewState.contentUrl || previewTarget.contentUrl,
       )
     ) {
-      setPreviewState((prev) => ({ ...prev, overlayOpen: true }))
+      setPreviewState((prev) => ({
+        ...prev,
+        overlayOpen: true,
+        overlaySlideIndex: nextSlideIndex,
+      }))
       return
     }
+    setPreviewState((prev) => ({
+      ...prev,
+      overlaySlideIndex: nextSlideIndex,
+    }))
     void loadPreviewForItem(previewTarget, {
       inlineOpen: previewState.inlineOpen,
       overlayOpen: true,
@@ -232,7 +247,11 @@ export function useStudioPreviewController({
   }, [])
 
   const closeOverlayPreview = useCallback(() => {
-    setPreviewState((prev) => ({ ...prev, overlayOpen: false }))
+    setPreviewState((prev) => ({
+      ...prev,
+      overlayOpen: false,
+      overlaySlideIndex: 0,
+    }))
   }, [])
 
   const retryPreviewLoad = useCallback(() => {

@@ -142,6 +142,12 @@ export const workspaceColorPalette = {
       icon: '#6a7a68',
       surface: 'rgba(106, 122, 104, 0.08)',
     },
+    slides: {
+      accent: '#8a5a3c',
+      border: '#d4b8a8',
+      icon: '#8a5a3c',
+      surface: 'rgba(138, 90, 60, 0.08)',
+    },
     'video-overview': {
       accent: '#3d5a80',
       border: '#b7c4d4',

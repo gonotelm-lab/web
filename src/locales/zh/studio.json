@@ -42,6 +42,7 @@
       "quiz": "基于勾选来源生成测验",
       "infoGraphic": "基于勾选来源生成信息图",
       "dataTable": "基于勾选来源生成数据表",
+      "slides": "基于勾选来源生成幻灯片",
       "comingSoon": "即将支持"
     },
     "status": {
@@ -135,6 +136,7 @@
     "flashcard": { "title": "生成闪卡" },
     "quiz": { "title": "生成测验" },
     "dataTable": { "title": "生成数据表" },
+    "slides": { "title": "生成幻灯片" },
     "language": "选择语言",
     "languageHelp": {
       "report": "控制报告输出的语言。",
@@ -150,11 +152,13 @@
     "tipPlaceholder": {
       "generic": "可补充强调重点、受众或表达要求。",
       "mindmap": "例如：请侧重'实施路径'和'风险'两个分支。",
-      "dataTable": "例如：按概念对比定义、适用场景与注意事项。"
+      "dataTable": "例如：按概念对比定义、适用场景与注意事项。",
+      "slides": "例如：侧重核心结论、面向受众或指定页结构。"
     },
     "tipHelp": {
       "mindmap": "可补充强调重点、指定层级偏好或结构要求。",
-      "dataTable": "可补充希望提取的字段、对比维度或表格侧重点。"
+      "dataTable": "可补充希望提取的字段、对比维度或表格侧重点。",
+      "slides": "可补充强调重点、受众或大纲结构偏好。"
     },
     "detailLevel": "探索深度",
     "detailLevelHelp": "控制信息图内容的详略程度。",
@@ -265,5 +269,14 @@
     "hintAria": "查看提示",
     "prevAria": "上一张",
     "nextAria": "下一张"
+  },
+  "slides": {
+    "title": "幻灯片",
+    "downloadHint": "幻灯片已导出为 PowerPoint 文件。",
+    "download": "下载幻灯片",
+    "loading": "正在解析幻灯片…",
+    "parseFailed": "无法解析幻灯片，请重试或下载原文件。",
+    "emptyUrl": "暂无幻灯片文件地址。",
+    "openSlideAria": "打开第 {{n}} 页放大预览"
   }
 }

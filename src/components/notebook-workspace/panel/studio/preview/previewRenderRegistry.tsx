@@ -7,6 +7,7 @@ import { FlashcardViewer } from '../components/FlashcardViewer'
 import { MindmapCanvas } from '../components/MindmapCanvas'
 import { QuizViewer } from '../components/QuizViewer'
 import { StudioAudioPlayer } from '../components/StudioAudioPlayer'
+import { StudioSlidesViewer } from '../slides/StudioSlidesViewer'
 import { workspaceSpace } from '../../../shared/ui/layoutTokens'
 import { workspaceType } from '@/components/notebook-workspace/shared/ui/typeTokens'
 import i18n from '@/i18n'
@@ -17,6 +18,10 @@ interface StudioArtifactPreviewRenderContext {
   artifact: StudioArtifactItem
   content: string
   mode: StudioArtifactPreviewMode
+  /** inline → 点击某一页打开 overlay 时回调（0-based） */
+  onOpenOverlayAtSlide?: (slideIndex: number) => void
+  /** overlay 初始定位页（0-based） */
+  initialSlideIndex?: number
 }
 
 interface StudioArtifactPreviewRenderer {
@@ -165,6 +170,22 @@ const previewRendererByKind: Partial<Record<StudioArtifactKind, StudioArtifactPr
       </Box>
     ),
   },
+  slides: {
+    renderInline: ({ artifact, onOpenOverlayAtSlide }) => (
+      <StudioSlidesViewer
+        artifact={artifact}
+        mode="inline"
+        onOpenOverlayAtSlide={onOpenOverlayAtSlide}
+      />
+    ),
+    renderOverlay: ({ artifact, initialSlideIndex }) => (
+      <StudioSlidesViewer
+        artifact={artifact}
+        mode="overlay"
+        initialSlideIndex={initialSlideIndex}
+      />
+    ),
+  },
   note: {
     renderInline: ({ content }) => (
       <Box sx={{ minWidth: 0 }}>
@@ -183,16 +204,30 @@ export const renderStudioArtifactPreviewContent = ({
   artifact,
   content,
   mode,
+  onOpenOverlayAtSlide,
+  initialSlideIndex,
 }: StudioArtifactPreviewRenderContext) => {
   const renderer = previewRendererByKind[artifact.kind]
   if (!renderer) {
     return renderFallbackPreview(content)
   }
   if (mode === 'inline' && renderer.renderInline) {
-    return renderer.renderInline({ artifact, content, mode })
+    return renderer.renderInline({
+      artifact,
+      content,
+      mode,
+      onOpenOverlayAtSlide,
+      initialSlideIndex,
+    })
   }
   if (mode === 'overlay' && renderer.renderOverlay) {
-    return renderer.renderOverlay({ artifact, content, mode })
+    return renderer.renderOverlay({
+      artifact,
+      content,
+      mode,
+      onOpenOverlayAtSlide,
+      initialSlideIndex,
+    })
   }
   return renderFallbackPreview(content)
 }

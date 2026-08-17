@@ -134,6 +134,7 @@ export type StudioArtifactKind =
   | 'quiz'
   | 'data_table'
   | 'note'
+  | 'slides'
 
 export type StudioArtifactFlashcardCount = 'few' | 'default' | 'many'
 export type StudioArtifactFlashcardDifficulty = 'easy' | 'medium' | 'hard'
@@ -211,6 +212,10 @@ export interface GenerateDataTableParameters {
   tip?: string
 }
 
+export interface GenerateSlidesParameters {
+  tip?: string
+}
+
 export interface MindmapArtifactExtras {
   tip?: string
 }
@@ -255,6 +260,10 @@ export interface DataTableArtifactExtras {
   tip?: string
 }
 
+export interface SlidesArtifactExtras {
+  tip?: string
+}
+
 export interface NoteArtifactExtras {
   chat_id?: string
   msg_id?: string
@@ -280,6 +289,7 @@ export interface GenerateStudioArtifactRequest {
   flashcard?: GenerateFlashcardParameters
   quiz?: GenerateQuizParameters
   data_table?: GenerateDataTableParameters
+  slides?: GenerateSlidesParameters
   note?: GenerateNoteParameters
 }
 
@@ -320,6 +330,7 @@ export interface StudioArtifactResult {
     | FlashcardArtifactExtras
     | QuizArtifactExtras
     | DataTableArtifactExtras
+    | SlidesArtifactExtras
     | NoteArtifactExtras
 }
 

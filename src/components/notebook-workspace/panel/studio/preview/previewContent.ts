@@ -5,7 +5,7 @@ export const hasStudioArtifactPreviewContent = (
   content: string,
   contentUrl: string,
 ) => {
-  if (kind === 'info_graphic' || kind === 'audio_overview') {
+  if (kind === 'info_graphic' || kind === 'audio_overview' || kind === 'slides') {
     return Boolean(contentUrl.trim())
   }
   return Boolean(content.trim())

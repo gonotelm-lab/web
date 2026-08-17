@@ -12,6 +12,11 @@ describe('hasStudioArtifactPreviewContent', () => {
     expect(hasStudioArtifactPreviewContent('info_graphic', 'ignored', '')).toBe(false)
   })
 
+  it('treats slides preview as content_url based', () => {
+    expect(hasStudioArtifactPreviewContent('slides', '', 'https://example.com/a.pptx')).toBe(true)
+    expect(hasStudioArtifactPreviewContent('slides', '', '')).toBe(false)
+  })
+
   it('treats text artifacts as content based', () => {
     expect(hasStudioArtifactPreviewContent('report', '# title', '')).toBe(true)
     expect(hasStudioArtifactPreviewContent('mindmap', '', '')).toBe(false)

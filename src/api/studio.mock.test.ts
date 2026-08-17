@@ -67,6 +67,22 @@ describe('studio api with msw mock', () => {
     expect(submitResp.task_id).toMatch(/^task-/)
   })
 
+  it('supports submitting slides task and returns pptx content_url', async () => {
+    const submitResp = await generateStudioArtifact('notebook-1', {
+      kind: 'slides',
+      source_ids: ['source-1'],
+      slides: {
+        tip: 'focus on takeaways',
+      },
+    })
+    expect(submitResp.task_id).toMatch(/^task-/)
+
+    const resultResp = await getStudioArtifact(submitResp.task_id)
+    expect(resultResp.kind).toBe('slides')
+    expect(resultResp.content_kind).toBe('storage')
+    expect(resultResp.content_url).toContain('.pptx')
+  })
+
   it('throws ApiError for server-error and timeout scenarios', async () => {
     setMockScenario('studio', 'server-error')
     await expect(

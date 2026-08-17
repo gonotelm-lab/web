@@ -13,6 +13,7 @@ import SourceOutlinedIcon from '@mui/icons-material/SourceOutlined'
 import QuizOutlinedIcon from '@mui/icons-material/QuizOutlined'
 import StyleOutlinedIcon from '@mui/icons-material/StyleOutlined'
 import TableChartOutlinedIcon from '@mui/icons-material/TableChartOutlined'
+import SlideshowOutlinedIcon from '@mui/icons-material/SlideshowOutlined'
 import type { SvgIconComponent } from '@mui/icons-material'
 import i18n from '@/i18n'
 import type { StudioArtifactKind } from '@/types/api'
@@ -104,6 +105,7 @@ const artifactKindIconMap: Record<StudioArtifactKind, SvgIconComponent> = {
   quiz: QuizOutlinedIcon,
   data_table: TableChartOutlinedIcon,
   note: StickyNote2OutlinedIcon,
+  slides: SlideshowOutlinedIcon,
 }
 
 const resolveListBorderTone = (

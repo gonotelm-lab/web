@@ -193,6 +193,12 @@ function resolveExtrasEntries(artifact: StudioArtifactItem): ExtrasEntry[] {
         { label: tipLabel, value: e.tip?.trim() || '—' },
       ]
     }
+    case 'slides': {
+      const e = extras as { tip?: string }
+      return [
+        { label: tipLabel, value: e.tip?.trim() || '—' },
+      ]
+    }
     case 'note': {
       const e = extras as { chat_id?: string; msg_id?: string }
       return [

@@ -22,6 +22,7 @@ import type {
   GenerateMindmapParameters,
   GenerateQuizParameters,
   GenerateReportParameters,
+  GenerateSlidesParameters,
 } from '@/types/api'
 import { PanelSubpageLayout } from '../../shared/ui/PanelSubpageLayout'
 import { workspaceLayout, workspaceRadius, workspaceSpace } from '../../shared/ui/layoutTokens'
@@ -37,6 +38,7 @@ import { FlashcardSettingsDialog } from './FlashcardSettingsDialog'
 import { MindmapSettingsDialog } from './MindmapSettingsDialog'
 import { QuizSettingsDialog } from './QuizSettingsDialog'
 import { ReportSettingsDialog } from './ReportSettingsDialog'
+import { SlidesSettingsDialog } from './SlidesSettingsDialog'
 import { getDefaultStudioOutputLanguage } from '@/i18n/studioOutputLanguage'
 import { getDefaultAudioOverviewParameters } from './audioOverviewSettings'
 import { defaultDataTableParameters } from './datatableSettings'
@@ -45,6 +47,7 @@ import { getDefaultInfoGraphicParameters } from './infoGraphicSettings'
 import { defaultMindmapParameters } from './mindmapSettings'
 import { defaultQuizParameters } from './quizSettings'
 import { getDefaultReportParameters } from './reportSettings'
+import { defaultSlidesParameters } from './slidesSettings'
 import { StudioToolCard } from './components/StudioToolCard'
 import { useStudioArtifactTasks } from './hooks/useStudioArtifactTasks'
 import { useStudioPreviewController } from './preview/useStudioPreviewController'
@@ -177,6 +180,11 @@ export const StudioPanel = memo(function StudioPanel({
   const [dataTableParams, setDataTableParams] = useState<GenerateDataTableParameters>(
     defaultDataTableParameters,
   )
+  const [slidesDialogOpen, setSlidesDialogOpen] = useState(false)
+  const [slidesDialogKey, setSlidesDialogKey] = useState(0)
+  const [slidesParams, setSlidesParams] = useState<GenerateSlidesParameters>(
+    defaultSlidesParameters,
+  )
 
   const handleCreateMindmap = useCallback((params?: GenerateMindmapParameters) => {
     if (!canSubmitArtifactTask) {
@@ -304,6 +312,24 @@ export const StudioPanel = memo(function StudioPanel({
     setDataTableDialogOpen(false)
   }, [canSubmitArtifactTask, dataTableParams, selectedReadySourceIds, submitArtifactTask, t])
 
+  const handleCreateSlides = useCallback((params?: GenerateSlidesParameters) => {
+    if (!canSubmitArtifactTask) {
+      return
+    }
+    const submitParams = params ?? slidesParams
+    if (params) {
+      setSlidesParams(params)
+    }
+    void submitArtifactTask({
+      kind: 'slides',
+      sourceIds: selectedReadySourceIds,
+      title: t('studio:kind.slideDeck'),
+      actionId: 'generate-slides',
+      slides: submitParams,
+    })
+    setSlidesDialogOpen(false)
+  }, [canSubmitArtifactTask, slidesParams, selectedReadySourceIds, submitArtifactTask, t])
+
   const handleCloseInfoGraphicDialog = useCallback(() => {
     setInfoGraphicDialogOpen(false)
   }, [])
@@ -367,6 +393,15 @@ export const StudioPanel = memo(function StudioPanel({
     setDataTableDialogOpen(false)
   }, [])
 
+  const handleOpenSlidesDialog = useCallback(() => {
+    setSlidesDialogKey((prev) => prev + 1)
+    setSlidesDialogOpen(true)
+  }, [])
+
+  const handleCloseSlidesDialog = useCallback(() => {
+    setSlidesDialogOpen(false)
+  }, [])
+
   const actionHandlers = useMemo<Record<StudioToolActionId, () => void>>(
     () => ({
       'generate-mindmap': () => {
@@ -390,6 +425,9 @@ export const StudioPanel = memo(function StudioPanel({
       'generate-data_table': () => {
         void handleCreateDataTable()
       },
+      'generate-slides': () => {
+        void handleCreateSlides()
+      },
       // note 从 chat 侧触发，不经 Studio 工具入口
       'save-as-note': () => undefined,
     }),
@@ -401,6 +439,7 @@ export const StudioPanel = memo(function StudioPanel({
       handleCreateFlashcard,
       handleCreateQuiz,
       handleCreateDataTable,
+      handleCreateSlides,
     ],
   )
 
@@ -413,6 +452,7 @@ export const StudioPanel = memo(function StudioPanel({
       'generate-flashcard': handleOpenFlashcardDialog,
       'generate-quiz': handleOpenQuizDialog,
       'generate-data_table': handleOpenDataTableDialog,
+      'generate-slides': handleOpenSlidesDialog,
     }),
     [
       handleOpenMindmapDialog,
@@ -422,6 +462,7 @@ export const StudioPanel = memo(function StudioPanel({
       handleOpenFlashcardDialog,
       handleOpenQuizDialog,
       handleOpenDataTableDialog,
+      handleOpenSlidesDialog,
     ],
   )
 
@@ -591,6 +632,7 @@ export const StudioPanel = memo(function StudioPanel({
           flashcard: t('studio:kind.flashcard'),
           quiz: t('studio:kind.quiz'),
           data_table: t('studio:kind.dataTable'),
+          slides: t('studio:kind.slideDeck'),
           note: t('studio:kind.note'),
         }[previewTarget.kind] || previewTarget.kind,
         content: (
@@ -637,6 +679,7 @@ export const StudioPanel = memo(function StudioPanel({
         loading={previewState.loading}
         error={previewState.error}
         content={previewState.content}
+        initialSlideIndex={previewState.overlaySlideIndex}
         onClose={closeOverlayPreview}
         onRetryLoad={retryPreviewLoad}
         onRenameTitle={
@@ -700,6 +743,14 @@ export const StudioPanel = memo(function StudioPanel({
         initialParams={dataTableParams}
         onClose={handleCloseDataTableDialog}
         onGenerate={handleCreateDataTable}
+      />
+
+      <SlidesSettingsDialog
+        key={`slides-${slidesDialogKey}`}
+        open={slidesDialogOpen}
+        initialParams={slidesParams}
+        onClose={handleCloseSlidesDialog}
+        onGenerate={handleCreateSlides}
       />
 
       {typeof document !== 'undefined'

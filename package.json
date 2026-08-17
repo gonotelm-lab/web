@@ -14,11 +14,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@aiden0z/pptx-renderer": "^1.2.4",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@fontsource/geist": "^5.3.0",
     "@fontsource/instrument-serif": "^5.3.0",
     "@fontsource/jetbrains-mono": "^5.2.8",
+    "@fontsource/noto-sans-sc": "^5.3.0",
     "@mui/icons-material": "^9.0.0",
     "@mui/material": "^9.0.0",
     "@mui/x-tree-view": "^9.1.0",

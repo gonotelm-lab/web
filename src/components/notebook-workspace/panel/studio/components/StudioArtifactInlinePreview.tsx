@@ -29,7 +29,7 @@ interface StudioArtifactInlinePreviewProps {
   error: string
   content: string
   canOpenOverlay: boolean
-  onOpenOverlay: () => void
+  onOpenOverlay: (slideIndex?: number) => void
   onDownload: () => void
   onRetryLoad: () => void
   onRenameTitle?: (title: string) => Promise<void>
@@ -49,12 +49,19 @@ export function StudioArtifactInlinePreview({
   const { t } = useTranslation(['studio', 'common'])
   const sourceCount = artifact.sourceIds.length || artifact.sourceCount
   const isAudioOverviewArtifact = artifact.kind === 'audio_overview'
-  const hasDownloadableContent = isAudioOverviewArtifact
+  const urlBasedDownload =
+    artifact.kind === 'audio_overview' ||
+    artifact.kind === 'info_graphic' ||
+    artifact.kind === 'slides'
+  const hasDownloadableContent = urlBasedDownload
     ? Boolean(artifact.contentUrl.trim())
     : Boolean(content.trim())
   const canDownload = !loading && !error && hasDownloadableContent
   const isMindmapArtifact = artifact.kind === 'mindmap'
   const isFlashcardArtifact = artifact.kind === 'flashcard'
+  const isSlidesArtifact = artifact.kind === 'slides'
+  const selfScrollContent =
+    isMindmapArtifact || isFlashcardArtifact || isSlidesArtifact
   const displayTitle = resolveStudioArtifactDisplayTitle(artifact.title, artifact.kind)
   const canRename = artifact.status === 'completed' && Boolean(onRenameTitle)
 
@@ -103,7 +110,7 @@ export function StudioArtifactInlinePreview({
                 <IconButton
                   size="small"
                   aria-label={t('common:preview.expand')}
-                  onClick={onOpenOverlay}
+                  onClick={() => onOpenOverlay()}
                   sx={inlinePreviewActionIconButtonSx}
                 >
                   <ZoomOutMapRoundedIcon sx={inlinePreviewActionIconSx} />
@@ -131,8 +138,8 @@ export function StudioArtifactInlinePreview({
         sx={(theme) => ({
           flex: 1,
           minHeight: 0,
-          overflow: isMindmapArtifact || isFlashcardArtifact ? 'hidden' : 'auto',
-          ...(isMindmapArtifact || isFlashcardArtifact ? null : subtleScrollbarSx(theme)),
+          overflow: selfScrollContent ? 'hidden' : 'auto',
+          ...(selfScrollContent ? null : subtleScrollbarSx(theme)),
         })}
       >
         {loading ? (
@@ -163,6 +170,9 @@ export function StudioArtifactInlinePreview({
               artifact,
               content,
               mode: 'inline',
+              onOpenOverlayAtSlide: canOpenOverlay
+                ? (slideIndex) => onOpenOverlay(slideIndex)
+                : undefined,
             })
           )
         )}

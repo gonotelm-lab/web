@@ -24,13 +24,16 @@ import type {
   GenerateFlashcardParameters,
   GenerateQuizParameters,
   GenerateDataTableParameters,
+  GenerateSlidesParameters,
 } from '@/types/api'
 import {
   buildTaskFailedMessage,
+  isStudioTaskCancelled,
   isStudioTaskCompleted,
-  isStudioTaskFailed,
   isStudioTaskRetryable,
   isStudioTaskRunning,
+  isStudioTaskSoftFailed,
+  shouldFinalizeStatusPollFailure,
   shouldStudioTaskKeepPolling,
   toArtifactVisualStatus,
 } from '../artifactStatus'
@@ -42,6 +45,7 @@ import { buildAudioOverviewRequestParams } from '../audioOverviewSettings'
 import { buildFlashcardRequestParams } from '../flashcardSettings'
 import { buildQuizRequestParams } from '../quizSettings'
 import { buildDataTableRequestParams } from '../datatableSettings'
+import { buildSlidesRequestParams } from '../slidesSettings'
 import {
   resolveStudioArtifactActionId,
   resolveStudioArtifactFallbackTitle,
@@ -97,6 +101,7 @@ const buildLocalExtras = (
   flashcard?: GenerateFlashcardParameters,
   quiz?: GenerateQuizParameters,
   dataTable?: GenerateDataTableParameters,
+  slides?: GenerateSlidesParameters,
 ): StudioArtifactItem['extras'] => {
   switch (kind) {
     case 'mindmap':
@@ -136,6 +141,10 @@ const buildLocalExtras = (
     case 'data_table':
       return {
         tip: dataTable?.tip,
+      }
+    case 'slides':
+      return {
+        tip: slides?.tip,
       }
     case 'note':
       return undefined
@@ -192,6 +201,7 @@ interface SubmitStudioArtifactTaskParams {
   flashcard?: GenerateFlashcardParameters
   quiz?: GenerateQuizParameters
   data_table?: GenerateDataTableParameters
+  slides?: GenerateSlidesParameters
 }
 
 export function useStudioArtifactTasks({
@@ -217,9 +227,11 @@ export function useStudioArtifactTasks({
   const historyLoadSeqRef = useRef(0)
   const actionErrorToastKeyRef = useRef(0)
   const onSourceCreatedRef = useRef(onSourceCreated)
+  const statusPollFailureCountsRef = useRef<Map<string, number>>(new Map())
 
   useEffect(() => {
     activeNotebookIdRef.current = notebookId
+    statusPollFailureCountsRef.current.clear()
   }, [notebookId])
 
   useEffect(() => {
@@ -316,6 +328,16 @@ export function useStudioArtifactTasks({
     [],
   )
 
+  const clearStatusPollFailure = useCallback((itemId: string) => {
+    statusPollFailureCountsRef.current.delete(itemId)
+  }, [])
+
+  const bumpStatusPollFailure = useCallback((itemId: string) => {
+    const next = (statusPollFailureCountsRef.current.get(itemId) ?? 0) + 1
+    statusPollFailureCountsRef.current.set(itemId, next)
+    return next
+  }, [])
+
   const pollArtifactTick = useCallback(async () => {
     const notebookSnapshot = activeNotebookIdRef.current
     const pendingItems = artifactItemsRef.current.filter(
@@ -330,53 +352,93 @@ export function useStudioArtifactTasks({
       pendingItems.map(async (item) => {
         try {
           const statusResp = await getStudioArtifactStatus(item.taskId)
-          if (activeNotebookIdRef.current === notebookSnapshot) {
-            if (isStudioTaskCompleted(statusResp.status)) {
-              return applyTaskResult(item.taskId, notebookSnapshot)
-            }
-            if (isStudioTaskFailed(statusResp.status)) {
-              const failedMessage = buildTaskFailedMessage(statusResp.status)
-              setArtifactItems((prev) => {
-                let changed = false
-                const next = prev.map((target) => {
-                  if (target.id !== item.id) {
-                    return target
-                  }
-                  if (target.status === statusResp.status && target.error === failedMessage) {
-                    return target
-                  }
-                  changed = true
-                  return {
-                    ...target,
-                    status: statusResp.status,
-                    error: failedMessage,
-                  }
-                })
-                return changed ? next : prev
-              })
-              return
-            }
+          if (activeNotebookIdRef.current !== notebookSnapshot) {
+            return
+          }
 
+          if (isStudioTaskCompleted(statusResp.status)) {
+            clearStatusPollFailure(item.id)
+            return applyTaskResult(item.taskId, notebookSnapshot)
+          }
+
+          if (isStudioTaskCancelled(statusResp.status)) {
+            clearStatusPollFailure(item.id)
+            const failedMessage = buildTaskFailedMessage(statusResp.status)
             setArtifactItems((prev) => {
               let changed = false
               const next = prev.map((target) => {
                 if (target.id !== item.id) {
                   return target
                 }
-                if (target.status === statusResp.status && !target.error) {
+                if (target.status === statusResp.status && target.error === failedMessage) {
                   return target
                 }
                 changed = true
                 return {
                   ...target,
                   status: statusResp.status,
-                  error: '',
+                  error: failedMessage,
                 }
               })
               return changed ? next : prev
             })
+            return
           }
+
+          if (isStudioTaskSoftFailed(statusResp.status)) {
+            const failureCount = bumpStatusPollFailure(item.id)
+            if (!shouldFinalizeStatusPollFailure(failureCount)) {
+              // Backend may still be retrying; keep prior pending/running status.
+              return
+            }
+            clearStatusPollFailure(item.id)
+            const failedMessage = buildTaskFailedMessage(statusResp.status)
+            setArtifactItems((prev) => {
+              let changed = false
+              const next = prev.map((target) => {
+                if (target.id !== item.id) {
+                  return target
+                }
+                if (target.status === statusResp.status && target.error === failedMessage) {
+                  return target
+                }
+                changed = true
+                return {
+                  ...target,
+                  status: statusResp.status,
+                  error: failedMessage,
+                }
+              })
+              return changed ? next : prev
+            })
+            return
+          }
+
+          clearStatusPollFailure(item.id)
+          setArtifactItems((prev) => {
+            let changed = false
+            const next = prev.map((target) => {
+              if (target.id !== item.id) {
+                return target
+              }
+              if (target.status === statusResp.status && !target.error) {
+                return target
+              }
+              changed = true
+              return {
+                ...target,
+                status: statusResp.status,
+                error: '',
+              }
+            })
+            return changed ? next : prev
+          })
         } catch (error) {
+          const failureCount = bumpStatusPollFailure(item.id)
+          if (!shouldFinalizeStatusPollFailure(failureCount)) {
+            return
+          }
+          clearStatusPollFailure(item.id)
           setArtifactItems((prev) =>
             prev.map((target) =>
               target.id === item.id
@@ -395,7 +457,7 @@ export function useStudioArtifactTasks({
       }),
     )
     return true
-  }, [applyTaskResult])
+  }, [applyTaskResult, bumpStatusPollFailure, clearStatusPollFailure])
 
   const hasPendingArtifacts = useMemo(
     () =>
@@ -485,6 +547,7 @@ export function useStudioArtifactTasks({
       flashcard,
       quiz,
       data_table: dataTable,
+      slides,
     }: SubmitStudioArtifactTaskParams) => {
       if (!notebookId) {
         return
@@ -497,6 +560,7 @@ export function useStudioArtifactTasks({
         flashcard,
         quiz,
         dataTable,
+        slides,
       )
       setPendingActions((prev) => ({ ...prev, [actionId]: true }))
 
@@ -524,6 +588,9 @@ export function useStudioArtifactTasks({
             : {}),
           ...(kind === 'data_table'
             ? { data_table: buildDataTableRequestParams(dataTable) }
+            : {}),
+          ...(kind === 'slides'
+            ? { slides: buildSlidesRequestParams(slides) }
             : {}),
         })
 
@@ -625,6 +692,7 @@ export function useStudioArtifactTasks({
       setArtifactActionPending(item.id, 'retry', true)
       try {
         await retryStudioArtifactTask(item.taskId)
+        clearStatusPollFailure(item.id)
         setArtifactItems((prev) =>
           prev.map((target) =>
             target.id === item.id
@@ -653,7 +721,7 @@ export function useStudioArtifactTasks({
         setArtifactActionPending(item.id, 'retry', false)
       }
     },
-    [setArtifactActionPending],
+    [clearStatusPollFailure, setArtifactActionPending],
   )
 
   const cancelArtifact = useCallback(
