@@ -70,6 +70,7 @@ vi.mock('./preview/useStudioPreviewController', () => ({
     closeOverlayPreview: () => undefined,
     retryPreviewLoad: () => undefined,
     downloadPreviewContent: () => undefined,
+    updatePreviewContentUrl: () => undefined,
   }),
 }))
 

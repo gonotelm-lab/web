@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import i18n from '@/i18n'
 import {
   getStudioArtifact,
-  loadStudioArtifactContentFromUrl,
 } from '@/api/studio'
 import { ApiError } from '@/lib/http'
 import type { StudioArtifactTaskStatus } from '@/types/api'
@@ -12,11 +11,13 @@ import {
   toArtifactVisualStatus,
 } from '../artifactStatus'
 import type { StudioArtifactItem } from '../types'
-import { resolveStudioArtifactDisplayTitle } from '../resolveStudioArtifactKind'
 import { getStudioArtifactPreviewCapability } from './previewCapabilities'
 import { hasStudioArtifactPreviewContent } from './previewContent'
-import { downloadFileFromUrl } from './downloadFile'
+import { downloadStudioStorageFile, fetchStudioStorageUrl } from './fetchStudioStorageUrl'
+import { isUrlBasedStudioArtifactKind } from './ensureFreshStudioContentUrl'
+import { isPresignedGetUrlExpired } from './presignedUrlExpiry'
 import { resolveStudioPreviewEntryMode } from './previewRouting'
+import { resolveStudioArtifactDownload } from './resolveStudioArtifactDownload'
 
 export interface StudioPreviewState {
   inlineOpen: boolean
@@ -43,6 +44,7 @@ const defaultStudioPreviewState: StudioPreviewState = {
 
 interface UseStudioPreviewControllerParams {
   artifactItems: StudioArtifactItem[]
+  onArtifactContentUrlUpdated?: (artifactId: string, contentUrl: string) => void
 }
 
 const buildStudioPreviewErrorMessage = (
@@ -60,12 +62,15 @@ const buildStudioPreviewErrorMessage = (
 
 export function useStudioPreviewController({
   artifactItems,
+  onArtifactContentUrlUpdated,
 }: UseStudioPreviewControllerParams) {
   const [previewState, setPreviewState] = useState<StudioPreviewState>(
     defaultStudioPreviewState,
   )
   const artifactItemsRef = useRef(artifactItems)
   const previewLoadSeqRef = useRef(0)
+  const onArtifactContentUrlUpdatedRef = useRef(onArtifactContentUrlUpdated)
+  onArtifactContentUrlUpdatedRef.current = onArtifactContentUrlUpdated
 
   useEffect(() => {
     artifactItemsRef.current = artifactItems
@@ -112,15 +117,26 @@ export function useStudioPreviewController({
       let taskStatus: StudioArtifactTaskStatus = latestItem.status
       let itemStatus = toArtifactVisualStatus(latestItem.status)
 
-      if (!content && !contentUrl && latestItem.taskId) {
+      const urlBased = isUrlBasedStudioArtifactKind(latestItem.kind)
+      const shouldRefreshArtifact =
+        Boolean(latestItem.taskId) &&
+        ((!content && !contentUrl) ||
+          (urlBased &&
+            (!contentUrl.trim() || isPresignedGetUrlExpired(contentUrl))))
+
+      if (shouldRefreshArtifact) {
+        const previousUrl = contentUrl
         const result = await getStudioArtifact(latestItem.taskId)
         if (previewLoadSeqRef.current !== requestSeq) {
           return
         }
-        content = result.content ?? ''
-        contentUrl = result.content_url ?? ''
+        content = result.content ?? content
+        contentUrl = result.content_url ?? contentUrl
         taskStatus = result.status
         itemStatus = toArtifactVisualStatus(result.status)
+        if (contentUrl.trim() && contentUrl !== previousUrl) {
+          onArtifactContentUrlUpdatedRef.current?.(latestItem.id, contentUrl)
+        }
       }
 
       if (shouldStudioTaskKeepPolling(taskStatus)) {
@@ -149,8 +165,16 @@ export function useStudioPreviewController({
         return
       }
 
-      if (!content && contentUrl && latestItem.kind !== 'info_graphic' && latestItem.kind !== 'audio_overview' && latestItem.kind !== 'slides') {
-        content = await loadStudioArtifactContentFromUrl(contentUrl)
+      if (!content && contentUrl && !urlBased) {
+        const response = await fetchStudioStorageUrl({
+          url: contentUrl,
+          taskId: latestItem.taskId,
+          onUrlRefreshed: (nextUrl) => {
+            contentUrl = nextUrl
+            onArtifactContentUrlUpdatedRef.current?.(latestItem.id, nextUrl)
+          },
+        })
+        content = await response.text()
         if (previewLoadSeqRef.current !== requestSeq) {
           return
         }
@@ -264,28 +288,48 @@ export function useStudioPreviewController({
     })
   }, [loadPreviewForItem, previewState.inlineOpen, previewState.overlayOpen, previewTarget])
 
+  const updatePreviewContentUrl = useCallback((nextUrl: string) => {
+    const trimmed = nextUrl.trim()
+    if (!trimmed) {
+      return
+    }
+    setPreviewState((prev) => {
+      if (!prev.targetId) {
+        return prev
+      }
+      onArtifactContentUrlUpdatedRef.current?.(prev.targetId, trimmed)
+      return {
+        ...prev,
+        contentUrl: trimmed,
+      }
+    })
+  }, [])
+
   const downloadPreviewContent = useCallback(() => {
     if (!previewTarget) {
       return
     }
-    const safeName = resolveStudioArtifactDisplayTitle(
-      previewTarget.title,
-      previewTarget.kind,
-    )
-      .replace(/[\\/:*?"<>|]+/g, '_')
-      .replace(/\s+/g, '_')
-      .slice(0, 60) || 'studio-artifact'
+    const plan = resolveStudioArtifactDownload({
+      kind: previewTarget.kind,
+      title: previewTarget.title,
+      content: previewState.content,
+      contentUrl: previewState.contentUrl || previewTarget.contentUrl,
+    })
+    if (!plan) {
+      return
+    }
 
-    if (previewTarget.kind === 'info_graphic') {
-      const imageUrl = previewState.contentUrl || previewTarget.contentUrl
-      if (!imageUrl.trim()) {
-        return
-      }
-      void downloadFileFromUrl(imageUrl, `${safeName}.png`).catch(() => {
+    if (plan.type === 'url') {
+      void downloadStudioStorageFile({
+        url: plan.url,
+        filename: plan.filename,
+        taskId: previewTarget.taskId,
+        onUrlRefreshed: updatePreviewContentUrl,
+      }).catch(() => {
         // Fallback keeps current behavior when cross-origin download is blocked.
         const anchor = document.createElement('a')
-        anchor.href = imageUrl
-        anchor.download = `${safeName}.png`
+        anchor.href = plan.url
+        anchor.download = plan.filename
         document.body.appendChild(anchor)
         anchor.click()
         anchor.remove()
@@ -293,24 +337,21 @@ export function useStudioPreviewController({
       return
     }
 
-    if (!previewState.content.trim()) {
-      return
-    }
-    const extension = previewTarget.kind === 'mindmap'
-      ? 'mmd'
-      : previewTarget.kind === 'report' || previewTarget.kind === 'data_table'
-        ? 'md'
-        : 'txt'
-    const blob = new Blob([previewState.content], { type: 'text/plain;charset=utf-8' })
+    const blob = new Blob([plan.content], { type: 'text/plain;charset=utf-8' })
     const blobUrl = URL.createObjectURL(blob)
     const anchor = document.createElement('a')
     anchor.href = blobUrl
-    anchor.download = `${safeName}.${extension}`
+    anchor.download = plan.filename
     document.body.appendChild(anchor)
     anchor.click()
     anchor.remove()
     URL.revokeObjectURL(blobUrl)
-  }, [previewState.content, previewState.contentUrl, previewTarget])
+  }, [
+    previewState.content,
+    previewState.contentUrl,
+    previewTarget,
+    updatePreviewContentUrl,
+  ])
 
   useEffect(() => {
     if (!previewState.targetId) {
@@ -332,5 +373,6 @@ export function useStudioPreviewController({
     closeOverlayPreview,
     retryPreviewLoad,
     downloadPreviewContent,
+    updatePreviewContentUrl,
   }
 }

@@ -3,15 +3,19 @@ import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded'
 import { Box, Button, Paper, Typography } from '@mui/material'
 import i18n from '@/i18n'
 import type { StudioArtifactItem } from '../types'
-import { downloadFileFromUrl } from '../preview/downloadFile'
+import { downloadStudioStorageFile } from '../preview/fetchStudioStorageUrl'
 import { resolveStudioArtifactDisplayTitle } from '../resolveStudioArtifactKind'
 import { workspaceSpace } from '../../../shared/ui/layoutTokens'
 
 interface StudioSlidesDownloadCardProps {
   artifact: StudioArtifactItem
+  onContentUrlRefreshed?: (nextUrl: string) => void
 }
 
-export function StudioSlidesDownloadCard({ artifact }: StudioSlidesDownloadCardProps) {
+export function StudioSlidesDownloadCard({
+  artifact,
+  onContentUrlRefreshed,
+}: StudioSlidesDownloadCardProps) {
   const pptxUrl = artifact.contentUrl.trim()
   const safeName = resolveStudioArtifactDisplayTitle(artifact.title, artifact.kind)
     .replace(/[\\/:*?"<>|]+/g, '_')
@@ -22,7 +26,12 @@ export function StudioSlidesDownloadCard({ artifact }: StudioSlidesDownloadCardP
     if (!pptxUrl) {
       return
     }
-    void downloadFileFromUrl(pptxUrl, `${safeName}.pptx`).catch(() => {
+    void downloadStudioStorageFile({
+      url: pptxUrl,
+      filename: `${safeName}.pptx`,
+      taskId: artifact.taskId,
+      onUrlRefreshed: onContentUrlRefreshed,
+    }).catch(() => {
       const anchor = document.createElement('a')
       anchor.href = pptxUrl
       anchor.download = `${safeName}.pptx`

@@ -172,6 +172,8 @@ export type StudioArtifactReportStyle =
   | 'study-guide'
   | 'detailed'
 
+export type StudioArtifactSlidesVisualStyle = 'default' | 'educational' | 'cute'
+
 export interface GenerateMindmapParameters {
   tip?: string
 }
@@ -214,6 +216,8 @@ export interface GenerateDataTableParameters {
 
 export interface GenerateSlidesParameters {
   tip?: string
+  language?: string
+  visual_style?: StudioArtifactSlidesVisualStyle
 }
 
 export interface MindmapArtifactExtras {
@@ -262,6 +266,8 @@ export interface DataTableArtifactExtras {
 
 export interface SlidesArtifactExtras {
   tip?: string
+  language?: string
+  visual_style?: StudioArtifactSlidesVisualStyle
 }
 
 export interface NoteArtifactExtras {

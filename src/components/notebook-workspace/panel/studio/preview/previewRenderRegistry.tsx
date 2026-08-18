@@ -22,6 +22,7 @@ interface StudioArtifactPreviewRenderContext {
   onOpenOverlayAtSlide?: (slideIndex: number) => void
   /** overlay 初始定位页（0-based） */
   initialSlideIndex?: number
+  onContentUrlRefreshed?: (nextUrl: string) => void
 }
 
 interface StudioArtifactPreviewRenderer {
@@ -171,18 +172,20 @@ const previewRendererByKind: Partial<Record<StudioArtifactKind, StudioArtifactPr
     ),
   },
   slides: {
-    renderInline: ({ artifact, onOpenOverlayAtSlide }) => (
+    renderInline: ({ artifact, onOpenOverlayAtSlide, onContentUrlRefreshed }) => (
       <StudioSlidesViewer
         artifact={artifact}
         mode="inline"
         onOpenOverlayAtSlide={onOpenOverlayAtSlide}
+        onContentUrlRefreshed={onContentUrlRefreshed}
       />
     ),
-    renderOverlay: ({ artifact, initialSlideIndex }) => (
+    renderOverlay: ({ artifact, initialSlideIndex, onContentUrlRefreshed }) => (
       <StudioSlidesViewer
         artifact={artifact}
         mode="overlay"
         initialSlideIndex={initialSlideIndex}
+        onContentUrlRefreshed={onContentUrlRefreshed}
       />
     ),
   },
@@ -206,6 +209,7 @@ export const renderStudioArtifactPreviewContent = ({
   mode,
   onOpenOverlayAtSlide,
   initialSlideIndex,
+  onContentUrlRefreshed,
 }: StudioArtifactPreviewRenderContext) => {
   const renderer = previewRendererByKind[artifact.kind]
   if (!renderer) {
@@ -218,6 +222,7 @@ export const renderStudioArtifactPreviewContent = ({
       mode,
       onOpenOverlayAtSlide,
       initialSlideIndex,
+      onContentUrlRefreshed,
     })
   }
   if (mode === 'overlay' && renderer.renderOverlay) {
@@ -227,6 +232,7 @@ export const renderStudioArtifactPreviewContent = ({
       mode,
       onOpenOverlayAtSlide,
       initialSlideIndex,
+      onContentUrlRefreshed,
     })
   }
   return renderFallbackPreview(content)

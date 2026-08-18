@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PresentationData } from '@aiden0z/pptx-renderer'
 import i18n from '@/i18n'
+import { fetchStudioStorageUrl } from '../preview/fetchStudioStorageUrl'
 import { loadPresentationFromBuffer } from './pptxEngine'
 import {
   deleteCachedPresentation,
@@ -17,6 +18,11 @@ export interface UsePptxPresentationResult {
   reload: () => void
 }
 
+export interface UsePptxPresentationOptions {
+  taskId?: string
+  onUrlRefreshed?: (nextUrl: string) => void
+}
+
 const isAbortError = (error: unknown) => {
   if (error instanceof DOMException && error.name === 'AbortError') {
     return true
@@ -24,29 +30,44 @@ const isAbortError = (error: unknown) => {
   return error instanceof Error && error.name === 'AbortError'
 }
 
-export function usePptxPresentation(url: string): UsePptxPresentationResult {
+export function usePptxPresentation(
+  url: string,
+  options: UsePptxPresentationOptions = {},
+): UsePptxPresentationResult {
   const normalizedUrl = url.trim()
+  const { taskId, onUrlRefreshed } = options
+  const onUrlRefreshedRef = useRef(onUrlRefreshed)
+  onUrlRefreshedRef.current = onUrlRefreshed
+
   const [reloadToken, setReloadToken] = useState(0)
   const [remoteStatus, setRemoteStatus] = useState<PptxPresentationStatus>('loading')
   const [remotePresentation, setRemotePresentation] = useState<PresentationData | null>(null)
   const [remoteError, setRemoteError] = useState('')
+  const [activeUrl, setActiveUrl] = useState(normalizedUrl)
   const requestSeqRef = useRef(0)
 
+  useEffect(() => {
+    setActiveUrl(normalizedUrl)
+  }, [normalizedUrl])
+
   const reload = useCallback(() => {
-    if (normalizedUrl) {
+    if (activeUrl) {
+      deleteCachedPresentation(activeUrl)
+    }
+    if (normalizedUrl && normalizedUrl !== activeUrl) {
       deleteCachedPresentation(normalizedUrl)
     }
     setRemoteStatus('loading')
     setRemotePresentation(null)
     setRemoteError('')
     setReloadToken((prev) => prev + 1)
-  }, [normalizedUrl])
+  }, [activeUrl, normalizedUrl])
 
   useEffect(() => {
     if (!normalizedUrl) {
       return
     }
-    if (getCachedPresentation(normalizedUrl)) {
+    if (getCachedPresentation(normalizedUrl) || getCachedPresentation(activeUrl)) {
       return
     }
 
@@ -56,16 +77,24 @@ export function usePptxPresentation(url: string): UsePptxPresentationResult {
 
     void (async () => {
       try {
-        const response = await fetch(normalizedUrl, { signal: abortController.signal })
-        if (!response.ok) {
-          throw new Error(i18n.t('studio:slides.parseFailed'))
-        }
+        let usedUrl = normalizedUrl
+        const response = await fetchStudioStorageUrl({
+          url: normalizedUrl,
+          taskId,
+          init: { signal: abortController.signal },
+          onUrlRefreshed: (nextUrl) => {
+            usedUrl = nextUrl
+            setActiveUrl(nextUrl)
+            onUrlRefreshedRef.current?.(nextUrl)
+          },
+        })
         const buffer = await response.arrayBuffer()
         const nextPresentation = await loadPresentationFromBuffer(buffer)
         if (requestSeqRef.current !== requestSeq) {
           return
         }
-        setCachedPresentation(normalizedUrl, nextPresentation, buffer)
+        setCachedPresentation(usedUrl, nextPresentation, buffer)
+        setActiveUrl(usedUrl)
         setRemotePresentation(nextPresentation)
         setRemoteStatus('ready')
         setRemoteError('')
@@ -86,7 +115,8 @@ export function usePptxPresentation(url: string): UsePptxPresentationResult {
     return () => {
       abortController.abort()
     }
-  }, [normalizedUrl, reloadToken])
+    // activeUrl intentionally omitted: refresh updates it without re-triggering fetch
+  }, [normalizedUrl, reloadToken, taskId])
 
   if (!normalizedUrl) {
     return {
@@ -97,7 +127,8 @@ export function usePptxPresentation(url: string): UsePptxPresentationResult {
     }
   }
 
-  const cached = getCachedPresentation(normalizedUrl)
+  const cached =
+    getCachedPresentation(activeUrl) || getCachedPresentation(normalizedUrl)
   if (cached) {
     return {
       status: 'ready',

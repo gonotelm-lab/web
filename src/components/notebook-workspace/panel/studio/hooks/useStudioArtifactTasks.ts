@@ -145,6 +145,8 @@ const buildLocalExtras = (
     case 'slides':
       return {
         tip: slides?.tip,
+        language: slides?.language,
+        visual_style: slides?.visual_style,
       }
     case 'note':
       return undefined
@@ -846,6 +848,22 @@ export function useStudioArtifactTasks({
     }
   }, [])
 
+  const patchArtifactContentUrl = useCallback((artifactId: string, contentUrl: string) => {
+    const nextUrl = contentUrl.trim()
+    if (!artifactId || !nextUrl) {
+      return
+    }
+    setArtifactItems((prev) => {
+      const current = prev.find((item) => item.id === artifactId)
+      if (!current || current.contentUrl === nextUrl) {
+        return prev
+      }
+      return prev.map((item) =>
+        item.id === artifactId ? { ...item, contentUrl: nextUrl } : item,
+      )
+    })
+  }, [])
+
   const isArtifactActionPending = useCallback(
     (itemId: string, action: StudioArtifactItemAction) =>
       Boolean(pendingArtifactActions[buildArtifactActionKey(itemId, action)]),
@@ -867,6 +885,7 @@ export function useStudioArtifactTasks({
     deleteArtifact,
     convertNoteToSource,
     renameArtifactTitle,
+    patchArtifactContentUrl,
     isArtifactActionPending,
   }
 }

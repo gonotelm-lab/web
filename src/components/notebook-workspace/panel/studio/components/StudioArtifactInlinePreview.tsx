@@ -33,6 +33,7 @@ interface StudioArtifactInlinePreviewProps {
   onDownload: () => void
   onRetryLoad: () => void
   onRenameTitle?: (title: string) => Promise<void>
+  onContentUrlRefreshed?: (nextUrl: string) => void
 }
 
 export function StudioArtifactInlinePreview({
@@ -45,6 +46,7 @@ export function StudioArtifactInlinePreview({
   onDownload,
   onRetryLoad,
   onRenameTitle,
+  onContentUrlRefreshed,
 }: StudioArtifactInlinePreviewProps) {
   const { t } = useTranslation(['studio', 'common'])
   const sourceCount = artifact.sourceIds.length || artifact.sourceCount
@@ -173,6 +175,7 @@ export function StudioArtifactInlinePreview({
               onOpenOverlayAtSlide: canOpenOverlay
                 ? (slideIndex) => onOpenOverlay(slideIndex)
                 : undefined,
+              onContentUrlRefreshed,
             })
           )
         )}

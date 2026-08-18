@@ -19,7 +19,8 @@
     "emptyDisplay": "当前产物没有可展示内容。",
     "infoGraphicAlt": "信息图预览",
     "loadFailed": "加载预览内容失败，请重试。",
-    "taskNotDone": "任务尚未完成，请稍后再试。"
+    "taskNotDone": "任务尚未完成，请稍后再试。",
+    "urlExpired": "预览链接已过期，请重试以获取新链接。"
   },
   "kind": {
     "mindmap": "思维导图",
@@ -141,7 +142,8 @@
     "languageHelp": {
       "report": "控制报告输出的语言。",
       "audio": "控制音频概览输出文本的语言。",
-      "infoGraphic": "控制信息图中可见文字的语言。"
+      "infoGraphic": "控制信息图中可见文字的语言。",
+      "slides": "控制幻灯片正文与标题的语言。"
     },
     "style": "生成风格",
     "styleHelp": {
@@ -163,7 +165,10 @@
     "detailLevel": "探索深度",
     "detailLevelHelp": "控制信息图内容的详略程度。",
     "visualStyle": "视觉风格",
-    "visualStyleHelp": "控制信息图的视觉表现风格。",
+    "visualStyleHelp": {
+      "infoGraphic": "控制信息图的视觉表现风格。",
+      "slides": "控制幻灯片的配色与版式气质。"
+    },
     "orientation": "选择方向",
     "orientationHelp": "控制信息图的画面比例。",
     "prompt": "描述你想要的信息图",
@@ -195,6 +200,11 @@
       "deepResearch": { "label": "深度研究", "description": "深入展开背景与细节，适合系统理解。" },
       "discussion": { "label": "讨论", "description": "以对谈方式串联观点，增强代入感。" },
       "debate": { "label": "辩论", "description": "强调观点碰撞与多角度对照。" }
+    },
+    "slides": {
+      "default": { "label": "默认", "description": "温暖教育向：扁平手绘感，米色纸张底。" },
+      "educational": { "label": "教学科普", "description": "教科书风格：高对比、几何分区清晰、冷静易读。" },
+      "cute": { "label": "可爱", "description": "粉嫩柔和：圆润留白，治愈轻松。" }
     }
   },
   "infoGraphic": {

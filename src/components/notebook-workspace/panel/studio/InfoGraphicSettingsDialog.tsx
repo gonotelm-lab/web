@@ -124,7 +124,7 @@ export const InfoGraphicSettingsDialog = memo(function InfoGraphicSettingsDialog
               {t('studio:settings.visualStyle')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: workspaceDialogLayout.helperTextMt }}>
-              {t('studio:settings.visualStyleHelp')}
+              {t('studio:settings.visualStyleHelp.infoGraphic')}
             </Typography>
             <ToggleButtonGroup
               exclusive

@@ -12,6 +12,7 @@ interface StudioSlidesViewerProps {
   mode: 'inline' | 'overlay'
   onOpenOverlayAtSlide?: (slideIndex: number) => void
   initialSlideIndex?: number
+  onContentUrlRefreshed?: (nextUrl: string) => void
 }
 
 export function StudioSlidesViewer({
@@ -19,9 +20,14 @@ export function StudioSlidesViewer({
   mode,
   onOpenOverlayAtSlide,
   initialSlideIndex = 0,
+  onContentUrlRefreshed,
 }: StudioSlidesViewerProps) {
   const { status, presentation, error, reload } = usePptxPresentation(
     artifact.contentUrl.trim(),
+    {
+      taskId: artifact.taskId,
+      onUrlRefreshed: onContentUrlRefreshed,
+    },
   )
 
   if (status === 'loading' || status === 'idle') {
@@ -62,7 +68,10 @@ export function StudioSlidesViewer({
             {i18n.t('common:preview.retryLoad')}
           </Button>
         </Box>
-        <StudioSlidesDownloadCard artifact={artifact} />
+        <StudioSlidesDownloadCard
+          artifact={artifact}
+          onContentUrlRefreshed={onContentUrlRefreshed}
+        />
       </Stack>
     )
   }

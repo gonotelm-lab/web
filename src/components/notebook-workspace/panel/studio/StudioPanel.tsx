@@ -47,7 +47,7 @@ import { getDefaultInfoGraphicParameters } from './infoGraphicSettings'
 import { defaultMindmapParameters } from './mindmapSettings'
 import { defaultQuizParameters } from './quizSettings'
 import { getDefaultReportParameters } from './reportSettings'
-import { defaultSlidesParameters } from './slidesSettings'
+import { getDefaultSlidesParameters } from './slidesSettings'
 import { StudioToolCard } from './components/StudioToolCard'
 import { useStudioArtifactTasks } from './hooks/useStudioArtifactTasks'
 import { useStudioPreviewController } from './preview/useStudioPreviewController'
@@ -105,6 +105,7 @@ export const StudioPanel = memo(function StudioPanel({
     deleteArtifact,
     convertNoteToSource,
     renameArtifactTitle,
+    patchArtifactContentUrl,
     isArtifactActionPending,
   } = useStudioArtifactTasks({ notebookId, onSourceCreated })
 
@@ -127,7 +128,11 @@ export const StudioPanel = memo(function StudioPanel({
     closeOverlayPreview,
     retryPreviewLoad,
     downloadPreviewContent,
-  } = useStudioPreviewController({ artifactItems })
+    updatePreviewContentUrl,
+  } = useStudioPreviewController({
+    artifactItems,
+    onArtifactContentUrlUpdated: patchArtifactContentUrl,
+  })
 
   const [infoGraphicDialogOpen, setInfoGraphicDialogOpen] = useState(false)
   const [infoGraphicDialogKey, setInfoGraphicDialogKey] = useState(0)
@@ -144,6 +149,11 @@ export const StudioPanel = memo(function StudioPanel({
   const [reportParams, setReportParams] = useState<GenerateReportParameters>(
     getDefaultReportParameters,
   )
+  const [slidesDialogOpen, setSlidesDialogOpen] = useState(false)
+  const [slidesDialogKey, setSlidesDialogKey] = useState(0)
+  const [slidesParams, setSlidesParams] = useState<GenerateSlidesParameters>(
+    getDefaultSlidesParameters,
+  )
 
   // Keep Studio output-language defaults aligned with UI locale (gonotelm.locale).
   useEffect(() => {
@@ -158,6 +168,9 @@ export const StudioPanel = memo(function StudioPanel({
       prev.text_language === outputLanguage
         ? prev
         : { ...prev, text_language: outputLanguage },
+    )
+    setSlidesParams((prev) =>
+      prev.language === outputLanguage ? prev : { ...prev, language: outputLanguage },
     )
   }, [i18n.language])
   const [mindmapDialogOpen, setMindmapDialogOpen] = useState(false)
@@ -179,11 +192,6 @@ export const StudioPanel = memo(function StudioPanel({
   const [dataTableDialogKey, setDataTableDialogKey] = useState(0)
   const [dataTableParams, setDataTableParams] = useState<GenerateDataTableParameters>(
     defaultDataTableParameters,
-  )
-  const [slidesDialogOpen, setSlidesDialogOpen] = useState(false)
-  const [slidesDialogKey, setSlidesDialogKey] = useState(0)
-  const [slidesParams, setSlidesParams] = useState<GenerateSlidesParameters>(
-    defaultSlidesParameters,
   )
 
   const handleCreateMindmap = useCallback((params?: GenerateMindmapParameters) => {
@@ -646,6 +654,7 @@ export const StudioPanel = memo(function StudioPanel({
             onDownload={downloadPreviewContent}
             onRetryLoad={retryPreviewLoad}
             onRenameTitle={(title) => renameArtifactTitle(previewTarget.id, title)}
+            onContentUrlRefreshed={updatePreviewContentUrl}
           />
         ),
         onClose: closeInlinePreview,
@@ -687,6 +696,7 @@ export const StudioPanel = memo(function StudioPanel({
             ? (title) => renameArtifactTitle(previewTarget.id, title)
             : undefined
         }
+        onContentUrlRefreshed={updatePreviewContentUrl}
       />
 
       <InfoGraphicSettingsDialog

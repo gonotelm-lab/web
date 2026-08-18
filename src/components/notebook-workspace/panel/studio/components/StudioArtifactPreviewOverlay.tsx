@@ -21,7 +21,8 @@ import { subtleScrollbarSx } from '../../../shared/ui/scrollbar'
 import type { StudioArtifactItem } from '../types'
 import { renderStudioArtifactPreviewContent } from '../preview/previewRenderRegistry'
 import { hasStudioArtifactPreviewContent } from '../preview/previewContent'
-import { downloadFileFromUrl } from '../preview/downloadFile'
+import { downloadStudioStorageFile } from '../preview/fetchStudioStorageUrl'
+import { resolveStudioArtifactDownload } from '../preview/resolveStudioArtifactDownload'
 import { resolveStudioArtifactDisplayTitle } from '../resolveStudioArtifactKind'
 import { StudioArtifactExtrasPopover } from './StudioArtifactExtrasPopover'
 import { StudioArtifactTitleBar } from './StudioArtifactTitleBar'
@@ -36,6 +37,7 @@ interface StudioArtifactPreviewOverlayProps {
   onClose: () => void
   onRetryLoad: () => void
   onRenameTitle?: (title: string) => Promise<void>
+  onContentUrlRefreshed?: (nextUrl: string) => void
 }
 
 export function StudioArtifactPreviewOverlay({
@@ -48,6 +50,7 @@ export function StudioArtifactPreviewOverlay({
   onClose,
   onRetryLoad,
   onRenameTitle,
+  onContentUrlRefreshed,
 }: StudioArtifactPreviewOverlayProps) {
   const { t } = useTranslation(['studio', 'common'])
   const handleCloseOverlay = useCallback(() => {
@@ -89,17 +92,26 @@ export function StudioArtifactPreviewOverlay({
     if (!artifact || !hasDownloadableContent) {
       return
     }
-    const safeName = resolveStudioArtifactDisplayTitle(artifact.title, artifact.kind)
-      .replace(/[\\/:*?"<>|]+/g, '_')
-      .replace(/\s+/g, '_')
-      .slice(0, 60) || 'studio-artifact'
+    const plan = resolveStudioArtifactDownload({
+      kind: artifact.kind,
+      title: artifact.title,
+      content,
+      contentUrl: artifact.contentUrl,
+    })
+    if (!plan) {
+      return
+    }
 
-    if (artifact.kind === 'info_graphic') {
-      void downloadFileFromUrl(artifact.contentUrl, `${safeName}.png`).catch(() => {
-        // Fallback keeps current behavior when cross-origin download is blocked.
+    if (plan.type === 'url') {
+      void downloadStudioStorageFile({
+        url: plan.url,
+        filename: plan.filename,
+        taskId: artifact.taskId,
+        onUrlRefreshed: onContentUrlRefreshed,
+      }).catch(() => {
         const anchor = document.createElement('a')
-        anchor.href = artifact.contentUrl
-        anchor.download = `${safeName}.png`
+        anchor.href = plan.url
+        anchor.download = plan.filename
         document.body.appendChild(anchor)
         anchor.click()
         anchor.remove()
@@ -107,51 +119,16 @@ export function StudioArtifactPreviewOverlay({
       return
     }
 
-    if (artifact.kind === 'audio_overview') {
-      const audioUrl = artifact.contentUrl
-      if (!audioUrl.trim()) return
-      void downloadFileFromUrl(audioUrl, `${safeName}.wav`).catch(() => {
-        const anchor = document.createElement('a')
-        anchor.href = audioUrl
-        anchor.download = `${safeName}.wav`
-        document.body.appendChild(anchor)
-        anchor.click()
-        anchor.remove()
-      })
-      return
-    }
-
-    if (artifact.kind === 'slides') {
-      const pptxUrl = artifact.contentUrl
-      if (!pptxUrl.trim()) return
-      void downloadFileFromUrl(pptxUrl, `${safeName}.pptx`).catch(() => {
-        const anchor = document.createElement('a')
-        anchor.href = pptxUrl
-        anchor.download = `${safeName}.pptx`
-        document.body.appendChild(anchor)
-        anchor.click()
-        anchor.remove()
-      })
-      return
-    }
-
-    const extension = artifact.kind === 'mindmap'
-      ? 'mmd'
-      : artifact.kind === 'report' || artifact.kind === 'data_table'
-        ? 'md'
-        : artifact.kind === 'flashcard' || artifact.kind === 'quiz'
-          ? 'json'
-          : 'txt'
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
+    const blob = new Blob([plan.content], { type: 'text/plain;charset=utf-8' })
     const blobUrl = URL.createObjectURL(blob)
     const anchor = document.createElement('a')
     anchor.href = blobUrl
-    anchor.download = `${safeName}.${extension}`
+    anchor.download = plan.filename
     document.body.appendChild(anchor)
     anchor.click()
     anchor.remove()
     URL.revokeObjectURL(blobUrl)
-  }, [artifact, content, hasDownloadableContent])
+  }, [artifact, content, hasDownloadableContent, onContentUrlRefreshed])
 
   return (
     <Dialog
@@ -295,6 +272,7 @@ export function StudioArtifactPreviewOverlay({
                 content,
                 mode: 'overlay',
                 initialSlideIndex,
+                onContentUrlRefreshed,
               })}
             </Box>
           )}

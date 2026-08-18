@@ -19,7 +19,8 @@
     "emptyDisplay": "This artifact has no displayable content.",
     "infoGraphicAlt": "Infographic preview",
     "loadFailed": "Failed to load preview. Please retry.",
-    "taskNotDone": "Task is not finished yet. Please try again later."
+    "taskNotDone": "Task is not finished yet. Please try again later.",
+    "urlExpired": "Preview link expired. Retry to get a fresh link."
   },
   "kind": {
     "mindmap": "Mind map",
@@ -141,7 +142,8 @@
     "languageHelp": {
       "report": "Controls the language of the report output.",
       "audio": "Controls the language of the audio overview script.",
-      "infoGraphic": "Controls the visible text language in the infographic."
+      "infoGraphic": "Controls the visible text language in the infographic.",
+      "slides": "Controls the language of slide titles and body text."
     },
     "style": "Generation style",
     "styleHelp": {
@@ -163,7 +165,10 @@
     "detailLevel": "Detail level",
     "detailLevelHelp": "Controls how detailed the infographic content is.",
     "visualStyle": "Visual style",
-    "visualStyleHelp": "Controls the visual look of the infographic.",
+    "visualStyleHelp": {
+      "infoGraphic": "Controls the visual look of the infographic.",
+      "slides": "Controls the color palette and layout tone of the slides."
+    },
     "orientation": "Orientation",
     "orientationHelp": "Controls the aspect ratio of the infographic.",
     "prompt": "Describe the infographic you want",
@@ -195,6 +200,11 @@
       "deepResearch": { "label": "Deep research", "description": "Expanded background and detail for systematic understanding." },
       "discussion": { "label": "Discussion", "description": "Conversational framing that connects viewpoints." },
       "debate": { "label": "Debate", "description": "Highlights contrasting perspectives and trade-offs." }
+    },
+    "slides": {
+      "default": { "label": "Default", "description": "Warm educational tone: flat sketched look on a cream paper base." },
+      "educational": { "label": "Educational", "description": "Textbook style: high contrast, clear geometric sections, calm and readable." },
+      "cute": { "label": "Cute", "description": "Soft pastel look: rounded shapes, generous whitespace, gentle mood." }
     }
   },
   "infoGraphic": {
