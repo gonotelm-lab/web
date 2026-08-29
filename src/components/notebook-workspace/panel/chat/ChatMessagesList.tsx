@@ -7,6 +7,7 @@ import { ChatMessageItem } from './ChatMessageItem'
 import type { ChatCitationJumpRequest, ChatUiMessage } from './types'
 import { workspaceSpace } from '../../shared/ui/layoutTokens'
 import { chatMessageContentTokens } from './layoutTokens'
+import { resolveMessageItemContentVisibility } from './chatConversationCommon'
 
 const messageItemSpacing = chatMessageContentTokens.messageGap
 const loadingIndicatorRowMinHeight = 18
@@ -98,16 +99,24 @@ export const ChatMessagesList = memo(function ChatMessagesList({
 
         {messages.map((message, index) => {
           const messageKey = message.clientKey ?? message.id
-          const isActiveAssistantMessage = activeAssistantMessageId === messageKey
+          // Match either stable clientKey or server id — resume must keep phase UI active.
+          const isActiveAssistantMessage = Boolean(
+            activeAssistantMessageId &&
+              (activeAssistantMessageId === messageKey ||
+                activeAssistantMessageId === message.id ||
+                activeAssistantMessageId === message.clientKey),
+          )
+          const isLastMessage = index === messages.length - 1
           return (
             <Box
               key={messageKey}
               data-message-id={message.id}
               sx={{
-                mb: index === messages.length - 1 ? 0 : messageItemSpacing,
+                mb: isLastMessage ? 0 : messageItemSpacing,
                 // Skip layout work for offscreen history (rendering-content-visibility).
-                contentVisibility: 'auto',
-                containIntrinsicSize: '0 120px',
+                // Keep the last message fully measured so stream completion can pin to the real bottom.
+                contentVisibility: resolveMessageItemContentVisibility(isLastMessage),
+                containIntrinsicSize: isLastMessage ? undefined : '0 120px',
               }}
             >
               <ChatMessageItem

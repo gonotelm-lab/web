@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
+  applyStickToBottomScroll,
+  isNearBottom,
   isStreamTerminalEvent,
+  resolveMessageItemContentVisibility,
   shouldFireStreamCompleted,
   shouldFlushStreamEventImmediately,
   shouldFlushStreamEventOnNextFrame,
+  streamAutoScrollThresholdPx,
 } from './chatConversationCommon'
 import type { StreamTaskEvent } from '@/types/api'
 
@@ -72,5 +76,69 @@ describe('shouldFireStreamCompleted', () => {
     expect(shouldFireStreamCompleted(true, true)).toBe(false)
     expect(shouldFireStreamCompleted(false, false)).toBe(false)
     expect(shouldFireStreamCompleted(false, true)).toBe(false)
+  })
+})
+
+describe('isNearBottom', () => {
+  it('treats the viewport as near bottom within the stream threshold', () => {
+    expect(
+      isNearBottom({
+        scrollHeight: 1000,
+        scrollTop: 960,
+        clientHeight: 40,
+      }),
+    ).toBe(true)
+  })
+
+  it('does not treat a user who scrolled away as near bottom', () => {
+    expect(
+      isNearBottom({
+        scrollHeight: 1000,
+        scrollTop: 100,
+        clientHeight: 400,
+      }),
+    ).toBe(false)
+  })
+
+  it('uses the shared stream threshold as the default cutoff', () => {
+    expect(
+      isNearBottom({
+        scrollHeight: 500,
+        scrollTop: 500 - 200 - (streamAutoScrollThresholdPx - 1),
+        clientHeight: 200,
+      }),
+    ).toBe(true)
+    expect(
+      isNearBottom({
+        scrollHeight: 500,
+        scrollTop: 500 - 200 - streamAutoScrollThresholdPx,
+        clientHeight: 200,
+      }),
+    ).toBe(false)
+  })
+})
+
+describe('applyStickToBottomScroll', () => {
+  it('jumps to the latest scrollHeight when the user is sticking to bottom', () => {
+    const container = { scrollHeight: 1280, scrollTop: 400 }
+    expect(applyStickToBottomScroll(container, true)).toBe(true)
+    expect(container.scrollTop).toBe(1280)
+  })
+
+  it('leaves scrollTop unchanged when the user has scrolled away', () => {
+    const container = { scrollHeight: 1280, scrollTop: 400 }
+    expect(applyStickToBottomScroll(container, false)).toBe(false)
+    expect(container.scrollTop).toBe(400)
+  })
+
+  it('no-ops when the scroll container is missing', () => {
+    expect(applyStickToBottomScroll(null, true)).toBe(false)
+  })
+})
+
+describe('resolveMessageItemContentVisibility', () => {
+  it('keeps the last message fully measured so completed answers can pin to the real bottom', () => {
+    expect(resolveMessageItemContentVisibility(true)).toBeUndefined()
+    expect(resolveMessageItemContentVisibility(false)).toBe('auto')
   })
 })

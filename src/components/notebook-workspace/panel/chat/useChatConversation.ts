@@ -14,6 +14,7 @@ import {
   abortChatStream,
   createChatMessage,
   deleteChatContext,
+  getChatRunningTask,
   listChatMessages,
   streamChatEvents,
 } from '@/api/chat'
@@ -32,6 +33,12 @@ import {
 } from './chatConversationCommon'
 import type { StreamDisplayPhaseType } from './chatConversationCommon'
 import { buildLiveMessagesAfterAbortRefresh, mapHistoryPagesToUiMessages } from './chatStreamDraftRetention'
+import {
+  clearCheckpoint,
+  createThrottledCheckpointSaver,
+  isCheckpointMatchingTask,
+  loadCheckpoint,
+} from './chatStreamCheckpoint'
 import type { ChatAnswerLengthOption, ChatStyleOption } from './chatSettings'
 import type { ChatUiMessage } from './types'
 import { useLiveMessageUpdater } from './useLiveMessageUpdater'
@@ -170,9 +177,12 @@ export function useChatConversation({
   const {
     showScrollToBottomButton,
     isProgrammaticScrollToBottomRef,
+    stickToBottomRef,
     scrollToBottom,
+    scrollToBottomIfStuck,
     smoothScrollToBottom,
     syncScrollToBottomButtonVisibility,
+    syncStickToBottomFromUserScroll,
     stopScrollToBottomAnimation,
     resetScrollControl,
   } = useChatScrollControl({
@@ -264,16 +274,20 @@ export function useChatConversation({
         }
         return buildLiveMessagesAfterAbortRefresh(previousLiveMessages, fetchedHistoryMessages)
       })
-      scrollToBottom()
+      scrollToBottomIfStuck()
     },
-    [messagesQuery, scrollToBottom],
+    [messagesQuery, scrollToBottomIfStuck],
   )
 
   useEffect(() => {
     return () => {
       // Unmount cleanup invalidates in-flight stream work and removes UI timers/buffers.
+      // Must clear streaming latches: React Strict Mode remounts after this cleanup; if
+      // activeTaskId stays set, the resume effect would skip and never reconnect SSE.
       invalidateStreamRunToken()
       abortActiveStreamController()
+      setActiveTaskId(null)
+      setActiveAssistantMessageId(null)
       setAbortRequestedFlag(false)
       clearStreamStatusSchedule()
       stopScrollToBottomAnimation()
@@ -347,25 +361,70 @@ export function useChatConversation({
     scrollToBottom,
   ])
 
+  useLayoutEffect(() => {
+    // Stream completion grows the last bubble (actions, deferred markdown, history
+    // swap) without a token event; pin to bottom after that layout if still following.
+    if (messagesQuery.isFetchingNextPage || messagesQuery.isLoading) return
+    scrollToBottomIfStuck()
+  }, [
+    displayMessages,
+    isStreaming,
+    messagesQuery.isFetchingNextPage,
+    messagesQuery.isLoading,
+    scrollToBottomIfStuck,
+  ])
+
   /**
    * Runs the streaming loop for one assistant response.
    * It uses a monotonically increasing run token to invalidate stale async callbacks,
    * retries transient disconnects, and finalizes history refresh once streaming ends.
    */
   const runStreamSession = useCallback(
-    async (taskId: string, assistantMessageId: string) => {
+    async (
+      taskId: string,
+      assistantMessageId: string,
+      options?: {
+        initialLastStreamId?: string
+        initialAssistantMessage?: ChatUiMessage
+      },
+    ) => {
       // Each run gets a unique token so reconnect loops/events from old runs cannot mutate current state.
       const runToken = ++streamRunTokenRef.current
-      let lastStreamId = ''
+      let lastStreamId = options?.initialLastStreamId ?? ''
       let reconnectCount = 0
       let finished = false
 
-      const assistantMsg = createEmptyAssistantMessage(assistantMessageId)
-      const assistantClientKey = assistantMessageId
-      let currentAssistantMessageId = assistantMessageId
+      const assistantMsg = options?.initialAssistantMessage
+        ? cloneChatUiMessage(options.initialAssistantMessage)
+        : createEmptyAssistantMessage(assistantMessageId)
+      if (!assistantMsg.clientKey) {
+        assistantMsg.clientKey = assistantMessageId
+      }
+      const assistantClientKey = assistantMsg.clientKey
+      let currentAssistantMessageId = assistantMsg.id
       let liveMessageFlushRafId: number | null = null
       let liveMessageFlushTimerId: number | null = null
       let lastStreamPhaseSummary = ''
+      const checkpointSaver = createThrottledCheckpointSaver()
+
+      const persistCheckpoint = () => {
+        checkpointSaver.schedule({
+          chatId,
+          taskId,
+          lastStreamId,
+          assistantMessage: cloneChatUiMessage(assistantMsg),
+        })
+      }
+
+      const flushCheckpointNow = () => {
+        checkpointSaver.flush()
+      }
+
+      const onPageHide = () => {
+        flushCheckpointNow()
+      }
+      window.addEventListener('pagehide', onPageHide)
+      window.addEventListener('beforeunload', onPageHide)
 
       const syncStreamStatusFromMessage = (message: ChatUiMessage) => {
         const hasResponseContent = message.fragments.some(
@@ -449,13 +508,13 @@ export function useChatConversation({
               }
 
               const streamEvent = event as StreamTaskEvent
-              if (streamEvent.id) {
-                lastStreamId = streamEvent.id
-              }
               if (streamEvent.error?.message) {
                 setErrorText(streamEvent.error.message)
               }
               if (isStreamTerminalEvent(streamEvent)) {
+                if (streamEvent.id) {
+                  lastStreamId = streamEvent.id
+                }
                 flushLiveMessageImmediately()
                 finished = true
                 clearStreamStatusSchedule()
@@ -466,6 +525,15 @@ export function useChatConversation({
               }
 
               applyStreamEventInPlace(assistantMsg, streamEvent)
+              if (streamEvent.id) {
+                lastStreamId = streamEvent.id
+              }
+              persistCheckpoint()
+              // Phase labels are the main pre-text UX; flush immediately so a refresh
+              // during "检索证据" etc. can restore the status from localStorage.
+              if (streamEvent.p === 'm.f.phase') {
+                flushCheckpointNow()
+              }
               if (assistantMsg.id !== currentAssistantMessageId) {
                 currentAssistantMessageId = assistantMsg.id
                 flushLiveMessageImmediately()
@@ -523,10 +591,16 @@ export function useChatConversation({
       }
 
       cancelLiveMessageFlush()
+      window.removeEventListener('pagehide', onPageHide)
+      window.removeEventListener('beforeunload', onPageHide)
 
       if (runToken !== streamRunTokenRef.current) {
+        checkpointSaver.dispose()
         return
       }
+
+      checkpointSaver.dispose()
+      clearCheckpoint(chatId)
 
       const streamWasAborted = abortRequestedRef.current
       setActiveTaskId(null)
@@ -556,6 +630,103 @@ export function useChatConversation({
     ],
   )
 
+  const activeTaskIdRef = useRef(activeTaskId)
+  activeTaskIdRef.current = activeTaskId
+  const createMessagePendingRef = useRef(createMessageMutation.isPending)
+  createMessagePendingRef.current = createMessageMutation.isPending
+  const runStreamSessionRef = useRef(runStreamSession)
+  runStreamSessionRef.current = runStreamSession
+  // Dedupe concurrent getChatRunningTask for the same chat (Strict Mode remount).
+  const streamTaskRequestRef = useRef<{
+    chatId: string
+    promise: Promise<{ task_id: string }>
+  } | null>(null)
+
+  /**
+   * After first-page history succeeds, resume an in-flight server stream if any.
+   * Restores localStorage checkpoint when task ids match; otherwise empty bubble.
+   * Intentionally omits runStreamSession from deps (held in ref) so identity churn
+   * does not re-fire stream-task; in-flight GETs are shared per chatId.
+   *
+   * Do NOT use a "already resumed for chatId" latch across effect remounts: React
+   * Strict Mode runs mount→cleanup→mount, and a latch set on the first mount
+   * would skip the second mount and kill resume entirely (including 0-0 replay).
+   */
+  useEffect(() => {
+    if (!chatId || !messagesQuery.isSuccess) {
+      return
+    }
+
+    let cancelled = false
+
+    const resumeIfNeeded = async () => {
+      if (activeTaskIdRef.current || createMessagePendingRef.current) {
+        return
+      }
+      try {
+        if (
+          streamTaskRequestRef.current === null ||
+          streamTaskRequestRef.current.chatId !== chatId
+        ) {
+          streamTaskRequestRef.current = {
+            chatId,
+            promise: getChatRunningTask(chatId),
+          }
+        }
+        const running = await streamTaskRequestRef.current.promise
+        if (cancelled) {
+          return
+        }
+        if (!running.task_id) {
+          clearCheckpoint(chatId)
+          return
+        }
+        if (activeTaskIdRef.current || createMessagePendingRef.current) {
+          return
+        }
+
+        const checkpoint = loadCheckpoint(chatId)
+        if (isCheckpointMatchingTask(checkpoint, running.task_id)) {
+          const restored = cloneChatUiMessage(checkpoint.assistantMessage)
+          if (!restored.clientKey) {
+            restored.clientKey = restored.id
+          }
+          // PhaseStatusIndicator only renders when isActiveAssistant; the list matches
+          // activeAssistantMessageId against clientKey ?? id (stable local key across
+          // server id rewrites). Must use clientKey here or restored phase UI is blank.
+          const activeKey = restored.clientKey
+          setActiveAssistantMessageId(activeKey)
+          setLiveMessages([restored])
+          await runStreamSessionRef.current(running.task_id, activeKey, {
+            initialLastStreamId: checkpoint.lastStreamId || undefined,
+            initialAssistantMessage: restored,
+          })
+          return
+        }
+
+        clearCheckpoint(chatId)
+        const assistantMessageId = `local-assistant-${Date.now()}`
+        setActiveAssistantMessageId(assistantMessageId)
+        setLiveMessages((prev) => [...prev, createEmptyAssistantMessage(assistantMessageId)])
+        await runStreamSessionRef.current(running.task_id, assistantMessageId)
+      } catch (error) {
+        if (cancelled) {
+          return
+        }
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return
+        }
+        // Silent: resume failure must not block normal chat.
+      }
+    }
+
+    void resumeIfNeeded()
+
+    return () => {
+      cancelled = true
+    }
+  }, [chatId, messagesQuery.isSuccess])
+
   /**
    * Sends a user prompt optimistically, creates temporary local bubbles,
    * then hands over to stream runner for incremental assistant updates.
@@ -569,6 +740,7 @@ export function useChatConversation({
 
     setErrorText('')
     shouldAutoScrollToBottomRef.current = true
+    clearCheckpoint(chatId)
 
     const userMessageId = `local-user-${Date.now()}`
     const assistantMessageId = `local-assistant-${Date.now()}`
@@ -668,6 +840,7 @@ export function useChatConversation({
       if (isProgrammaticScrollToBottomRef.current) {
         return
       }
+      syncStickToBottomFromUserScroll()
       syncScrollToBottomButtonVisibility()
 
       const {
@@ -704,6 +877,7 @@ export function useChatConversation({
       }
       setErrorText('')
       shouldAutoScrollToBottomRef.current = false
+      stickToBottomRef.current = false
       loadingMoreHistoryRef.current = true
       void fetchNextHistoryPage()
         .then((result) => {
@@ -727,7 +901,9 @@ export function useChatConversation({
     isFetchingNextHistoryPage,
     isLoadingHistoryMessages,
     isProgrammaticScrollToBottomRef,
+    stickToBottomRef,
     syncScrollToBottomButtonVisibility,
+    syncStickToBottomFromUserScroll,
   ])
 
   const onSendMessage = useCallback((prompt: string) => {

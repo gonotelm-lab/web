@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from 'vitest'
 import { ApiError } from '@/lib/http'
-import { createChatMessage, getChatSuggestions, listChatMessages, streamChatEvents } from './chat'
+import {
+  createChatMessage,
+  getChatRunningTask,
+  getChatSuggestions,
+  listChatMessages,
+  streamChatEvents,
+} from './chat'
 import { setMockScenario } from '@/test/mocks'
 
 describe('chat api with msw mock', () => {
@@ -110,5 +116,16 @@ describe('chat api with msw mock', () => {
 
     expect(endStatus).toBe('eof')
     expect(onEvent).toHaveBeenCalledWith('message', expect.objectContaining({ done: true }))
+  })
+
+  it('returns empty task_id when no running stream task', async () => {
+    const result = await getChatRunningTask('chat-1')
+    expect(result.task_id).toBe('')
+  })
+
+  it('returns running task_id under resume scenario', async () => {
+    setMockScenario('chat', 'resume')
+    const result = await getChatRunningTask('chat-1')
+    expect(result.task_id).toBe('task-running-1')
   })
 })

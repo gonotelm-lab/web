@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import type { Dispatch, RefObject, SetStateAction } from 'react'
-import { streamAutoScrollThresholdPx } from './chatConversationCommon'
+import { isNearBottom } from './chatConversationCommon'
 import type { ChatUiMessage } from './types'
 
 interface UseLiveMessageUpdaterParams {
@@ -50,9 +50,7 @@ export function useLiveMessageUpdater({
     (messageId: string, nextMessage: ChatUiMessage) => {
       const container = messageListRef.current
       const shouldStickToBottom = Boolean(
-        container &&
-          container.scrollHeight - container.scrollTop - container.clientHeight <
-            streamAutoScrollThresholdPx,
+        container && isNearBottom(container),
       )
       const nextFingerprint = buildLiveMessageFingerprint(nextMessage)
 

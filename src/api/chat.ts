@@ -4,6 +4,7 @@ import type {
   ChatAbortStreamRequest,
   ChatCreateMessageRequest,
   ChatCreateMessageResponse,
+  ChatGetRunningTaskResponse,
   ChatGetSuggestionsResponse,
   ChatListMessagesResponse,
   StreamHeartbeatEvent,
@@ -135,6 +136,16 @@ export function abortChatStream(payload: ChatAbortStreamRequest) {
     method: 'POST',
     body: JSON.stringify({ task_id: payload.task_id }),
   })
+}
+
+export function getChatRunningTask(chatId: string, init?: RequestInit) {
+  return request<ChatGetRunningTaskResponse>(
+    `/api/v1/chats/${encodeURIComponent(chatId)}/stream-task`,
+    {
+      method: 'GET',
+      ...init,
+    },
+  )
 }
 
 export function deleteChatContext(chatId: string) {

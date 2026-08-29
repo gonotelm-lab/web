@@ -17,6 +17,37 @@ export const streamReconnectMaxRetries = 1
 export const streamUiFlushIntervalMs = 120
 export const smoothScrollDeltaEpsilonPx = 1
 
+interface ChatScrollMetrics {
+  scrollHeight: number
+  scrollTop: number
+  clientHeight: number
+}
+
+interface ChatStickScrollContainer {
+  scrollHeight: number
+  scrollTop: number
+}
+
+export const isNearBottom = (
+  metrics: ChatScrollMetrics,
+  thresholdPx = streamAutoScrollThresholdPx,
+) => metrics.scrollHeight - metrics.scrollTop - metrics.clientHeight < thresholdPx
+
+export const applyStickToBottomScroll = (
+  container: ChatStickScrollContainer | null | undefined,
+  shouldStick: boolean,
+) => {
+  if (!container || !shouldStick) {
+    return false
+  }
+  container.scrollTop = container.scrollHeight
+  return true
+}
+
+export const resolveMessageItemContentVisibility = (
+  isLastMessage: boolean,
+): 'auto' | undefined => (isLastMessage ? undefined : 'auto')
+
 /** 服务端流式任务的终止事件：done=true 或 error 非空 */
 export const isStreamTerminalEvent = (event: StreamTaskEvent) =>
   event.done === true || Boolean(event.error?.message)

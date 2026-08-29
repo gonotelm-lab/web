@@ -1,5 +1,6 @@
 import type {
   ChatCreateMessageResponse,
+  ChatGetRunningTaskResponse,
   ChatGetSuggestionsResponse,
   ChatListMessagesResponse,
   ChatMessage,
@@ -54,5 +55,12 @@ export const createChatGetSuggestionsResponseFixture = (
 ): ChatGetSuggestionsResponse => ({
   type: 'opener',
   questions: ['什么是 Rust 的所有权？', '如何避免借用检查错误？', 'Rust 与 C++ 相比有什么优势？'],
+  ...overrides,
+})
+
+export const createChatGetRunningTaskResponseFixture = (
+  overrides: Partial<ChatGetRunningTaskResponse> = {},
+): ChatGetRunningTaskResponse => ({
+  task_id: '',
   ...overrides,
 })

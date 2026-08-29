@@ -1,6 +1,7 @@
 import { http, HttpResponse } from 'msw'
 import {
   createChatCreateMessageResponseFixture,
+  createChatGetRunningTaskResponseFixture,
   createChatListMessagesResponseFixture,
   createChatMessageFixture,
 } from '../fixtures/chat'
@@ -83,6 +84,20 @@ export const chatHandlers = [
       scenario,
       successData: createChatListMessagesResponseFixture(chatHistoryMessages),
       emptyData: createChatListMessagesResponseFixture([]),
+    })
+  }),
+
+  http.get(`${apiBaseUrl}/api/v1/chats/:chatId/stream-task`, async () => {
+    const scenario = getMockScenario('chat')
+    if (scenario === 'resume') {
+      return createSuccessResponse(
+        createChatGetRunningTaskResponseFixture({ task_id: 'task-running-1' }),
+      )
+    }
+    return resolveScenarioResponse({
+      scenario,
+      successData: createChatGetRunningTaskResponseFixture({ task_id: '' }),
+      emptyData: createChatGetRunningTaskResponseFixture({ task_id: '' }),
     })
   }),
 

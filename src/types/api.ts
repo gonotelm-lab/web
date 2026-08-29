@@ -442,6 +442,10 @@ export interface ChatGetSuggestionsResponse {
   questions: string[]
 }
 
+export interface ChatGetRunningTaskResponse {
+  task_id: string
+}
+
 export type ChatStyle = 'default' | 'analyst' | 'guide'
 export type ChatAnswerLength = 'default' | 'longer' | 'shorter'
 
