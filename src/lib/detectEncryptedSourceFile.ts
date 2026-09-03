@@ -2,7 +2,16 @@ export type EncryptedCheckResult =
   | { encrypted: false }
   | { encrypted: true; reason: string }
 
-const SKIP_EXTS = new Set(['.txt', '.md', '.markdown', '.csv'])
+const SKIP_EXTS = new Set([
+  '.txt',
+  '.md',
+  '.markdown',
+  '.csv',
+  '.jpg',
+  '.jpeg',
+  '.png',
+  '.webp',
+])
 const OLE_MAGIC = [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1] as const
 const PDF_PROBE_BYTES = 64 * 1024
 const ZIP_PROBE_BYTES = 256 * 1024

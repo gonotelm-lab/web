@@ -8,7 +8,15 @@ const sourceUploadMimeByExt: Record<string, string> = {
   '.epub': 'application/epub+zip',
   '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
 }
+
+export const allowedSourceFileExtensions = new Set(Object.keys(sourceUploadMimeByExt))
+
+export const acceptedSourceFileTypes = Object.keys(sourceUploadMimeByExt).join(',')
 
 const normalizeMimeType = (mimeType: string) =>
   mimeType

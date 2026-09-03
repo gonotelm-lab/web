@@ -100,6 +100,7 @@ const detectSourceIconType = (
   if (normalizedFormat.startsWith('text/plain')) return 'txt'
   if (normalizedFormat.startsWith('text/markdown')) return 'markdown'
   if (normalizedFormat.startsWith('text/csv')) return 'csv'
+  if (normalizedFormat.startsWith('image/')) return 'image'
   return 'docx'
 }
 

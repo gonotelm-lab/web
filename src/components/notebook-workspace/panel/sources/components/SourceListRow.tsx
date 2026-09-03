@@ -8,6 +8,7 @@ import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
+import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined'
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
 import MoreHorizOutlinedIcon from '@mui/icons-material/MoreHorizOutlined'
 import NotesOutlinedIcon from '@mui/icons-material/NotesOutlined'
@@ -241,6 +242,8 @@ export const SourceListRow = memo(function SourceListRow({
       <TableChartOutlinedIcon sx={sourceTypeIconSxForItem} />
     ) : item.iconType === 'pptx' ? (
       <SlideshowOutlinedIcon sx={sourceTypeIconSxForItem} />
+    ) : item.iconType === 'image' ? (
+      <ImageOutlinedIcon sx={sourceTypeIconSxForItem} />
     ) : item.iconType === 'docx' ? (
       <DescriptionOutlinedIcon sx={sourceTypeIconSxForItem} />
     ) : (

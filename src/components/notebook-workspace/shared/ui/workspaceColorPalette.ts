@@ -83,6 +83,12 @@ export const workspaceColorPalette = {
       icon: '#2f6b6b',
       surface: 'rgba(47, 107, 107, 0.08)',
     },
+    image: {
+      accent: '#6b4f8a',
+      border: '#c4b4d4',
+      icon: '#6b4f8a',
+      surface: 'rgba(107, 79, 138, 0.08)',
+    },
     default: {
       accent: '#4a5a50',
       border: '#c9c2b4',

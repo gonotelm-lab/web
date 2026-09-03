@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { resolveUploadMimeType } from './sourceMime'
+import {
+  acceptedSourceFileTypes,
+  allowedSourceFileExtensions,
+  resolveUploadMimeType,
+} from './sourceMime'
 
 const makeFileLike = (name: string, type: string) => ({ name, type }) as File
 
@@ -70,5 +74,32 @@ describe('resolveUploadMimeType', () => {
       'application/x-custom',
     )
     expect(resolveUploadMimeType(makeFileLike('a.unknown', ''))).toBe('application/octet-stream')
+  })
+
+  it.each([
+    ['a.jpg', 'image/jpeg', 'image/jpeg'],
+    ['a.jpeg', 'image/jpeg', 'image/jpeg'],
+    ['a.png', 'image/png', 'image/png'],
+    ['a.webp', 'image/webp', 'image/webp'],
+  ])('%s 解析为 %s', (name, type, expected) => {
+    expect(resolveUploadMimeType(makeFileLike(name, type))).toBe(expected)
+  })
+
+  it.each([
+    ['a.jpg', 'image/jpeg'],
+    ['a.jpeg', 'image/jpeg'],
+    ['a.png', 'image/png'],
+    ['a.webp', 'image/webp'],
+  ])('浏览器 mime 为空时 %s 按扩展名解析为 %s', (name, expected) => {
+    expect(resolveUploadMimeType(makeFileLike(name, ''))).toBe(expected)
+  })
+
+  it('允许上传 jpeg/png/webp 扩展名，不包含 gif', () => {
+    for (const ext of ['.jpg', '.jpeg', '.png', '.webp']) {
+      expect(allowedSourceFileExtensions.has(ext)).toBe(true)
+      expect(acceptedSourceFileTypes.split(',')).toContain(ext)
+    }
+    expect(allowedSourceFileExtensions.has('.gif')).toBe(false)
+    expect(acceptedSourceFileTypes.split(',')).not.toContain('.gif')
   })
 })

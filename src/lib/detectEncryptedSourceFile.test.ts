@@ -26,6 +26,14 @@ describe('detectEncryptedSourceFile', () => {
     })
   })
 
+  it('跳过 jpg/jpeg/png/webp', async () => {
+    for (const name of ['a.jpg', 'a.jpeg', 'a.png', 'a.webp']) {
+      await expect(detectEncryptedSourceFile(fileFromText(name, 'not-an-office-file'))).resolves.toEqual({
+        encrypted: false,
+      })
+    }
+  })
+
   it('明文 PDF（无 /Encrypt）通过', async () => {
     const pdf = '%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\n%%EOF\n'
     await expect(detectEncryptedSourceFile(fileFromText('a.pdf', pdf))).resolves.toEqual({

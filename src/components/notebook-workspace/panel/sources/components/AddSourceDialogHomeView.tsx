@@ -6,6 +6,10 @@ import NotesIcon from '@mui/icons-material/Notes'
 import { Box, Paper, Stack, Typography } from '@mui/material'
 import i18n from '@/i18n'
 import { detectEncryptedSourceFile } from '../../../../../lib/detectEncryptedSourceFile'
+import {
+  acceptedSourceFileTypes,
+  allowedSourceFileExtensions,
+} from '../../../../../lib/sourceMime'
 import { workspaceRadius, workspaceSpace } from '../../../shared/ui/layoutTokens'
 import { workspaceInteraction, workspaceTransitionPresets } from '../../../shared/ui/motionTokens'
 import { workspaceIconSize } from '../../../shared/ui/typeTokens'
@@ -19,24 +23,12 @@ interface AddSourceDialogHomeViewProps {
 
 const maxSourceFileSizeBytes = 100 * 1024 * 1024
 const maxSourceFilesPerBatch = 20
-const allowedFileExtensions = new Set([
-  '.pdf',
-  '.txt',
-  '.md',
-  '.markdown',
-  '.csv',
-  '.docx',
-  '.epub',
-  '.xlsx',
-  '.pptx',
-])
-const acceptedFileTypes = '.pdf,.txt,.md,.markdown,.csv,.docx,.epub,.xlsx,.pptx'
 
 const validateSourceFile = (file: File) => {
   const lowerName = file.name.toLowerCase()
   const dotIndex = lowerName.lastIndexOf('.')
   const ext = dotIndex >= 0 ? lowerName.slice(dotIndex) : ''
-  if (!allowedFileExtensions.has(ext)) {
+  if (!allowedSourceFileExtensions.has(ext)) {
     return i18n.t('sources:upload.unsupportedType')
   }
   if (file.size < 1) {
@@ -223,7 +215,7 @@ export function AddSourceDialogHomeView({
           hidden
           type="file"
           multiple
-          accept={acceptedFileTypes}
+          accept={acceptedSourceFileTypes}
           aria-label={t('sources:upload.inputAria')}
           onChange={(e) => {
             const files = Array.from(e.target.files ?? [])

@@ -11,6 +11,7 @@ export type SourceIconType =
   | 'txt'
   | 'markdown'
   | 'csv'
+  | 'image'
 
 export interface SourceListItem {
   id: string
