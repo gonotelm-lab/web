@@ -131,4 +131,18 @@ export const notebookHandlers = [
   http.patch(`${apiBaseUrl}/api/v1/notebooks/:notebookId`, async () =>
     createSuccessResponse(null),
   ),
+
+  http.post(`${apiBaseUrl}/api/v1/notebooks/:notebookId/description/generation`, async ({ params }) => {
+    const scenario = getMockScenario('notebook')
+    const notebookId = String(params.notebookId ?? 'notebook-1')
+    return resolveScenarioResponse({
+      scenario,
+      successData: {
+        desc: `Generated description for ${notebookId}`,
+      },
+      emptyData: {
+        desc: '',
+      },
+    })
+  }),
 ]

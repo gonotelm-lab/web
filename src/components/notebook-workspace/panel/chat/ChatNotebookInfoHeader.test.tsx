@@ -32,23 +32,17 @@ describe('ChatNotebookInfoHeader', () => {
     expect(html).toContain('0 个来源')
   })
 
-  it('renders full description content without truncation fallback replacement', () => {
-    const fullDescription = [
-      'Line one for full description.',
-      'Line two stays visible.',
-      'Line three stays visible.',
-      'Line four stays visible.',
-      'Line five stays visible.',
-    ].join(' ')
-
+  it('renders description skeleton while generating notebook description', () => {
     const html = renderToStaticMarkup(
       <ChatNotebookInfoHeader
-        notebookName="Full Description Notebook"
-        notebookDescription={fullDescription}
-        notebookSourceCount={2}
+        notebookName="Loading Notebook"
+        notebookDescription=""
+        notebookSourceCount={1}
+        descriptionLoading
       />,
     )
 
-    expect(html).toContain(fullDescription)
+    expect(html).toContain('data-testid="chat-notebook-description-skeleton"')
+    expect(html).toContain('Loading Notebook')
   })
 })

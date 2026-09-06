@@ -116,6 +116,7 @@ interface ChatPanelProps {
   notebookName: string
   notebookDescription: string
   notebookSourceCount: number
+  notebookDescriptionLoading?: boolean
   selectedSourceIds: string[]
   readySourceIds: string[]
   sourcesPanelCollapsed: boolean
@@ -140,6 +141,7 @@ function ChatPanelContent({
   notebookName,
   notebookDescription,
   notebookSourceCount,
+  notebookDescriptionLoading = false,
   selectedSourceIds,
   readySourceIds,
   sourcesPanelCollapsed,
@@ -282,9 +284,10 @@ function ChatPanelContent({
         notebookName={notebookName}
         notebookDescription={notebookDescription}
         notebookSourceCount={notebookSourceCount}
+        descriptionLoading={notebookDescriptionLoading}
       />
     ),
-    [notebookDescription, notebookName, notebookSourceCount],
+    [notebookDescription, notebookDescriptionLoading, notebookName, notebookSourceCount],
   )
 
   return (

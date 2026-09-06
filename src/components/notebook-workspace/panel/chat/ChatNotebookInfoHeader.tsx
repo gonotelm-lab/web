@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import CheckIcon from '@mui/icons-material/Check'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
-import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, IconButton, Skeleton, Stack, Tooltip, Typography } from '@mui/material'
 import type { Theme } from '@mui/material/styles'
 import { useTranslation } from 'react-i18next'
 import { chatMessageContentTokens } from './layoutTokens'
@@ -39,12 +39,14 @@ interface ChatNotebookInfoHeaderProps {
   notebookName: string
   notebookDescription: string
   notebookSourceCount: number
+  descriptionLoading?: boolean
 }
 
 export function ChatNotebookInfoHeader({
   notebookName,
   notebookDescription,
   notebookSourceCount,
+  descriptionLoading = false,
 }: ChatNotebookInfoHeaderProps) {
   const { t } = useTranslation(['chat', 'common'])
   const [copied, setCopied] = useState(false)
@@ -132,21 +134,45 @@ export function ChatNotebookInfoHeader({
           {title}
         </Typography>
 
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{
-            width: '100%',
-            lineHeight: 1.6,
-            whiteSpace: 'pre-wrap',
-            overflowWrap: 'anywhere',
-            textAlign: 'left',
-            letterSpacing: 0,
-            minHeight: '1.6em',
-          }}
-        >
-          {description || '\u00A0'}
-        </Typography>
+        {descriptionLoading ? (
+          <Stack spacing={0.75} sx={{ width: '100%', minHeight: '1.6em' }}>
+            <Skeleton
+              data-testid="chat-notebook-description-skeleton"
+              animation="wave"
+              variant="rounded"
+              width="88%"
+              height={14}
+            />
+            <Skeleton
+              animation="wave"
+              variant="rounded"
+              width="72%"
+              height={14}
+            />
+            <Skeleton
+              animation="wave"
+              variant="rounded"
+              width="56%"
+              height={14}
+            />
+          </Stack>
+        ) : (
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{
+              width: '100%',
+              lineHeight: 1.6,
+              whiteSpace: 'pre-wrap',
+              overflowWrap: 'anywhere',
+              textAlign: 'left',
+              letterSpacing: 0,
+              minHeight: '1.6em',
+            }}
+          >
+            {description || '\u00A0'}
+          </Typography>
+        )}
 
         <Typography
           variant="caption"

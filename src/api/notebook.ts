@@ -92,3 +92,12 @@ export function listNotebookSources(
     : `/api/v1/notebooks/${notebookId}/sources`
   return request<ListNotebookSourcesResponse>(path)
 }
+
+export function generateNotebookDescription(id: string) {
+  return request<{ desc: string }>(
+    `/api/v1/notebooks/${encodeURIComponent(id)}/description/generation`,
+    {
+      method: 'POST',
+    },
+  )
+}

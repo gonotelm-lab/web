@@ -22,6 +22,7 @@ import {
 } from '../api/source'
 import {
   deleteNotebook,
+  generateNotebookDescription,
   getNotebook,
   getOrCreateNotebookChat,
   listNotebookSources,
@@ -175,6 +176,9 @@ export function NotebookWorkspacePage() {
   >(null)
   const [sourceErrorToast, setSourceErrorToast] = useState<{ key: number; message: string } | null>(null)
   const sourceErrorToastKeyRef = useRef(0)
+  const [isGeneratingNotebookDescription, setIsGeneratingNotebookDescription] = useState(false)
+  const pendingNotebookDescGenerationRef = useRef(false)
+  const notebookDescGenerationInFlightRef = useRef(false)
 
   const sources = useWorkspaceStore((s) => s.sources)
   const addSource = useWorkspaceStore((s) => s.addSource)
@@ -255,6 +259,9 @@ export function NotebookWorkspacePage() {
   const resetWorkspaceUiState = useCallback(() => {
     setRemovingSourceIds({})
     setIsHydratingSources(true)
+    pendingNotebookDescGenerationRef.current = false
+    notebookDescGenerationInFlightRef.current = false
+    setIsGeneratingNotebookDescription(false)
   }, [])
 
   const beginHydratingSources = useCallback(() => {
@@ -407,6 +414,56 @@ export function NotebookWorkspacePage() {
     onSourceReady: handleSourceReady,
   })
 
+  const markPendingNotebookDescGeneration = useCallback(() => {
+    if (pendingNotebookDescGenerationRef.current) return
+    const state = useWorkspaceStore.getState()
+    if (state.notebookMeta.sourceCount > 0 || state.sources.length > 0) return
+    pendingNotebookDescGenerationRef.current = true
+    // poll 开始前就展示骨架动效；generation 接口仍等 poll 结束后再调
+    setIsGeneratingNotebookDescription(true)
+  }, [])
+
+  const clearPendingNotebookDescGeneration = useCallback(() => {
+    pendingNotebookDescGenerationRef.current = false
+    notebookDescGenerationInFlightRef.current = false
+    setIsGeneratingNotebookDescription(false)
+  }, [])
+
+  useEffect(() => {
+    if (!id || !pendingNotebookDescGenerationRef.current) return
+    if (notebookDescGenerationInFlightRef.current) return
+
+    const activeSources = sources.filter((source) => !removingSourceIds[source.id])
+    if (activeSources.length === 0) return
+
+    const hasNonTerminal = activeSources.some(
+      (source) => source.status !== 'ready' && source.status !== 'failed',
+    )
+    if (hasNonTerminal) return
+
+    const hasReady = activeSources.some((source) => source.status === 'ready')
+    if (!hasReady) {
+      clearPendingNotebookDescGeneration()
+      return
+    }
+
+    notebookDescGenerationInFlightRef.current = true
+    void (async () => {
+      try {
+        const result = await generateNotebookDescription(id)
+        const nextDesc = result.desc ?? ''
+        patchNotebookMeta({ desc: nextDesc })
+        queryClient.setQueryData<Notebook>(['notebook', id], (prev) =>
+          prev ? { ...prev, desc: nextDesc } : prev,
+        )
+      } catch (error) {
+        console.warn('generate notebook description failed', error)
+      } finally {
+        clearPendingNotebookDescGeneration()
+      }
+    })()
+  }, [clearPendingNotebookDescGeneration, id, patchNotebookMeta, queryClient, removingSourceIds, sources])
+
   const notebookQuery = useQuery({
     queryKey: ['notebook', id],
     queryFn: () => getNotebook(id),
@@ -431,13 +488,19 @@ export function NotebookWorkspacePage() {
       return
     }
 
-    patchNotebookMeta({
+    const nextMeta: Partial<typeof notebookMeta> = {
       id: notebookIdFromQuery,
-      desc: notebookDescFromQuery,
       sourceCount: notebookSourceCountFromQuery,
       name: notebookNameFromQuery,
-    })
+    }
+    // 生成中不要用旧查询结果把 desc 盖回空
+    if (!isGeneratingNotebookDescription) {
+      nextMeta.desc = notebookDescFromQuery
+    }
+
+    patchNotebookMeta(nextMeta)
   }, [
+    isGeneratingNotebookDescription,
     notebookDescFromQuery,
     notebookIdFromQuery,
     notebookNameFromQuery,
@@ -662,6 +725,7 @@ export function NotebookWorkspacePage() {
     const normalized = content.trim()
     if (!normalized) return
 
+    markPendingNotebookDescGeneration()
     try {
       const created = await createSourceMutation.mutateAsync({
         notebookId: id,
@@ -680,10 +744,13 @@ export function NotebookWorkspacePage() {
         urlContent: kind === 'url' ? normalized : undefined,
       })
     } catch (err) {
+      if (useWorkspaceStore.getState().sources.length === 0) {
+        clearPendingNotebookDescGeneration()
+      }
       console.warn('create source failed', err)
       throw err
     }
-  }, [addSource, createSourceMutation, id])
+  }, [addSource, clearPendingNotebookDescGeneration, createSourceMutation, id, markPendingNotebookDescGeneration])
 
   const handleCreateFileSource = useCallback(async (file: File) => {
     if (!id) return
@@ -740,12 +807,19 @@ export function NotebookWorkspacePage() {
   }, [addSource, createSourceMutation, id, setSourceStatus, uploadSourceMutation])
 
   const handleCreateFileSources = useCallback(async (files: File[]) => {
-    await Promise.all(
-      files.map(async (file) => {
-        await handleCreateFileSource(file)
-      }),
-    )
-  }, [handleCreateFileSource])
+    markPendingNotebookDescGeneration()
+    try {
+      await Promise.all(
+        files.map(async (file) => {
+          await handleCreateFileSource(file)
+        }),
+      )
+    } finally {
+      if (useWorkspaceStore.getState().sources.length === 0) {
+        clearPendingNotebookDescGeneration()
+      }
+    }
+  }, [clearPendingNotebookDescGeneration, handleCreateFileSource, markPendingNotebookDescGeneration])
 
   const handleCreateUrlSource = useCallback(
     (url: string) => handleCreateSimpleSource('url', url),
@@ -1490,6 +1564,7 @@ export function NotebookWorkspacePage() {
               notebookName={displayNotebookName}
               notebookDescription={notebookMeta.desc}
               notebookSourceCount={notebookMeta.sourceCount}
+              notebookDescriptionLoading={isGeneratingNotebookDescription}
               selectedSourceIds={deferredSelectedSourceIdList}
               readySourceIds={readySourceIdList}
               sourcesPanelCollapsed={isSourcesPanelCollapsed}
